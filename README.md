@@ -6,13 +6,14 @@ This is a simple dotfile for my basic setup
 
 - zsh
 - starship (prompt)
+- znap (plugin manager)
   
 Optional:
-- yay
+- yay (who doesn't like yogurt?)
 - ssh-keygen (openssh)
-- xclip
+- xclip (I like pbcopy and pbpaste 😂)
 - some nerd-font
-- fzf
+- fzf (fuzzy search change lives)
 
 ## Setting Up
 

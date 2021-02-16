@@ -45,3 +45,11 @@ fi
 export STARSHIP_CONFIG="$DOTFILES/zsh/starship/starship.toml"
 export STARSHIP_CACHE="$DOTFILES/zsh/starship/cache"
 eval "$(starship init zsh)"
+
+zstyle ':znap:*' plugins-dir $DOTFILES/zsh/znap
+source $DOTFILES/zsh/znap/zsh-snap/znap.zsh
+
+export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
+znap source zsh-users/zsh-completions
+znap source zsh-users/zsh-syntax-highlighting
+znap source zsh-users/zsh-autosuggestions

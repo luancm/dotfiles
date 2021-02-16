@@ -75,7 +75,7 @@ else
 fi
 
 if ! command -v fzf > /dev/null; then
-	if $(prompt_confirmation 'Do you want to install fzf (fuzzy finder))?'); then
+	if $(prompt_confirmation 'Do you want to install fzf (fuzzy finder)?'); then
 		if command -v pacman > /dev/null; then
 			sudo pacman -S fzf
 			log_success 'Dependency `fzf` installed successfully'
@@ -87,4 +87,12 @@ if ! command -v fzf > /dev/null; then
 	fi
 else
 	log_success 'Dependency `fzf` already installed'
+fi
+
+
+if [ ! -d $DOTFILES/zsh/znap/zsh-snap ]; then
+	git clone --depth 1 https://github.com/marlonrichert/zsh-snap.git $DOTFILES/zsh/znap/zsh-snap
+	log_success 'Dependency `znap` installed successfully'
+else
+	log_success 'Dependency `znap` already installed'
 fi

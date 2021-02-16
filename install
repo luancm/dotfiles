@@ -1,0 +1,66 @@
+#!/bin/sh
+#
+# install all things
+
+export DOTFILES=$(dirname $(readlink -fm $0))
+source $DOTFILES/lib/io_handlers.sh
+
+setup_ssh() {
+	if [ -f ~/.ssh/id_rsa.pub ]; then
+		log_success 'SSH: Already configured in ~/.ssh/id_rsa.pub'
+		return 0
+	fi
+
+	if ! $(prompt_confirmation 'SSH: Do you want to configure ssh?'); then
+		log_success 'SSH: Skipping ssh configuration'
+		return 0
+	fi
+
+	ssh-keygen
+	log_success 'SSH: Configured successfully'
+}
+
+link_file() {
+	read -r source_path target_path <<<$(echo $1 $2)
+	if [ -L ${target_path} ] || [ -e ${target_path} ]; then
+		if [ "$(readlink "$target_path")" = "$source_path" ]; then
+			log_success "Skipping ${source_path}. Already linked"
+			return 0
+		else
+			mv "$target_path" "$target_path.backup"
+			log_success "Backed up $target_path to $target_path.backup"
+		fi
+	fi
+	ln -sf "$source_path" "$target_path"
+	log_success "Linked $source_path to $target_path"
+}
+
+# Finds all files '<file_name>.symlink' and create a link to the respective '.<file_name>' file in home
+create_symlinks() {
+	log_info 'Creating symlinks'
+	find -H "$DOTFILES" -maxdepth 3 -name '*.symlink' -not -path '*.git*' |
+		while read -r src; do
+			dst="$HOME/.$(basename "${src%.*}")"
+			link_file "$src" "$dst"
+		done
+}
+
+# ================================================ #
+# ============== Start Installation ============== #
+# ================================================ #
+
+log_info '❯❯ Installing dependencies...'
+sh -c $DOTFILES/lib/install_dependencies.sh
+
+# Call installers
+array=( $(find -H "$DOTFILES" -maxdepth 3 -name 'install.sh' -not -path '*.git*') )
+for installer in ${array[@]}; do
+	log_info "❯❯ Installing $installer"
+    sh -c "$installer"
+done
+
+create_symlinks
+
+setup_ssh
+
+log_success 'All installed!'

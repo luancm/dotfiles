@@ -4,6 +4,9 @@ This is a simple dotfile for my basic setup
 
 ## Dependencies
 
+If using MacOS, homebrew is a good thing to have, the script tries to install dependencies automatically
+(for Arch, yay is installed for AUR packages)
+
 - zsh
 - starship (prompt)
 - znap (plugin manager)

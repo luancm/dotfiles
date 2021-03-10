@@ -17,7 +17,7 @@ indent_prefix() {
 	if [ $tab_count -le 0 ]; then
 		echo $prefix
 	else
-		while IFS= read num; do prefix+="  "; done < <(seq $tab_count)
+		while [ $(( ( i += 1 ) <= $tab_count )) -ne 0 ]; do prefix+="  "; done
 		echo $prefix
 	fi
 }

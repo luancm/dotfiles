@@ -2,7 +2,7 @@
 #
 # install all things
 
-export DOTFILES=$(dirname $(readlink -fm $0))
+export DOTFILES=$(cd "$(dirname "$0")"; pwd -P)
 source $DOTFILES/lib/io_handlers.sh
 
 setup_ssh() {

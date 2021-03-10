@@ -31,8 +31,12 @@ done	# Include hidden files.
 unset zsh_files updated_at
 
 # search history with fzf if installed, default otherwise
-if test -d /usr/share/fzf; then
-	. /usr/share/fzf/key-bindings.zsh
+if command -v fzf > /dev/null; then
+	if [ "${OSTYPE#*darwin}" = "$OSTYPE" ]; then
+		. /usr/share/fzf/key-bindings.zsh
+	else
+		. $HOME/.fzf.zsh
+	fi
 else
 	bindkey '^R' history-incremental-search-backward
 fi

@@ -9,6 +9,7 @@ alias duf="du -sh * | sort -hr"
 
 alias docker_clean_images='docker rmi $(docker images -a --filter=dangling=true -q)'
 alias docker_clean_ps='docker rm $(docker ps --filter=status=exited --filter=status=created -q)'
+alias docker_killall_ps='docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)'
 
 if [ "${OSTYPE#*darwin}" = "$OSTYPE" ]; then
     alias reload!="exec $(getent passwd $(id -un) | awk -F : '{print $NF}') -l"

@@ -5,6 +5,8 @@ export EDITOR='vim'
 export VEDITOR='code'
 export PATH="$PATH:$DOTFILES/bin:$HOME/.bin"
 
+source $DOTFILES/lib/io_handlers.sh
+
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
@@ -45,6 +47,22 @@ fi
 # want in your public, versioned repo.
 # shellcheck disable=SC1090
 [ -f ~/.localrc ] && . ~/.localrc
+
+# if has nvm installed, use it when entering node project
+if command -v node > /dev/null; then
+	log_info 'Configuring NVM'
+	
+	autoload -U add-zsh-hook
+
+	load-nvmrc() {
+		if [[ -f .nvmrc && -r .nvmrc ]]; then
+			source $DOTFILES/frameworks/nvm_init.sh
+			nvm use
+		fi
+	}
+
+	add-zsh-hook chpwd load-nvmrc
+fi
 
 export STARSHIP_CONFIG="$DOTFILES/zsh/starship/starship.toml"
 export STARSHIP_CACHE="$DOTFILES/zsh/starship/cache"

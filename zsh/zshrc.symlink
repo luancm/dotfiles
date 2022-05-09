@@ -13,6 +13,8 @@ SAVEHIST=10000
 
 zsh_files=($DOTFILES/zsh/*.zsh)
 
+log_info 'Configuring Completions'
+
 # Basic auto/tab complete:
 autoload -U compinit
 zmodload zsh/complist
@@ -25,12 +27,16 @@ zstyle ':completion:*' insert-tab pending # pasting with tabs doesn't perform co
 zstyle ':completion:*' rehash true # rehash if command not found (possibly recently installed)
 zstyle ':completion:*' menu select=2 # menu if nb items > 2
 
+log_info 'Loading completion files'
+
 # load everything but the path and completion files
 for file in ${${zsh_files:#*/path.zsh}:#*/completion.zsh}; do
   source "$file"
 done	# Include hidden files.
 
 unset zsh_files updated_at
+
+log_info 'Setting up fuzzy search'
 
 # search history with fzf if installed, default otherwise
 if command -v fzf > /dev/null; then
@@ -43,10 +49,22 @@ else
 	bindkey '^R' history-incremental-search-backward
 fi
 
+log_info 'Loading .localrc configuration'
+
 # use .localrc for SUPER SECRET CRAP that you don't
 # want in your public, versioned repo.
 # shellcheck disable=SC1090
 [ -f ~/.localrc ] && . ~/.localrc
+
+
+if [ ! "${OSTYPE#*darwin}" = "$OSTYPE" ]; then
+	log_info 'Configuring homebrew for MacOS'
+	source $DOTFILES/homebrew/config.sh
+
+	if command -v rbenv > /dev/null; then
+		export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
+	fi
+fi
 
 # if has nvm installed, use it when entering node project
 if command -v node > /dev/null; then
@@ -64,10 +82,12 @@ if command -v node > /dev/null; then
 	add-zsh-hook chpwd load-nvmrc
 fi
 
+log_info 'Configuring Starship for prompt'
 export STARSHIP_CONFIG="$DOTFILES/zsh/starship/starship.toml"
 export STARSHIP_CACHE="$DOTFILES/zsh/starship/cache"
 eval "$(starship init zsh)"
 
+log_info 'Loading Znap'
 zstyle ':znap:*' plugins-dir $DOTFILES/zsh/znap
 source $DOTFILES/zsh/znap/zsh-snap/znap.zsh
 
@@ -75,3 +95,5 @@ export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
 znap source zsh-users/zsh-completions
 znap source zsh-users/zsh-syntax-highlighting
 znap source zsh-users/zsh-autosuggestions
+
+log_success 'Good to go!'

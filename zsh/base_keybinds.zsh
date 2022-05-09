@@ -32,8 +32,18 @@ key[Ctrl-Right]="${terminfo[kRIT5]}"
 [[ -n "${key[PageUp]}"     ]] && bindkey -- "${key[PageUp]}"      beginning-of-buffer-or-history
 [[ -n "${key[PageDown]}"   ]] && bindkey -- "${key[PageDown]}"    end-of-buffer-or-history
 [[ -n "${key[Shift-Tab]}"  ]] && bindkey -- "${key[Shift-Tab]}"   reverse-menu-complete
-[[ -n "${key[Ctrl-Left]}"  ]] && bindkey -- "${key[Ctrl-Left]}"   backward-word
-[[ -n "${key[Ctrl-Right]}" ]] && bindkey -- "${key[Ctrl-Right]}"  forward-word
+
+if [ "${OSTYPE#*darwin}" = "$OSTYPE" ]; then
+	[[ -n "${key[Ctrl-Left]}"  ]] && bindkey -- "${key[Ctrl-Left]}"   backward-word
+	[[ -n "${key[Ctrl-Right]}" ]] && bindkey -- "${key[Ctrl-Right]}"  forward-word
+else
+	bindkey "^[^[[C" forward-word
+	bindkey "^[^[[D" backward-word
+	bindkey "^A" beginning-of-line
+	bindkey "^E" end-of-line
+fi
+
+WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'  ;# without /
 
 # History seach
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search

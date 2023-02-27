@@ -36,6 +36,8 @@ key[Ctrl-Right]="${terminfo[kRIT5]}"
 if [ "${OSTYPE#*darwin}" = "$OSTYPE" ]; then
 	[[ -n "${key[Ctrl-Left]}"  ]] && bindkey -- "${key[Ctrl-Left]}"   backward-word
 	[[ -n "${key[Ctrl-Right]}" ]] && bindkey -- "${key[Ctrl-Right]}"  forward-word
+	[[ -n "${key[Cmd-Left]}"   ]] && bindkey -- "${key[Cmd-Left]}"        beginning-of-line
+	[[ -n "${key[Cmd-Right]}"  ]] && bindkey -- "${key[Cmd-Right]}"         end-of-line
 else
 	bindkey "^[^[[C" forward-word
 	bindkey "^[^[[D" backward-word

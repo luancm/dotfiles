@@ -5,6 +5,8 @@ export EDITOR='vim'
 export VEDITOR='code'
 export PATH="$PATH:$DOTFILES/bin:$HOME/.bin"
 
+[ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
+
 source $DOTFILES/lib/io_handlers.sh
 
 HISTFILE=~/.zsh_history
@@ -36,14 +38,19 @@ done	# Include hidden files.
 
 unset zsh_files updated_at
 
+if [ is_mac_os ]; then
+	log_info 'Configuring homebrew for MacOS'
+	source $DOTFILES/homebrew/config.sh
+fi
+
 log_info 'Setting up fuzzy search'
 
 # search history with fzf if installed, default otherwise
 if command -v fzf > /dev/null; then
-	if [ "${OSTYPE#*darwin}" = "$OSTYPE" ]; then
-		. /usr/share/fzf/key-bindings.zsh
-	else
+	if [ is_mac_os ]; then
 		. $HOME/.fzf.zsh
+	else
+		. /usr/share/fzf/key-bindings.zsh
 	fi
 else
 	bindkey '^R' history-incremental-search-backward
@@ -56,30 +63,18 @@ log_info 'Loading .localrc configuration'
 # shellcheck disable=SC1090
 [ -f ~/.localrc ] && . ~/.localrc
 
-
-if [ ! "${OSTYPE#*darwin}" = "$OSTYPE" ]; then
-	log_info 'Configuring homebrew for MacOS'
-	source $DOTFILES/homebrew/config.sh
-
-	if command -v rbenv > /dev/null; then
+if command -v rbenv > /dev/null; then
+	if [ is_mac_os ]; then
 		export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
 	fi
+
+	eval "$(rbenv init -)"
 fi
 
 # if has nvm installed, use it when entering node project
 if command -v node > /dev/null; then
 	log_info 'Configuring NVM'
-	
-	autoload -U add-zsh-hook
-
-	load-nvmrc() {
-		if [[ -f .nvmrc && -r .nvmrc ]]; then
-			source $DOTFILES/frameworks/nvm_init.sh
-			nvm use
-		fi
-	}
-
-	add-zsh-hook chpwd load-nvmrc
+	source $DOTFILES/frameworks/nvm_init.sh
 fi
 
 log_info 'Configuring Starship for prompt'

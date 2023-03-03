@@ -2,6 +2,8 @@
 #
 # install all things
 
+[ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
+
 export DOTFILES=$(cd "$(dirname "$0")"; pwd -P)
 source $DOTFILES/lib/io_handlers.sh
 

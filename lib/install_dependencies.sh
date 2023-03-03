@@ -65,7 +65,7 @@ else
 fi
 
 # xclip for pbcopy and pbpaste aliases
-if [ "${OSTYPE#*darwin}" = "$OSTYPE" ]; then
+if [ ! is_mac_os ]; then
 	if ! command -v xclip > /dev/null; then
 		if $(prompt_confirmation 'Do you want to install xclip (for pbcopy and pbpaste aliases)?'); then
 			if command -v pacman > /dev/null; then

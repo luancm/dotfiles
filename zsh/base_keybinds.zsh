@@ -39,10 +39,11 @@ if [ ! is_mac_os ]; then
 	[[ -n "${key[Cmd-Left]}"   ]] && bindkey -- "${key[Cmd-Left]}"    beginning-of-line
 	[[ -n "${key[Cmd-Right]}"  ]] && bindkey -- "${key[Cmd-Right]}"   end-of-line
 else
-	bindkey "^[^[[C" forward-word
-	bindkey "^[^[[D" backward-word
-	bindkey "^A" beginning-of-line
+	# for iterm2, ensure that your profile have the key mapping 'Natural Text Editing' preset.
+	bindkey "^[f" forward-word
+	bindkey "^[b" backward-word
 	bindkey "^E" end-of-line
+	bindkey "^A" beginning-of-line
 fi
 
 WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'  ;# without /

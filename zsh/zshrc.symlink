@@ -4,6 +4,7 @@ export DOTFILES="$HOME/.dotfiles"
 export EDITOR='vim'
 export VEDITOR='code'
 export PATH="$PATH:$DOTFILES/bin:$HOME/.bin"
+export GPG_TTY=$(tty)
 
 [ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
 

@@ -71,6 +71,7 @@ symbol = " "
 
 [ruby]
 symbol = " "
+detect_variables = []
 
 [rust]
 symbol = " "
@@ -83,3 +84,9 @@ symbol = " "
 
 [swift]
 symbol = "ﯣ "
+
+[kotlin]
+symbol = " "
+
+[gradle]
+symbol = " "

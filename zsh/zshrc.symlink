@@ -66,7 +66,17 @@ log_info 'Loading .localrc configuration'
 
 if command -v rbenv > /dev/null; then
 	if [ is_mac_os ]; then
+		export OPTFLAGS="-Wno-error=implicit-function-declaration"
+
 		export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
+		export PATH="$(brew --prefix openssl@1.1)/bin:$PATH"
+		export LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
+		export CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
+		export PKG_CONFIG_PATH="$(brew --prefix openssl@1.1)/lib/pkgconfig"
+
+		bundle config build.thin --with-cflags="-Wno-error=implicit-function-declaration"
+
+		bundle config build.puma --with-cppflags=-I$(brew --prefix openssl@1.1)/include
 	fi
 
 	eval "$(rbenv init -)"

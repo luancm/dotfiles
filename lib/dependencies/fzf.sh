@@ -6,7 +6,7 @@ if ! command -v fzf > /dev/null; then
 		elif command -v brew > /dev/null; then
 			brew install fzf
 			log_info 'Installing fzf, please choose to NOT update your shell configuration files'
-			sh -c "/usr/local/opt/fzf/install"
+			sh -c "$(brew --prefix)/opt/fzf/install"
 			log_success 'Dependency `fzf` installed successfully'
 		else
 			log_error $autoinstall_error_message

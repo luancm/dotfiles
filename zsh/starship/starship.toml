@@ -1,16 +1,48 @@
 # Symbols examples: λ ❯ ◇ ▶ ▷ 🌻 🗲
 
 # Don't print a new line at the start of the prompt
-add_newline = false
+add_newline = true
 
-[character]                            # The name of the module we are configuring is "character"
-success_symbol = "[λ](bold green)"     # The "success_symbol" segment is being set to "➜" with the color "bold green"
+format = """
+$time\
+$username\
+$hostname\
+$directory\
+$git_branch \
+$git_state\
+$git_status\
+$cmd_duration\
+$line_break\
+$python\
+$character"""
 
-# Disable the package module, hiding it from the prompt completely
-# [package]
-# disabled = true
+[character]
+success_symbol = "[λ](bold purple)"
+error_symbol = "[λ](bold red)"
+vimcmd_symbol = "[λ](bold green)"
 
-# symbols
+[git_branch]
+format = "[$branch]($style)"
+style = "bold bright-black"
+
+[git_state]
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+style = "bright-black"
+
+[cmd_duration]
+format = "[$duration]($style) "
+style = "yellow"
+
+[python]
+format = "[$virtualenv]($style) "
+style = "bright-black"
+
+[time]
+disabled = false
+format = '\[[$time]($style)\] '
+time_format = "%R"
+utc_time_offset = "local"
+style = "dimmed white"
 
 [aws]
 symbol = "  "
@@ -32,9 +64,6 @@ symbol = " "
 
 [elm]
 symbol = " "
-
-[git_branch]
-symbol = " "
 
 [golang]
 symbol = " "
@@ -65,9 +94,6 @@ symbol = " "
 
 [php]
 symbol = " "
-
-[python]
-symbol = " "
 
 [ruby]
 symbol = " "

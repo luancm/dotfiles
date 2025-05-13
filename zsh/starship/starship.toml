@@ -1,5 +1,8 @@
 # Symbols examples: λ ❯ ◇ ▶ ▷ 🌻 🗲
 
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
 # Don't print a new line at the start of the prompt
 add_newline = true
 
@@ -38,81 +41,9 @@ format = "[$virtualenv]($style) "
 style = "bright-black"
 
 [time]
-disabled = false
+disabled = true
 format = '\[[$time]($style)\] '
 time_format = "%R"
 utc_time_offset = "local"
 style = "dimmed white"
 
-[aws]
-symbol = "  "
-
-[conda]
-symbol = " "
-
-[dart]
-symbol = " "
-
-[directory]
-read_only = " "
-
-[docker_context]
-symbol = " "
-
-[elixir]
-symbol = " "
-
-[elm]
-symbol = " "
-
-[golang]
-symbol = " "
-
-[hg_branch]
-symbol = " "
-
-[java]
-symbol = " "
-
-[julia]
-symbol = " "
-
-[memory_usage]
-symbol = " "
-
-[nim]
-symbol = " "
-
-[nix_shell]
-symbol = " "
-
-[package]
-symbol = " "
-
-[perl]
-symbol = " "
-
-[php]
-symbol = " "
-
-[ruby]
-symbol = " "
-detect_variables = []
-
-[rust]
-symbol = " "
-
-[scala]
-symbol = " "
-
-[shlvl]
-symbol = " "
-
-[swift]
-symbol = "ﯣ "
-
-[kotlin]
-symbol = " "
-
-[gradle]
-symbol = " "

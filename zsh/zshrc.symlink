@@ -91,6 +91,7 @@ fi
 log_info 'Configuring Starship for prompt'
 export STARSHIP_CONFIG="$DOTFILES/zsh/starship/starship.toml"
 export STARSHIP_CACHE="$DOTFILES/zsh/starship/cache"
+prompt off
 eval "$(starship init zsh)"
 
 log_info 'Loading Znap'

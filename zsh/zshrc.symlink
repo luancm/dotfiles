@@ -1,4 +1,5 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
+
 # shortcut to this dotfiles path is $DOTFILES
 export DOTFILES="$HOME/.dotfiles"
 export EDITOR='vim'
@@ -6,7 +7,11 @@ export VEDITOR='code'
 export PATH="$PATH:$DOTFILES/bin:$HOME/.bin"
 export GPG_TTY=$(tty)
 
-[ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
+if [[ "${OSTYPE#*darwin}" = "$OSTYPE" ]]; then
+  is_mac_os=false
+else
+  is_mac_os=true
+fi
 
 source $DOTFILES/lib/io_handlers.sh
 
@@ -14,9 +19,8 @@ HISTFILE=~/.zsh_history
 HISTSIZE=1000000000
 SAVEHIST=1000000000
 
-zsh_files=($DOTFILES/zsh/*.zsh)
 
-log_info 'Configuring Completions'
+log_info 'Configuring ZSH'
 
 # Basic auto/tab complete:
 autoload -U compinit
@@ -30,25 +34,27 @@ zstyle ':completion:*' insert-tab pending # pasting with tabs doesn't perform co
 zstyle ':completion:*' rehash true # rehash if command not found (possibly recently installed)
 zstyle ':completion:*' menu select=2 # menu if nb items > 2
 
-log_info 'Loading completion files'
+# load zsh files
+zsh_files=($DOTFILES/zsh/*.zsh)
 
-# load everything but the path and completion files
-for file in ${${zsh_files:#*/path.zsh}:#*/completion.zsh}; do
+for file in $zsh_files; do
   source "$file"
-done	# Include hidden files.
+done
 
-unset zsh_files updated_at
+unset zsh_files 
 
-if [ is_mac_os ]; then
+# enable syntax highlighting
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+if $is_mac_os; then
 	log_info 'Configuring homebrew for MacOS'
 	source $DOTFILES/homebrew/config.sh
 fi
 
 log_info 'Setting up fuzzy search'
-
 # search history with fzf if installed, default otherwise
 if command -v fzf > /dev/null; then
-	if [ is_mac_os ]; then
+	if $is_mac_os; then
 		. $HOME/.fzf.zsh
 	else
 		. /usr/share/fzf/key-bindings.zsh
@@ -58,29 +64,7 @@ else
 fi
 
 log_info 'Loading .localrc configuration'
-
-# use .localrc for SUPER SECRET CRAP that you don't
-# want in your public, versioned repo.
-# shellcheck disable=SC1090
 [ -f ~/.localrc ] && . ~/.localrc
-
-if command -v rbenv > /dev/null; then
-	if [ is_mac_os ]; then
-		export OPTFLAGS="-Wno-error=implicit-function-declaration"
-
-		export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
-		export PATH="$(brew --prefix openssl@1.1)/bin:$PATH"
-		export LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
-		export CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
-		export PKG_CONFIG_PATH="$(brew --prefix openssl@1.1)/lib/pkgconfig"
-
-		bundle config build.thin --with-cflags="-Wno-error=implicit-function-declaration"
-
-		bundle config build.puma --with-cppflags=-I$(brew --prefix openssl@1.1)/include
-	fi
-
-	eval "$(rbenv init -)"
-fi
 
 # if has nvm installed, use it when entering node project
 if command -v node > /dev/null; then
@@ -94,13 +78,6 @@ export STARSHIP_CACHE="$DOTFILES/zsh/starship/cache"
 prompt off
 eval "$(starship init zsh)"
 
-log_info 'Loading Znap'
-zstyle ':znap:*' plugins-dir $DOTFILES/zsh/znap
-source $DOTFILES/zsh/znap/zsh-snap/znap.zsh
-
-export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
-znap source zsh-users/zsh-completions
-znap source zsh-users/zsh-syntax-highlighting
-znap source zsh-users/zsh-autosuggestions
+# export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
 
 log_success 'Good to go!'

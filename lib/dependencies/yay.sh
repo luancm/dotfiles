@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+source $DOTFILES/lib/io_handlers.sh
+
 # If in arch, install yay
 if command -v pacman > /dev/null; then
 	if ! command -v yay > /dev/null; then

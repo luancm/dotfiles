@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # install all things
 
@@ -8,7 +8,7 @@ export DOTFILES=$(cd "$(dirname "$0")"; pwd -P)
 source $DOTFILES/lib/io_handlers.sh
 
 setup_ssh() {
-	if [ -f ~/.ssh/id_rsa.pub ]; then
+	if [ -f ~/.ssh/id_ed25519.pub ]; then
 		log_success 'SSH: Already configured in ~/.ssh/id_rsa.pub'
 		return 0
 	fi
@@ -17,34 +17,9 @@ setup_ssh() {
 		log_success 'SSH: Skipping ssh configuration'
 		return 0
 	fi
-
-	ssh-keygen
+  
+  ssh-keygen -t ed25519
 	log_success 'SSH: Configured successfully'
-}
-
-link_file() {
-	read -r source_path target_path <<<$(echo $1 $2)
-	if [ -L ${target_path} ] || [ -e ${target_path} ]; then
-		if [ "$(readlink "$target_path")" = "$source_path" ]; then
-			log_success "Skipping ${source_path}. Already linked"
-			return 0
-		else
-			mv "$target_path" "$target_path.backup"
-			log_success "Backed up $target_path to $target_path.backup"
-		fi
-	fi
-	ln -sf "$source_path" "$target_path"
-	log_success "Linked $source_path to $target_path"
-}
-
-# Finds all files '<file_name>.symlink' and create a link to the respective '.<file_name>' file in home
-create_symlinks() {
-	log_info 'Creating symlinks'
-	find -H "$DOTFILES" -maxdepth 3 -name '*.symlink' -not -path '*.git*' |
-		while read -r src; do
-			dst="$HOME/.$(basename "${src%.*}")"
-			link_file "$src" "$dst"
-		done
 }
 
 # ================================================ #
@@ -52,16 +27,17 @@ create_symlinks() {
 # ================================================ #
 
 log_info '❯❯ Installing dependencies...'
-sh -c $DOTFILES/lib/install_dependencies.sh
+bash $DOTFILES/lib/install_dependencies.sh
 
 # Call installers
 array=( $(find -H "$DOTFILES" -maxdepth 3 -name 'install.sh' -not -path '*.git*') )
 for installer in ${array[@]}; do
 	log_info "❯❯ Installing $installer"
-    sh -c "$installer"
+  bash "$installer"
 done
 
-create_symlinks
+log_info "❯❯ Creating Symlinks"
+bash $DOTFILES/lib/create_symlinks.sh
 
 setup_ssh
 

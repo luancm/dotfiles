@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+source $DOTFILES/lib/io_handlers.sh
+
 if  command -v zsh > /dev/null && grep "$(command -v zsh)" /etc/shells > /dev/null; then
 	log_success 'Dependency `zsh` already installed'
 else
@@ -7,8 +11,5 @@ else
 	elif command -v brew > /dev/null; then
 		brew install zsh
 		log_success 'Dependency `zsh` installed successfully'
-	else
-		log_error $autoinstall_error_message
-		exit
 	fi
 fi

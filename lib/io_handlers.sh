@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 reset=$(tput sgr0)
 bold=$(tput bold)
 
@@ -7,11 +9,8 @@ green=$(tput setaf 2)
 blue=$(tput setaf 4)
 yellow=$(tput setaf 3)
 
-
-
 indent_prefix() {
-	# 1 = called directly, 2+ called by another script. REF=https://unix.stackexchange.com/questions/232384/argument-string-to-integer-in-bash
-	# PS: this works smoothly if script was sourced. If used `sh` it will have an extra tab.
+	# Insert tab for each shell interpreted created (calling (bash/sh -c/zsh) <file>). REF=https://unix.stackexchange.com/questions/232384/argument-string-to-integer-in-bash
 	tab_count=$(($SHLVL - 1))
 	prefix=''
 	if [ $tab_count -le 0 ]; then

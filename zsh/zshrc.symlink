@@ -23,7 +23,7 @@ SAVEHIST=1000000000
 log_info 'Configuring ZSH'
 
 # Basic auto/tab complete:
-autoload -U compinit
+autoload -Uz compinit
 zmodload zsh/complist
 compinit
 _comp_options+=(globdots)
@@ -43,8 +43,9 @@ done
 
 unset zsh_files 
 
-# enable syntax highlighting
+# Plugins
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 if $is_mac_os; then
 	log_info 'Configuring homebrew for MacOS'

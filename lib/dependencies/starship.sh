@@ -3,13 +3,14 @@
 source $DOTFILES/lib/io_handlers.sh
 
 if ! command -v starship > /dev/null; then
-	if command -v yay > /dev/null; then
-		yay -S starship
-		log_success 'Dependency `starship` installed successfully'
-	elif command -v brew > /dev/null; then
-		brew install starship
-		log_success 'Dependency `starship` installed successfully'
-	fi
+  if ! is_installer_available; then
+    log_warn "Auto install not supported for your system, you will need to install it manually"
+    exit 0
+  fi
+    
+  install_package starship
+
+	log_success 'Dependency `starship` installed successfully'
 else
 	log_success 'Dependency `starship` already installed'
 fi

@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
 
 source $DOTFILES/lib/io_handlers.sh
+source $DOTFILES/lib/package_installer.sh
 
 if ! command -v fzf > /dev/null; then
 	if $(prompt_confirmation 'Do you want to install fzf (fuzzy finder)?'); then
-		if command -v pacman > /dev/null; then
-			sudo pacman -S fzf
-			log_success 'Dependency `fzf` installed successfully'
-		elif command -v brew > /dev/null; then
-			brew install fzf
-			log_info 'Installing fzf, please choose to NOT update your shell configuration files'
-			sh -c "$(brew --prefix)/opt/fzf/install"
-			log_success 'Dependency `fzf` installed successfully'
-		fi
+
+    if ! is_installer_available; then
+      log_warn "Auto install not supported for your system, you will need to install it manually"
+      exit 0
+    fi
+    
+    install_package fzf
+    
+    if [[ "PKG_MANAGER" = "brew" ]]; then
+      sh -c "$(brew --prefix)/opt/fzf/install"
+    fi
+
+		log_success 'Dependency `fzf` installed successfully'
 	else
 		log_info 'Skipping fzf installation'
 	fi

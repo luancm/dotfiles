@@ -7,6 +7,4 @@
 export HOMEBREW_FORCE_BREWED_CURL=1
 eval $(/opt/homebrew/bin/brew shellenv)
 
-log_info 'Homebrew: Creating aliases'
 source "$DOTFILES/homebrew/aliases.sh"
-log_success 'Homebrew: Successfully configured'

@@ -20,13 +20,14 @@ HISTSIZE=1000000000
 SAVEHIST=1000000000
 
 
-log_info 'Configuring ZSH'
+log_info "Welcome, let's zsh!"
 
 # Basic auto/tab complete:
 autoload -Uz compinit
 zmodload zsh/complist
 compinit
 _comp_options+=(globdots)
+
 
 zstyle ':completion:*' completer _oldlist _expand _complete _match _ignored _approximate # forces zsh to realize new commands
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' # matches case insensitive for lowercase
@@ -53,11 +54,9 @@ else
 fi
 
 if $is_mac_os; then
-	log_info 'Configuring homebrew for MacOS'
 	source $DOTFILES/homebrew/config.sh
 fi
 
-log_info 'Setting up fuzzy search'
 # search history with fzf if installed, default otherwise
 if command -v fzf > /dev/null; then
 	if $is_mac_os; then
@@ -72,16 +71,18 @@ fi
 log_info 'Loading .localrc configuration'
 [ -f ~/.localrc ] && . ~/.localrc
 
-# if has nvm installed, use it when entering node project
-if command -v node > /dev/null; then
-	log_info 'Configuring NVM'
-	source $DOTFILES/frameworks/nvm_init.sh
-fi
+log_info 'Configuring prompt'
+autoload -U promptinit
+promptinit
 
-log_info 'Configuring Starship for prompt'
 export STARSHIP_CONFIG="$DOTFILES/zsh/starship/starship.toml"
 export STARSHIP_CACHE="$DOTFILES/zsh/starship/cache"
-prompt off
+
+# disable prompt if needed
+if command -v prompt > /dev/null; then
+  prompt off
+fi
+
 eval "$(starship init zsh)"
 
 # export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)

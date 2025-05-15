@@ -24,6 +24,23 @@ return {
         pickers = {
           find_files = {
             hidden = true
+          },
+          buffers = {
+            sort_mru = true,
+            mappings = {
+              i = {
+                -- Map Ctrl+Tab to cycle to next item when in insert mode
+                ["<C-i>"] = function(...)
+                  require("telescope.actions").move_selection_next(...)
+                end,
+              },
+              n = {
+                -- Map Ctrl+Tab to cycle to next item when in normal mode
+                ["<C-i>"] = function(...)
+                  require("telescope.actions").move_selection_next(...)
+                end,
+              },
+            },
           }
         },
       })
@@ -31,9 +48,10 @@ return {
       local builtin = require('telescope.builtin')
       vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })
       vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Telescope live grep' })
-      vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Telescope buffers' })
       vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help tags' })
       vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = 'Telescope find files' })
+      vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Telescope buffers' })
+      vim.keymap.set('n', '<C-i>', builtin.buffers, { desc = 'Telescope buffers' })
     end
   },
   {

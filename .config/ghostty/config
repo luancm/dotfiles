@@ -1,6 +1,7 @@
 # The syntax is "key = value". The whitespace around the
 # equals doesn't matter.
 theme = Monokai Pro Spectrum
+background = #000000
 # Comments start with a `#` and are only valid on their own line.
 # Blank lines are ignored!
 

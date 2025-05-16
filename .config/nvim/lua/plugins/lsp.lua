@@ -9,7 +9,7 @@ return {
     "mason-org/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup {
-        ensure_installed = { "lua_ls", "ts_ls", "bashls", "beautysh" },
+        ensure_installed = { "lua_ls", "ts_ls", "bashls" },
       }
     end
   },
@@ -20,11 +20,17 @@ return {
       lspconfig.lua_ls.setup({})
       lspconfig.ts_ls.setup({})
       lspconfig.bashls.setup({})
-      lspconfig.beautysh.setup({})
+
+      vim.lsp.config.bashls = {
+        cmd = { 'bash-language-server', 'start' },
+        filetypes = { 'bash', 'sh', 'zsh' }
+      }
+      vim.lsp.enable 'bashls'
 
       vim.keymap.set("n", "K", vim.lsp.buf.hover)
       vim.keymap.set("n", "gd", vim.lsp.buf.definition)
       vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action)
+      vim.keymap.set("n", "<leader>bf", vim.lsp.buf.format)
     end
   }
 }

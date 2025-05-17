@@ -9,7 +9,7 @@ return {
     "mason-org/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup {
-        ensure_installed = { "lua_ls", "ts_ls", "bashls", "hyprls" },
+        ensure_installed = { "ts_ls", "bashls", "hyprls" },
       }
     end
   },
@@ -17,7 +17,6 @@ return {
     "neovim/nvim-lspconfig",
     config = function()
       local lspconfig = require("lspconfig")
-      lspconfig.lua_ls.setup({})
       lspconfig.ts_ls.setup({})
       lspconfig.bashls.setup({})
       lspconfig.hyprls.setup({})
@@ -33,5 +32,16 @@ return {
       vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action)
       vim.keymap.set("n", "<leader>bf", vim.lsp.buf.format)
     end
-  }
+  },
+  {
+    "folke/lazydev.nvim",
+    ft = "lua", -- only load on lua files
+    opts = {
+      library = {
+        -- See the configuration section for more details
+        -- Load luvit types when the `vim.uv` word is found
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      },
+    },
+  },
 }

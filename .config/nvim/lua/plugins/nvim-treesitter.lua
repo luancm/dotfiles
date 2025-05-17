@@ -1,6 +1,7 @@
-return {{
-  "nvim-treesitter/nvim-treesitter", build = ":TSUpdate",
-  config = function () 
+return { {
+  "nvim-treesitter/nvim-treesitter",
+  build = ":TSUpdate",
+  config = function()
     local configs = require("nvim-treesitter.configs")
 
     configs.setup({
@@ -27,6 +28,9 @@ return {{
         -- Instead of true it can also be a list of languages
         additional_vim_regex_highlighting = false,
       },
+      ignore_install = {
+      },
+      modules = {},
     })
   end
-}}
+} }

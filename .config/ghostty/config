@@ -6,7 +6,7 @@ background = #000000
 # Blank lines are ignored!
 
 keybind = ctrl+z=close_surface
-keybind = ctrl+d=new_split:right
+# keybind = ctrl+d=new_split:right
 
 # Empty values reset the configuration to the default value
 font-family = FiraCode Nerd Font Med

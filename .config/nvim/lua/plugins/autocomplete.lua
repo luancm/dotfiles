@@ -41,7 +41,7 @@ return {
         -- <c-k>: Toggle signature help
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = "default",
+        preset = "enter",
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -80,5 +80,31 @@ return {
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
     },
+    configuration = function()
+      local cmp = require("require")
+      cmp.setup({
+        mapping = cmp.mapping.preset.insert({
+          ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+
+          ["<S-Tab>"] = cmp.mapping(function()
+            if cmp.visible() then
+              cmp.select_prev_item()
+            end
+          end, { "i", "s" }),
+          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<C-e>'] = cmp.mapping.abort(),
+          ['<CR>'] = cmp.mapping.confirm({ select = true }),
+        }),
+        formatting = {
+          format = require("nvim-highlight-colors").format
+        }
+      })
+    end
   }
 }

@@ -15,20 +15,21 @@ vim.g.mapleader = " "
 -- to be used in plugins or custom configs
 vim.g.have_nerd_font = true
 
+vim.g.loaded_snippet = 1
+
 -- Keymaps
+
 vim.keymap.set("n", "<C-k>", "<cmd>wincmd k<cr>")
 vim.keymap.set("n", "<C-j>", "<cmd>wincmd j<cr>")
 vim.keymap.set("n", "<C-h>", "<cmd>wincmd h<cr>")
 vim.keymap.set("n", "<C-l>", "<cmd>wincmd l<cr>")
 
 vim.keymap.set("n", "<leader>h", "<cmd>nohlsearch<cr>")
-vim.keymap.set("n", "<C-i>", "<cmd>lua vim.diagnostic.open_float()<cr>")
 
 -- From theprimeagen
-vim.keymap.set({"n", "v"}, "<leader>y", [["+y]])
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 
 vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
-

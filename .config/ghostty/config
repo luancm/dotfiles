@@ -8,6 +8,8 @@ background = #000000
 keybind = ctrl+z=close_surface
 # keybind = ctrl+d=new_split:right
 
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
+
 # Empty values reset the configuration to the default value
 font-family = FiraCode Nerd Font Med
 

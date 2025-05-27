@@ -1,6 +1,6 @@
-@define-color background  #181825;
+@define-color background rgba(24, 24, 37, 0.3);
 @define-color light #cdd6f4;
-@define-color dark  #1e1e2e;
+@define-color dark #1e1e2e;
 
 * {
   border: none;

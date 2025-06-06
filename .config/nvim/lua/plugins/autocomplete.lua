@@ -70,7 +70,7 @@ return {
       },
 
       sources = {
-        default = { "lsp", "path", "snippets", "lazydev", "buffer" },
+        default = { "lsp", "path", "snippets", "lazydev" },
         providers = {
           lazydev = { name = "LazyDev", module = "lazydev.integrations.blink", score_offset = 100 },
         },
@@ -106,5 +106,12 @@ return {
     },
     configuration = function()
     end
+  },
+  {
+    "L3MON4D3/LuaSnip",
+    -- follow latest release.
+    version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+    -- install jsregexp (optional!).
+    build = "make install_jsregexp"
   }
 }

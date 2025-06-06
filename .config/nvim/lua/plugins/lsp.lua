@@ -9,7 +9,7 @@ return {
     "mason-org/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup {
-        ensure_installed = { "ts_ls", "bashls", "hyprls", "jsonls", "gradle_ls", "kotlin_language_server", "clangd" },
+        ensure_installed = { "ts_ls", "bashls", "hyprls", "jsonls", "gradle_ls", "kotlin_language_server", "clangd", "gopls" },
       }
     end
   },
@@ -24,6 +24,7 @@ return {
       lspconfig.gradle_ls.setup({})
       lspconfig.kotlin_language_server.setup({})
       lspconfig.clangd.setup({})
+      lspconfig.gopls.setup({})
 
       vim.lsp.config.bashls = {
         cmd = { 'bash-language-server', 'start' },

@@ -27,6 +27,8 @@ return {
         ["<C-space>"] = { "show", "show_documentation", "hide_documentation", "fallback" },
         ["<C-e>"] = { "cancel", "hide", "fallback" },
         ["<CR>"] = { "accept", "fallback" },
+        ["<Right>"] = { "select_and_accept", "fallback" },
+        ["<C-l>"] = { "select_and_accept", "fallback" },
 
         ["<Tab>"] = { "select_next", "fallback" },
         ["<S-Tab>"] = { "select_prev", "fallback" },
@@ -57,8 +59,8 @@ return {
 
         menu = { auto_show = true },
         ghost_text = {
-          enabled = false,
-          show_with_menu = false,
+          enabled = true,
+          show_without_selection = true,
         },
 
         list = {
@@ -99,7 +101,7 @@ return {
       -- the rust implementation via `"prefer_rust_with_warning"`
       --
       -- See :h blink-cmp-config-fuzzy for more information
-      fuzzy = { implementation = "lua" },
+      fuzzy = { implementation = "prefer_rust_with_warning" },
 
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },

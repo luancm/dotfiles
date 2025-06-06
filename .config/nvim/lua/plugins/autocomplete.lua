@@ -21,17 +21,18 @@ return {
     opts = {
       keymap = {
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = "super-tab",
+        preset = "none",
 
-        ["<Tab>"] = { "insert_next", "select_next", "fallback" },
-        ["<S-Tab>"] = { "insert_prev", "select_prev", "fallback" },
 
-        ["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
-        ["<C-e>"] = { "hide", "fallback" },
-        ["<CR>"] = {},
+        ["<C-space>"] = { "show", "show_documentation", "hide_documentation", "fallback" },
+        ["<C-e>"] = { "cancel", "hide", "fallback" },
+        ["<CR>"] = { "accept", "fallback" },
 
+        ["<Tab>"] = { "select_next", "fallback" },
+        ["<S-Tab>"] = { "select_prev", "fallback" },
         ["<Up>"] = { "select_prev", "fallback" },
         ["<Down>"] = { "select_next", "fallback" },
+
         ["<C-p>"] = { "select_prev", "fallback_to_mappings" },
         ["<C-n>"] = { "select_next", "fallback_to_mappings" },
 
@@ -60,7 +61,12 @@ return {
           show_with_menu = false,
         },
 
-        list = { selection = { preselect = false, auto_insert = true } },
+        list = {
+          selection = {
+            preselect = false,
+            auto_insert = false
+          },
+        },
       },
 
       sources = {
@@ -74,7 +80,16 @@ return {
 
       cmdline = {
         keymap = { preset = 'inherit' },
-        completion = { menu = { auto_show = true } },
+        completion = {
+          menu = {
+            auto_show = true
+          },
+          list = {
+            selection = {
+              preselect = false,
+            },
+          },
+        },
       },
 
       -- Blink.cmp includes an optional, recommended rust fuzzy matcher,

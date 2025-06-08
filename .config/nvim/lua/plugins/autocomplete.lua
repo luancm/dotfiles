@@ -26,7 +26,9 @@ return {
 
         ["<C-space>"] = { "show", "show_documentation", "hide_documentation", "fallback" },
         ["<C-e>"] = { "cancel", "hide", "fallback" },
+
         ["<CR>"] = { "accept", "fallback" },
+
         ["<Right>"] = { "select_and_accept", "fallback" },
         ["<C-l>"] = { "select_and_accept", "fallback" },
 
@@ -66,7 +68,7 @@ return {
         list = {
           selection = {
             preselect = false,
-            auto_insert = false
+            auto_insert = true
           },
         },
       },
@@ -80,20 +82,6 @@ return {
 
       snippets = { preset = "luasnip" },
 
-      cmdline = {
-        keymap = { preset = 'inherit' },
-        completion = {
-          menu = {
-            auto_show = true
-          },
-          list = {
-            selection = {
-              preselect = false,
-            },
-          },
-        },
-      },
-
       -- Blink.cmp includes an optional, recommended rust fuzzy matcher,
       -- which automatically downloads a prebuilt binary when enabled.
       --
@@ -105,6 +93,22 @@ return {
 
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
+
+      -- Configurations for the cmdline only
+      cmdline = {
+        keymap = { preset = 'inherit' },
+        fuzzy = { implementation = "prefer_rust_with_warning" },
+        completion = {
+          menu = {
+            auto_show = true
+          },
+          list = {
+            selection = {
+              preselect = false,
+            },
+          },
+        },
+      },
     },
     configuration = function()
     end

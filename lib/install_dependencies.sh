@@ -6,6 +6,8 @@ if [ -z $DOTFILES ]; then echo 'Dotfiles were not installed, to install run `~/.
 
 source $DOTFILES/lib/io_handlers.sh
 
+[ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
+
 # Call installers
 dependency_installers=( $(find -H "$DOTFILES/lib/dependencies" -name '*.sh') )
 for installer in ${dependency_installers[@]}; do 

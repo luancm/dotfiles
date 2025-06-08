@@ -4,7 +4,7 @@
 export DOTFILES="$HOME/.dotfiles"
 export EDITOR='vim'
 export VEDITOR='code'
-export PATH="$PATH:$DOTFILES/bin:$HOME/.bin"
+export PATH="$PATH:$DOTFILES/bin:$HOME/.bin:$HOME/.local/bin"
 export GPG_TTY=$(tty)
 
 if [[ "${OSTYPE#*darwin}" = "$OSTYPE" ]]; then

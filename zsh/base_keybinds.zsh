@@ -33,7 +33,7 @@ key[Ctrl-Right]="${terminfo[kRIT5]}"
 [[ -n "${key[PageDown]}"   ]] && bindkey -- "${key[PageDown]}"    end-of-buffer-or-history
 [[ -n "${key[Shift-Tab]}"  ]] && bindkey -- "${key[Shift-Tab]}"   reverse-menu-complete
 
-if [ ! is_mac_os ]; then
+if ! $is_mac_os; then
 	[[ -n "${key[Ctrl-Left]}"  ]] && bindkey -- "${key[Ctrl-Left]}"   backward-word
 	[[ -n "${key[Ctrl-Right]}" ]] && bindkey -- "${key[Ctrl-Right]}"  forward-word
 	[[ -n "${key[Cmd-Left]}"   ]] && bindkey -- "${key[Cmd-Left]}"    beginning-of-line

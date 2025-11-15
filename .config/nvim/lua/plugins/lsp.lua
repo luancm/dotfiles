@@ -19,21 +19,51 @@ return {
       "ziglang/zig.vim"
     },
     config = function()
-      local lspconfig = require("lspconfig")
-      lspconfig.ts_ls.setup({})
-      lspconfig.bashls.setup({})
-      lspconfig.hyprls.setup({})
-      lspconfig.jsonls.setup({})
-      lspconfig.gradle_ls.setup({})
-      lspconfig.kotlin_language_server.setup({})
-      lspconfig.clangd.setup({})
-      lspconfig.gopls.setup({})
-
+      vim.lsp.config.ts_ls = {
+        cmd = { 'typescript-language-server', '--stdio' },
+        filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
+        root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json' },
+      }
+      
       vim.lsp.config.bashls = {
         cmd = { 'bash-language-server', 'start' },
-        filetypes = { 'bash', 'sh', 'zsh' }
+        filetypes = { 'bash', 'sh', 'zsh' },
       }
-      vim.lsp.enable 'bashls'
+      
+      vim.lsp.config.hyprls = {
+        cmd = { 'hyprls', '--stdio' },
+        filetypes = { 'hyprlang' },
+      }
+      
+      vim.lsp.config.jsonls = {
+        cmd = { 'vscode-json-language-server', '--stdio' },
+        filetypes = { 'json', 'jsonc' },
+      }
+      
+      vim.lsp.config.gradle_ls = {
+        cmd = { 'gradle-language-server' },
+        filetypes = { 'groovy' },
+        root_markers = { 'settings.gradle', 'settings.gradle.kts' },
+      }
+      
+      vim.lsp.config.kotlin_language_server = {
+        cmd = { 'kotlin-language-server' },
+        filetypes = { 'kotlin' },
+      }
+      
+      vim.lsp.config.clangd = {
+        cmd = { 'clangd' },
+        filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
+      }
+      
+      vim.lsp.config.gopls = {
+        cmd = { 'gopls' },
+        filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
+        root_markers = { 'go.work', 'go.mod', '.git' },
+      }
+      
+      -- Enable all configured LSP servers
+      vim.lsp.enable({ 'ts_ls', 'bashls', 'hyprls', 'jsonls', 'gradle_ls', 'kotlin_language_server', 'clangd', 'gopls' })
 
       -- don't show parse errors in a separate window
       vim.g.zig_fmt_parse_errors = 0

@@ -1,7 +1,9 @@
 # The syntax is "key = value". The whitespace around the
 # equals doesn't matter.
-theme = Monokai Pro Spectrum
-background = #000000
+
+# Theme: Change this line to switch themes
+import = ~/.config/themes/catppuccin/ghostty.conf
+
 # Comments start with a `#` and are only valid on their own line.
 # Blank lines are ignored!
 

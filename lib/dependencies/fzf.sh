@@ -8,12 +8,12 @@ if ! command -v fzf > /dev/null; then
 
     if ! is_installer_available; then
       log_warn "Auto install not supported for your system, you will need to install it manually"
-      exit 0
+      return 0
     fi
     
     install_package fzf
     
-    if [[ "PKG_MANAGER" = "brew" ]]; then
+    if [[ "$PKG_MANAGER" = "brew" ]]; then
       sh -c "$(brew --prefix)/opt/fzf/install"
     fi
 

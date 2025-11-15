@@ -6,7 +6,7 @@ source $DOTFILES/lib/package_installer.sh
 if ! command -v ghostty > /dev/null; then # Installed in mac by default
   if ! is_installer_available; then
     log_warn "Auto install not supported for your system, you will need to install it manually"
-    exit 0
+    return 0
   fi
     
   install_package ghostty

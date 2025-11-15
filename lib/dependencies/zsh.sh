@@ -3,13 +3,6 @@
 source $DOTFILES/lib/io_handlers.sh
 source $DOTFILES/lib/package_installer.sh
 
-ensure_installer() {
-  if ! is_installer_available; then
-    log_warn "Auto install not supported for your system, you will need to install it manually"
-    exit 0
-  fi
-}
-
 if  command -v zsh > /dev/null && grep "$(command -v zsh)" /etc/shells > /dev/null; then
 	log_success 'Dependency `zsh` already installed'
 else

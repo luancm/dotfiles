@@ -14,8 +14,7 @@ create_symlink() {
       mkdir -p "$target_dir"
   fi
     
-	read -r source_path target_path <<<$(echo $1 $2)
-	if [ -L ${target_path} ] || [ -e ${target_path} ]; then
+	if [ -L "${target_path}" ] || [ -e "${target_path}" ]; then
 		if [[ "$(readlink "$target_path")" = "$source_path" ]]; then
 			log_success "Skipping ${source_path}. Already linked"
 			return 0

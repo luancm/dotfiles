@@ -63,7 +63,7 @@ return {
       }
       
       -- Enable all configured LSP servers
-      vim.lsp.enable({ 'ts_ls', 'bashls', 'hyprls', 'jsonls', 'gradle_ls', 'kotlin_language_server', 'clangd', 'gopls' })
+      vim.lsp.enable({ 'ts_ls', 'bashls', 'hyprls', 'jsonls', 'gradle_ls', 'kotlin_language_server', 'clangd', 'gopls', 'zls' })
 
       -- don't show parse errors in a separate window
       vim.g.zig_fmt_parse_errors = 0
@@ -81,10 +81,11 @@ return {
         end
       })
 
-      local lspconfig = require('lspconfig')
-      lspconfig.zls.setup {
+      vim.lsp.config.zls = {
+        cmd = { 'zls' },
+        filetypes = { 'zig', 'zon' },
+        root_markers = { 'zls.json', 'build.zig', '.git' },
         -- Server-specific settings. See `:help lspconfig-setup`
-
         -- omit the following line if `zls` is in your PATH
         -- cmd = { '/path/to/zls_executable' },
         -- There are two ways to set config options:

@@ -1,153 +1,67 @@
 /* Theme: Change this line to switch themes */
 @import "/home/luancm/.config/themes/catppuccin/waybar.css";
 
-/* Override for transparency */
-@define-color background rgba(30, 30, 46, 0.3);
-@define-color light @text;
-@define-color dark @background;
-
 * {
+  background-color: @background;
+  color: @text;
+
   border: none;
   border-radius: 0;
   min-height: 0;
-  font-family: Iosevka NF SemiBold;
-  font-size: 15px;
-  color: @light;
+  font-family: 'CaskaydiaMono Nerd Font';
+  font-size: 16px;
 }
 
-window#waybar {
-  background-color: @background;
-  transition-property: background-color;
-  transition-duration: 0.5s;
+.modules-left {
+  margin-left: 8px;
 }
 
-window#waybar.hidden {
-  opacity: 0.5;
-}
-
-#workspaces {
-  background-color: transparent;
-  color: @dark;
+.modules-right {
+  margin-right: 8px;
 }
 
 #workspaces button {
-  all: initial;
-  /* Remove GTK theme values (waybar #1351) */
-  min-width: 0;
-  /* Fix weird spacing in materia (waybar #450) */
-  box-shadow: inset 0 -3px transparent;
-  /* Use box-shadow instead of border so the text isn't offset */
-  padding: 4px 18px;
-  margin: 2px 3px;
-  border-radius: 4px;
-  background-color: @dark;
-  color: @light;
+     all: initial;
+     padding: 0 15px;
+     margin: 0 1.5px;
+     min-width: 15px;
+   }
+
+#workspaces button.empty {
+  opacity: 0.5;
 }
 
-#workspaces button.active {
-  color: @dark;
-  background-color: @light;
-}
-
-#workspaces button.active label,
-#workspaces button.focused,
-#workspaces button:hover,
-#workspaces button:hover label {
-  box-shadow: inherit;
-  text-shadow: inherit;
-  color: @dark;
-  background-color: @light;
-}
-
-#workspaces button.urgent {
-  background-color: #f38ba8;
-}
-
-#idle_inhibitor,
 #cpu,
-#memory,
-#keyboard-state,
 #battery,
-#bluetooth,
-#backlight,
-#wireplumber,
-#network,
-#language,
-#clock,
+#pulseaudio {
+  min-width: 12px;
+  margin: 0 7.5px;
+}
+
 #tray {
-  border-radius: 4px;
-  margin: 4px 3px;
-  padding: 2px 10px;
-  background-color: @dark;
-  color: @light;
+  margin-right: 16px;
 }
 
-#keyboard-state label {
-  padding: 4px 4px;
-}
-
-#custom-logo {
-  padding-right: 7px;
-  padding-left: 7px;
-  margin-left: 5px;
-  font-size: 15px;
-  border-radius: 8px 0px 0px 8px;
-  color: #1793d1;
-}
-
-#cpu,
-#memory {
-  background-color: #fab387;
-  color: @dark;
-}
-
-#battery {
-  background-color: #f38ba8;
-  color: @dark;
-}
-
-#battery.warning,
-#battery.critical,
-#battery.urgent {
-  background-color: #ff0000;
-  color: #FFFF00;
-}
-
-#battery.charging {
-  background-color: #a6e3a1;
-  color: @dark;
-}
-
-#backlight {
-  background-color: #fab387;
-  color: @dark;
-}
-
-#wireplumber {
-  background-color: #f9e2af;
-  color: @dark;
+#bluetooth {
+  margin-right: 17px;
 }
 
 #network {
-  background-color: #94e2d5;
-  color: @dark;
-  padding-right: 17px;
+  margin-right: 20px;
 }
 
-#clock {
-  background-color: #cba6f7;
-  color: @dark;
+#custom-expand-icon {
+  margin-right: 20px;
 }
 
 tooltip {
-  border-radius: 8px;
-  padding: 15px;
-  background-color: #131822;
-  color: @light;
+  padding: 2px;
 }
 
-tooltip label {
-  padding: 5px;
-  background-color: #131822;
-  color: @light;
+#clock {
+  margin-left: 8.75px;
+}
+
+.hidden {
+  opacity: 0;
 }

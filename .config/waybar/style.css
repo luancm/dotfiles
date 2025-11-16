@@ -1,5 +1,5 @@
 /* Theme: Change this line to switch themes */
-@import "~/.config/themes/catppuccin/waybar.css";
+@import "/home/luancm/.config/themes/catppuccin/waybar.css";
 
 /* Override for transparency */
 @define-color background rgba(30, 30, 46, 0.3);

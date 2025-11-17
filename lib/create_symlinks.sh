@@ -8,6 +8,10 @@ create_symlink() {
   local source_path="$1"
   local target_path="$2"
   
+  # Resolve to absolute paths to detect loops
+  local source_real="$(readlink -f "$source_path" 2>/dev/null || echo "$source_path")"
+  local target_real="$(readlink -f "$target_path" 2>/dev/null || echo "$target_path")"
+  
   # Create target directory if it doesn't exist
   local target_dir="$(dirname "$target_path")"
   if [ ! -d "$target_dir" ]; then
@@ -71,8 +75,8 @@ create_symlinks_for_folder() {
   # Find all files matching the pattern
   log_info "Finding files matching '$pattern' in '$source_folder'..."
     
-  # Find all files matching the pattern
-  find $source_folder -type f -path "$pattern" | while read -r file; do
+  # Find all files matching the pattern (exclude .backup files)
+  find $source_folder -type f -path "$pattern" ! -name "*.backup*" | while read -r file; do
       # Get the relative path (without the leading ./)
       relative_path="${file#$source_folder/}"
       

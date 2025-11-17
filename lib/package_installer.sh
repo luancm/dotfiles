@@ -3,7 +3,11 @@
 source $DOTFILES/lib/io_handlers.sh
 
 # Detect package manager and set variable
-if command -v pacman > /dev/null; then
+if command -v yay > /dev/null; then
+    PKG_MANAGER="yay"
+    PKG_INSTALL="yay -S"
+    PKG_CHECK="yay -Qi"
+elif command -v pacman > /dev/null; then
     PKG_MANAGER="pacman"
     PKG_INSTALL="sudo pacman -S"
     PKG_CHECK="sudo pacman -Qi"

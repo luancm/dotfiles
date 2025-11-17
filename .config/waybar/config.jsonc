@@ -119,7 +119,7 @@
   },
   "pulseaudio": {
     "format": "{volume}% {icon} {format_source}",
-    "on-click": "pavucontrol",
+    "on-click": "pwvucontrol",
     "on-click-right": "pamixer -t",
     "tooltip-format": "Playing at {volume}%",
     "scroll-step": 5,

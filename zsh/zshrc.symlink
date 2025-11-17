@@ -71,6 +71,12 @@ fi
 log_info 'Loading .localrc configuration'
 [ -f ~/.localrc ] && . ~/.localrc
 
+# NVM (Node Version Manager)
+log_info 'Configuring NVM'
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
 log_info 'Configuring prompt'
 autoload -U promptinit
 promptinit

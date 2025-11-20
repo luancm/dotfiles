@@ -1,6 +1,6 @@
 /* Catppuccin Mocha colors for Waybar */
 
-@define-color background #1e1e2e;
+@define-color background rgba(30, 30, 46, 0.7);
 @define-color surface0 #313244;
 @define-color surface1 #45475a;
 @define-color text #cdd6f4;

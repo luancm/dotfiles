@@ -3,9 +3,7 @@
   "layer": "top",
   "position": "top",
   "spacing": 4, // Gaps between modules
-  "height": 24,
-  "margin-left": 18,
-  "margin-right": 18,
+  "height": 28,
   "modules-left": ["hyprland/workspaces"],
   "modules-center": ["clock"],
   "modules-right": [

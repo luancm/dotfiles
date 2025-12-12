@@ -19,11 +19,23 @@ return {
               -- e.g. git_{create, delete, ...}_branch for the git_branches picker
               ["<C-h>"] = "which_key"
             }
+          },
+          vimgrep_arguments = {
+            "rg",
+            "--color=never",
+            "--no-heading",
+            "--with-filename",
+            "--line-number",
+            "--column",
+            "--follow",
+            "--smart-case",
+            "--trim"
           }
         },
         pickers = {
           find_files = {
-            hidden = true
+            hidden = true,
+            follow = true,
           },
           buffers = {
             sort_mru = true,
@@ -47,11 +59,40 @@ return {
 
       local builtin = require('telescope.builtin')
       vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })
-      vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Telescope live grep' })
       vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help tags' })
       vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = 'Telescope find files' })
       vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Telescope buffers' })
       vim.keymap.set('n', '<C-i>', builtin.buffers, { desc = 'Telescope buffers' })
+
+      -- From
+      local function live_grep()
+        local function is_git_repo()
+          vim.fn.system("git rev-parse --is-inside-work-tree")
+          return vim.v.shell_error == 0
+        end
+
+        local function get_git_root()
+          local dot_git_path = vim.fn.finddir(".git", ".;")
+          return vim.fn.fnamemodify(dot_git_path, ":h")
+        end
+
+        local opts = {}
+        if is_git_repo() then
+          opts = {
+            cwd = get_git_root(),
+          }
+        else
+          opts = {
+            -- print working directory for debugging
+            
+            print("Not a git repository, using current working directory: " .. vim.fn.getcwd()),
+            cwd = vim.fn.getcwd(),
+          }
+          end
+
+        builtin.live_grep(opts)
+      end
+      vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Telescope live grep' })
     end
   },
   {

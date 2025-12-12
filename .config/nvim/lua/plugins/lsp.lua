@@ -9,7 +9,7 @@ return {
     "mason-org/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup {
-        ensure_installed = { "ts_ls", "bashls", "hyprls", "jsonls", "gradle_ls", "kotlin_language_server", "clangd", "gopls" },
+        ensure_installed = { "ts_ls", "bashls", "hyprls", "jsonls", "gradle_ls", "kotlin_language_server", "clangd", "gopls", "rust_analyzer", "zls" },
       }
     end
   },
@@ -61,9 +61,15 @@ return {
         filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
         root_markers = { 'go.work', 'go.mod', '.git' },
       }
+
+      vim.lsp.config.rust_analyzer = {
+        cmd = { 'rust-analyzer' },
+        filetypes = { 'rust' },
+        root_markers = { 'Cargo.toml', 'rust-project.json', '.git' },
+      }
       
       -- Enable all configured LSP servers
-      vim.lsp.enable({ 'ts_ls', 'bashls', 'hyprls', 'jsonls', 'gradle_ls', 'kotlin_language_server', 'clangd', 'gopls', 'zls' })
+      vim.lsp.enable({ 'ts_ls', 'bashls', 'hyprls', 'jsonls', 'gradle_ls', 'kotlin_language_server', 'clangd', 'gopls', 'rust_analyzer', 'zls' })
 
       -- don't show parse errors in a separate window
       vim.g.zig_fmt_parse_errors = 0

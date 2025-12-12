@@ -15,6 +15,12 @@ return {
         opts = {},
       },
       "folke/lazydev.nvim",
+      -- GitHub Copilot (official plugin with auth support)
+      {
+        "github/copilot.vim",
+        cmd = "Copilot",
+        event = "InsertEnter",
+      },
     },
     --- @module "blink.cmp"
     --- @type blink.cmp.Config

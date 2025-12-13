@@ -65,7 +65,29 @@ return {
         -- Optionally, set `auto_show = true` to show the documentation after a delay.
         documentation = { auto_show = true, auto_show_delay_ms = 500 },
 
-        menu = { auto_show = true },
+        menu = {
+          auto_show = true,
+          draw = {
+            -- We don't need label_description now because label and label_description are already
+            -- combined together in label by colorful-menu.nvim.
+            columns = {
+              { "label",      gap = 1 },
+              { "kind_icon",  "kind" },
+              { "source_name" },
+            },
+            components = {
+              label = {
+                text = function(ctx)
+                  return require("colorful-menu").blink_components_text(ctx)
+                end,
+                highlight = function(ctx)
+                  return require("colorful-menu").blink_components_highlight(ctx)
+                end,
+              },
+            },
+            treesitter = { 'lsp' },
+          },
+        },
         ghost_text = {
           enabled = true,
           show_without_selection = true,

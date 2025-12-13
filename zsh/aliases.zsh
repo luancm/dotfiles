@@ -2,7 +2,7 @@
 
 alias l="ls -lAh"
 alias la="ls -A"
-alias ll="ls -l"
+alias ll="ls -lSh"
 
 alias grep="grep --color=auto"
 alias duf="du -sh * | sort -hr"

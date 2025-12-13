@@ -21,6 +21,15 @@ return {
         cmd = "Copilot",
         event = "InsertEnter",
       },
+      -- Copilot source for blink.cmp (keeps Copilot ghost text + adds menu items)
+      {
+        "fang2hou/blink-copilot",
+      },
+      -- color-menu
+      {
+        "xzbdmw/colorful-menu.nvim",
+        opts = { highlighters = { 'treesitter' } },
+      },
     },
     --- @module "blink.cmp"
     --- @type blink.cmp.Config
@@ -102,9 +111,15 @@ return {
       },
 
       sources = {
-        default = { "lsp", "path", "snippets", "lazydev" },
+        default = { "lsp", "path", "snippets", "lazydev", "copilot" },
         providers = {
           lazydev = { name = "LazyDev", module = "lazydev.integrations.blink", score_offset = 100 },
+          copilot = {
+            name = "copilot",
+            module = "blink-copilot",
+            async = true,
+            score_offset = 50,
+          },
         },
       },
 

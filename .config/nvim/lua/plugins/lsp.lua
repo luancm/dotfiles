@@ -130,14 +130,14 @@ return {
       vim.cmd("command! GoToPreviewImpl lua require('goto-preview').goto_preview_implementation()")
       vim.cmd("command! CloseGoToPreview lua require('goto-preview').close_all_win()")
       vim.cmd("command! OpenFloatDiag lua vim.diagnostic.open_float()")
-      vim.keymap.set("n", "gd", ":LspDef<CR>")
-      vim.keymap.set("n", "gD", ":LspDefTab<CR>")
-      vim.keymap.set("n", "gi", ":LspRename<CR>")
-      vim.keymap.set("n", "<C-k>", ":LspHover<CR>")
-      vim.keymap.set("n", "gpd", ":GoToPreview<CR>")
-      vim.keymap.set("n", "gpi", ":GoToPreviewImpl<CR>")
-      vim.keymap.set("n", "gpc", ":CloseGoToPreview<CR>")
-      vim.keymap.set("n", "tf", ":OpenFloatDiag<CR>")
+      vim.keymap.set("n", "gd", ":LspDef<CR>", { desc = "[G]o [D]efinition (LSP)" }) 
+      vim.keymap.set("n", "gD", ":LspDefTab<CR>", { desc = "[G]o [D]efinition [T]ab (LSP)" })
+      vim.keymap.set("n", "gi", ":LspRename<CR>", { desc = "[G]o [I]mplementation (LSP)" })
+      vim.keymap.set("n", "<C-k>", ":LspHover<CR>", { desc = "Hover (LSP)" })
+      vim.keymap.set("n", "gpd", ":GoToPreview<CR>", { desc = "[G]o [P]review [D]efinition (LSP)" })
+      vim.keymap.set("n", "gpi", ":GoToPreviewImpl<CR>", { desc = "[G]o [P]review [I]mplementation (LSP)" })
+      vim.keymap.set("n", "gpc", ":CloseGoToPreview<CR>", { desc = "[G]o [P]review [C]lose (LSP)" })
+      vim.keymap.set("n", "<leader>tf", ":OpenFloatDiag<CR>", { desc = "[T]oggle [F]loat Diagnostics (LSP)" })
     end
   },
   {

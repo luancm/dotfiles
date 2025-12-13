@@ -14,7 +14,6 @@ return {
     -- fill any relevant options here
   },
   config = function()
-    vim.keymap.set("n", "<leader>b", "<cmd>Neotree toggle show buffers right<cr>")
-    -- vim.keymap.set("n", "<leader>s", "<cmd>Neotree float git_status<cr>")
+    vim.keymap.set("n", "<leader>tt", "<cmd>neotree toggle<cr>", { desc = "[T]oogle [T]ree (NeoTree)" })
   end
 }

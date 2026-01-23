@@ -44,14 +44,15 @@ done
 
 unset zsh_files 
 
-# Plugins
-if $is_mac_os; then
-  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-  source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-else
-  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+# Plugins managed by Antidote
+# Ensure antidote is installed
+if [[ ! -d "$DOTFILES/zsh/antidote" ]]; then
+  git clone --depth=1 https://github.com/mattmc3/antidote.git "$DOTFILES/zsh/antidote"
 fi
+
+# Initialize antidote
+source "$DOTFILES/zsh/antidote/antidote.zsh"
+antidote load "$DOTFILES/zsh/zsh_plugins.txt"
 
 if $is_mac_os; then
 	source $DOTFILES/homebrew/config.sh

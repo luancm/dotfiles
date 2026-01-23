@@ -12,6 +12,7 @@
   ],
   "modules-right": [
     "group/tray-expander",
+    "idle_inhibitor",
     "bluetooth",
     "network",
     "pulseaudio",

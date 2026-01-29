@@ -37,23 +37,42 @@ fi
 log_info ">>> Setting up System Services (Greetd & PAM)"
 
 # 1. Setup Greetd Config (Login Manager)
-GREETD_CONFIG="/etc/greetd/config.toml"
-SOURCE_CONFIG="$DOTFILES/system_configs/etc/greetd/config.toml"
+GREETD_DIR="/etc/greetd"
+GREETD_CONFIG="$GREETD_DIR/config.toml"
+REGREET_CONFIG="$GREETD_DIR/regreet.toml"
+SOURCE_DIR="$DOTFILES/system_configs/etc/greetd"
+WALLPAPER_SRC="$HOME/.cache/current_wallpaper"
+WALLPAPER_DEST="$GREETD_DIR/wallpaper"
 
-if [ -f "$GREETD_CONFIG" ]; then
-    log_info "Backing up $GREETD_CONFIG to $GREETD_CONFIG.bak"
-    sudo cp $GREETD_CONFIG "$GREETD_CONFIG.bak"
+if [ -d "$GREETD_DIR" ]; then
+    log_info "Configuring greetd..."
     
-    # Use the source file if it exists
-    if [ -f "$SOURCE_CONFIG" ]; then
-        log_info "Copying configuration from $SOURCE_CONFIG"
-        sudo cp "$SOURCE_CONFIG" "$GREETD_CONFIG"
-        log_success "Updated $GREETD_CONFIG"
-    else
-        log_error "Source config not found at $SOURCE_CONFIG"
+    # Config.toml
+    if [ -f "$SOURCE_DIR/config.toml" ]; then
+        log_info "Updating config.toml"
+        sudo cp "$SOURCE_DIR/config.toml" "$GREETD_CONFIG"
     fi
+
+    # Regreet.toml
+    if [ -f "$SOURCE_DIR/regreet.toml" ]; then
+        log_info "Updating regreet.toml"
+        sudo cp "$SOURCE_DIR/regreet.toml" "$REGREET_CONFIG"
+    fi
+    
+    # Wallpaper - Copy whatever the symlink points to
+    if [ -L "$WALLPAPER_SRC" ] || [ -f "$WALLPAPER_SRC" ]; then
+        log_info "Updating greeter wallpaper from $WALLPAPER_SRC"
+        # Use cat to copy content so we ignore extension mismatches
+        sudo cp "$WALLPAPER_SRC" "$WALLPAPER_DEST"
+        # Ensure greeter user can read it
+        sudo chmod 644 "$WALLPAPER_DEST"
+    else
+        log_warn "Current wallpaper not found at $WALLPAPER_SRC, skipping wallpaper update."
+    fi
+
+    log_success "Greetd configuration updated"
 else
-    log_warn "Warning: $GREETD_CONFIG not found. Is greetd installed?"
+    log_warn "Warning: $GREETD_DIR not found. Is greetd installed?"
 fi
 
 # 2. Setup PAM for Keyring Auto-unlock

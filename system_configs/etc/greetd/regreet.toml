@@ -1,0 +1,20 @@
+# ReGreet Configuration
+# https://github.com/rharish101/ReGreet/blob/master/regreet.sample.toml
+
+[background]
+path = "/etc/greetd/wallpaper"
+fit = "Cover"
+
+[GTK]
+application_prefer_dark_theme = true
+cursor_theme_name = "Adwaita"
+font_name = "JetBrainsMono NF 11"
+icon_theme_name = "Adwaita"
+theme_name = "catppuccin-mocha-blue-standard+default"
+
+[commands]
+reboot = [ "systemctl", "reboot" ]
+poweroff = [ "systemctl", "poweroff" ]
+
+[appearance]
+greeting_msg = "Welcome back, Luan"

@@ -10,7 +10,8 @@ return {
             local cwd = vim.uv.cwd()
             local basename = vim.fs.basename(cwd)
 			_99.setup({
-                -- provider = _99.ClaudeCodeProvider,  -- default: OpenCodeProvider
+                provider = _99.Providers.ClaudeCodeProvider,
+                model = "claude-sonnet-4-6",
 				logger = {
 					level = _99.DEBUG,
 					path = "/tmp/" .. basename .. ".99.debug",
@@ -79,9 +80,21 @@ return {
 				_99.visual()
 			end, { desc = "[9] [V]isual request" })
 
-			vim.keymap.set("v", "<leader>9s", function()
+			vim.keymap.set("n", "<leader>9s", function()
+				_99.search()
+			end, { desc = "[9] [S]earch" })
+
+			vim.keymap.set("n", "<leader>9b", function()
+				_99.vibe()
+			end, { desc = "[9] Vi[b]e (agentic)" })
+
+			vim.keymap.set("n", "<leader>9o", function()
+				_99.open()
+			end, { desc = "[9] [O]pen last result" })
+
+			vim.keymap.set("n", "<leader>9x", function()
 				_99.stop_all_requests()
-			end, { desc = "[9] [S]top requests" })
+			end, { desc = "[9] [X] Stop requests" })
 		end,
 	},
 }

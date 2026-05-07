@@ -140,7 +140,6 @@ return {
       -- Configurations for the cmdline only
       cmdline = {
         keymap = { preset = 'inherit' },
-        fuzzy = { implementation = "prefer_rust_with_warning" },
         completion = {
           menu = {
             auto_show = true

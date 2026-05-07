@@ -1,0 +1,49 @@
+/* === Login & Clock boxes === */
+ frame.background {
+     background-color: rgba(30, 30, 46, 0.55);
+     border: 1px solid rgba(205, 214, 244, 0.08);
+     border-radius: 12px;
+ }
+ 
+ frame.background > border {
+     border: none;
+ }
+ 
+ /* === Inputs === */
+ entry,
+ combobox,
+ .passwordentry {
+     background-color: rgba(49, 50, 68, 0.6);
+     border: 1px solid rgba(205, 214, 244, 0.12);
+     border-radius: 6px;
+     color: #cdd6f4;
+ }
+ 
+ entry:focus,
+ .passwordentry:focus {
+     border-color: rgba(137, 180, 250, 0.6);
+ }
+ 
+ /* === Login button === */
+ button.suggested-action {
+     background-color: rgba(137, 180, 250, 0.85);
+     color: #1e1e2e;
+     border-radius: 6px;
+     border: none;
+ }
+ 
+ button.suggested-action:hover {
+     background-color: #89b4fa;
+ }
+ 
+ /* === Reboot / Poweroff === */
+ button.destructive-action {
+     background-color: rgba(30, 30, 46, 0.65);
+     color: #f38ba8;
+     border: 1px solid rgba(243, 139, 168, 0.6);
+     border-radius: 6px;
+ }
+ 
+ button.destructive-action:hover {
+     background-color: rgba(243, 139, 168, 0.3);
+ }

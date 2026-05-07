@@ -24,7 +24,7 @@ vim.keymap.set("n", "<C-j>", "<cmd>wincmd j<cr>")
 vim.keymap.set("n", "<C-h>", "<cmd>wincmd h<cr>")
 vim.keymap.set("n", "<C-l>", "<cmd>wincmd l<cr>")
 
-vim.keymap.set("n", "<leader>h", "<cmd>nohlsearch<cr>")
+vim.keymap.set("n", "<leader><space>", "<cmd>nohlsearch<cr>", { desc = "Clear search highlights" })
 
 -- From theprimeagen
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])

@@ -118,8 +118,7 @@ return {
       }
 
       vim.keymap.set("n", "K", vim.lsp.buf.hover)
-      vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action)
-      vim.keymap.set("n", "<leader>bf", vim.lsp.buf.format)
+      vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "[C]ode [A]ction" })
 
 
       vim.cmd("command! LspDef lua vim.lsp.buf.definition()")
@@ -133,8 +132,7 @@ return {
       vim.cmd("command! OpenFloatDiag lua vim.diagnostic.open_float()")
       vim.keymap.set("n", "gd", ":LspDef<CR>", { desc = "[G]o to [D]efinition (LSP)" }) 
       vim.keymap.set("n", "gD", ":LspDefTab<CR>", { desc = "[G]o to [D]efinition [T]ab (LSP)" })
-      vim.keymap.set("n", "gi", ":LspRename<CR>", { desc = "[G]o to [I]mplementation (LSP)" })
-      vim.keymap.set("n", "<C-k>", ":LspHover<CR>", { desc = "Hover (LSP)" })
+      vim.keymap.set("n", "<leader>cr", ":LspRename<CR>", { desc = "[C]ode [R]ename" })
       vim.keymap.set("n", "gpd", ":GoToPreview<CR>", { desc = "[G]o to [P]review [D]efinition (LSP)" })
       vim.keymap.set("n", "gpi", ":GoToPreviewImpl<CR>", { desc = "[G]o to [P]review [I]mplementation (LSP)" })
       vim.keymap.set("n", "gpc", ":CloseGoToPreview<CR>", { desc = "[G]o to [P]review [C]lose (LSP)" })

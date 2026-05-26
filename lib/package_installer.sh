@@ -40,6 +40,7 @@ get_package_name() {
             # Map Arch package names to Ubuntu/Debian equivalents
             case "$package" in
                 openssh) echo "openssh-client" ;;
+                fd) echo "fd-find" ;;
                 # Most packages have the same name
                 *) echo "$package" ;;
             esac

@@ -4,7 +4,7 @@
 
 [ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
 
-export DOTFILES=$(cd "$(dirname "$0")"; pwd -P)
+export DOTFILES=$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)
 source $DOTFILES/lib/io_handlers.sh
 
 setup_ssh() {

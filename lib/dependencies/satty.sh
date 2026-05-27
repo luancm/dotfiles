@@ -10,7 +10,7 @@ if ! $is_mac_os; then
     return 0
   fi
 
-  if $(prompt_confirmation 'Do you want to install satty (for screen shots)?'); then
+  if prompt_confirmation 'Do you want to install satty (for screen shots)?'; then
     if ! is_installer_available; then
       log_warn 'No package manager found. Please install grim and satty manually.'
       return 0

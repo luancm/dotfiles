@@ -13,7 +13,7 @@ setup_ssh() {
 		return 0
 	fi
 
-	if ! $(prompt_confirmation 'SSH: Do you want to configure ssh?'); then
+	if ! prompt_confirmation 'SSH: Do you want to configure ssh?'; then
 		log_success 'SSH: Skipping ssh configuration'
 		return 0
 	fi

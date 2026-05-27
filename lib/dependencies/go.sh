@@ -68,13 +68,13 @@ if command -v go > /dev/null; then
     return 0
   else
     log_info "Go ${current} is installed; target version is ${GO_VERSION}."
-    if ! $(prompt_confirmation "Replace existing Go ${current} with ${GO_VERSION}?"); then
+    if ! prompt_confirmation "Replace existing Go ${current} with ${GO_VERSION}?"; then
       log_info 'Skipping Go installation'
       return 0
     fi
   fi
 else
-  if ! $(prompt_confirmation "Install Go ${GO_VERSION}?"); then
+  if ! prompt_confirmation "Install Go ${GO_VERSION}?"; then
     log_info 'Skipping Go installation'
     return 0
   fi

@@ -4,7 +4,7 @@ source $DOTFILES/lib/io_handlers.sh
 source $DOTFILES/lib/package_installer.sh
 
 if ! command -v fzf > /dev/null; then
-	if $(prompt_confirmation 'Do you want to install fzf (fuzzy finder)?'); then
+	if prompt_confirmation 'Do you want to install fzf (fuzzy finder)?'; then
 
     if ! is_installer_available; then
       log_warn "Auto install not supported for your system, you will need to install it manually"

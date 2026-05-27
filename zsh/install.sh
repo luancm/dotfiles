@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -z $DOTFILES ]]; then echo 'Dotfiles were not installed, to install run `~/.dotfiles/install`'; return 1; fi
+if [[ -z $DOTFILES ]]; then echo 'Dotfiles were not installed, to install run `~/.dotfiles/install`'; exit 1; fi
 source $DOTFILES/lib/io_handlers.sh
 
 if ! command -v zsh > /dev/null; then log_error 'Trying to configure zsh without it installed. Do not forget to run `~/.dotfiles/install` before'; exit; fi

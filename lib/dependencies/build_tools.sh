@@ -62,7 +62,7 @@ fi
 if build_tools_already_installed; then
   log_success 'Dependency `build tools` already installed'
 else
-  if $(prompt_confirmation 'Install essential build tools (gcc, make, headers)? Required for compiling C/C++ and most Makefile projects.'); then
+  if prompt_confirmation 'Install essential build tools (gcc, make, headers)? Required for compiling C/C++ and most Makefile projects.'; then
     if install_build_tools; then
       log_success 'Dependency `build tools` installed successfully'
     else

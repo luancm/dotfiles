@@ -16,7 +16,7 @@ fi
 if command -v nvm > /dev/null || [[ -d "$NVM_DIR_PATH" ]]; then
   log_success 'Dependency `nvm` already installed'
 else
-  if $(prompt_confirmation 'Install nvm (Node Version Manager)?'); then
+  if prompt_confirmation 'Install nvm (Node Version Manager)?'; then
     if ! command -v curl > /dev/null; then
       log_info 'nvm installer requires curl; running curl dependency installer...'
       source "$DOTFILES/lib/dependencies/curl.sh"

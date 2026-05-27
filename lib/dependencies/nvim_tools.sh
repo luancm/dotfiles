@@ -24,7 +24,7 @@ for package in "${!NVIM_DEPENDENCIES[@]}"; do
     continue
   fi
 
-  if $(prompt_confirmation "Install Neovim dependency '$package'? (required for Telescope and plugin tooling)"); then
+  if prompt_confirmation "Install Neovim dependency '$package'? (required for Telescope and plugin tooling)"; then
     if install_package "$package"; then
       # Debian/Ubuntu ships fd as `fdfind` to avoid clashing with another tool.
       # Expose it as `fd` (what nvim plugins expect) via ~/.local/bin.

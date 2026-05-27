@@ -1,3 +1,4 @@
 cache/
 zsh/antidote
 zsh/zsh_plugins.zsh
+homebrew/exclude.local

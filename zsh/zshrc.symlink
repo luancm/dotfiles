@@ -22,10 +22,17 @@ SAVEHIST=1000000000
 
 log_info "Welcome, let's zsh!"
 
-# Basic auto/tab complete:
+# Basic auto/tab complete (compinit with daily cache rebuild).
+# `-C` skips the cache integrity check for a faster startup; the glob
+# qualifier (#qN.mh+24) matches if ~/.zcompdump is older than 24h, in
+# which case we do a full compinit to pick up newly installed completions.
 autoload -Uz compinit
 zmodload zsh/complist
-compinit
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
 _comp_options+=(globdots)
 
 
@@ -72,11 +79,25 @@ fi
 log_info 'Loading .localrc configuration'
 [ -f ~/.localrc ] && . ~/.localrc
 
-# NVM (Node Version Manager)
-log_info 'Configuring NVM'
+# NVM (Node Version Manager) — lazy-loaded to avoid the ~200ms cost of
+# sourcing nvm.sh on every shell start. Calling any of the shimmed
+# commands below sources nvm.sh on demand and then re-runs the command;
+# the shims unset themselves so subsequent calls hit the real nvm/node.
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  _nvm_load() {
+    unset -f nvm node npm npx yarn pnpm corepack _nvm_load 2>/dev/null
+    \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  }
+  nvm()      { _nvm_load; nvm "$@"; }
+  node()     { _nvm_load; node "$@"; }
+  npm()      { _nvm_load; npm "$@"; }
+  npx()      { _nvm_load; npx "$@"; }
+  yarn()     { _nvm_load; yarn "$@"; }
+  pnpm()     { _nvm_load; pnpm "$@"; }
+  corepack() { _nvm_load; corepack "$@"; }
+fi
 
 # Go (no-op if not installed)
 [[ -d "/usr/local/go/bin" ]] && export PATH="$PATH:/usr/local/go/bin"

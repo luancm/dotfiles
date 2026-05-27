@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-if [[ -z "$DOTFILES" ]]; then echo 'Dotfiles were not installed, to install run `bash ~/.dotfiles/install`'; exit 1; fi
-source $DOTFILES/lib/io_handlers.sh
+if [[ -z "${DOTFILES:-}" ]]; then echo 'Dotfiles were not installed, to install run `bash ~/.dotfiles/install`'; exit 1; fi
+source "$DOTFILES/lib/io_handlers.sh"
 
 setup_git() {
-	if [[ "$(git config --global --get dotfiles.managed)" = "true" ]]; then
+	# `git config --get` returns 1 when the key is missing; tolerate that under set -e.
+	if [[ "$(git config --global --get dotfiles.managed || true)" = "true" ]]; then
 		log_success "Git: Already managed by dotfiles"
 		return 0
 	fi
@@ -26,6 +28,6 @@ setup_git
 
 log_info 'Git: Creating aliases'
 
-source $DOTFILES/git/aliases.sh
+source "$DOTFILES/git/aliases.sh"
 
 log_success 'Git: Successfully configured'

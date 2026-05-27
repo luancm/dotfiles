@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 #
 # install all things
+set -euo pipefail
 
 [ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
 
-export DOTFILES=$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)
-source $DOTFILES/lib/io_handlers.sh
+export DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)"
+source "$DOTFILES/lib/io_handlers.sh"
 
 setup_ssh() {
 	if [ -f ~/.ssh/id_ed25519.pub ]; then
@@ -27,17 +28,17 @@ setup_ssh() {
 # ================================================ #
 
 log_info '❯❯ Installing dependencies...'
-bash $DOTFILES/lib/install_dependencies.sh
+bash "$DOTFILES/lib/install_dependencies.sh"
 
 # Call installers
-array=( $(find -H "$DOTFILES" -maxdepth 3 -name 'install.sh' -not -path '*.git*') )
-for installer in ${array[@]}; do
+mapfile -t installers < <(find -H "$DOTFILES" -maxdepth 3 -name 'install.sh' -not -path '*.git*')
+for installer in "${installers[@]}"; do
 	log_info "❯❯ Installing $installer"
   bash "$installer"
 done
 
 log_info "❯❯ Creating Symlinks"
-bash $DOTFILES/lib/create_symlinks.sh
+bash "$DOTFILES/lib/create_symlinks.sh"
 
 setup_ssh
 

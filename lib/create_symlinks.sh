@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+set -eo pipefail
 
-source $DOTFILES/lib/io_handlers.sh
+source "$DOTFILES/lib/io_handlers.sh"
 
 # Function to create a symlink, handling existing files/links
 # Usage: create_symlink <source_file> <target_link>
@@ -72,9 +73,9 @@ create_symlinks_for_folder() {
   log_info "Finding files matching '$pattern' in '$source_folder'..."
     
   # Find all files matching the pattern (exclude .backup files)
-  find $source_folder -type f -path "$pattern" ! -name "*.backup*" | while read -r file; do
+  find "$source_folder" -type f -path "$pattern" ! -name "*.backup*" | while read -r file; do
       # Get the relative path (without the leading ./)
-      relative_path="${file#$source_folder/}"
+      relative_path="${file#"$source_folder"/}"
       
       # Check if file should be skipped
       if should_skip "$relative_path" "${exclude_patterns[@]}"; then

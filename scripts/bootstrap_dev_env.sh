@@ -11,7 +11,7 @@
 # 2. Clones the dotfiles repo over HTTPS into --dest (default ~/.dotfiles).
 #    HTTPS avoids the chicken-and-egg of needing an SSH key on GitHub first;
 #    the repo is public, so a read-only HTTPS clone is fine for bootstrap.
-# 3. Runs the dotfiles install script (which installs zsh, starship, znap,
+# 3. Runs the dotfiles install script (which installs zsh, starship, antidote,
 #    symlinks, and generates ~/.ssh/id_ed25519 via its own setup_ssh).
 # 4. Prints the generated SSH public key with a link to GitHub's SSH-key
 #    settings page, so you can add it.
@@ -76,7 +76,7 @@ else
   ok "Cloned dotfiles"
 fi
 
-# 3. install (zsh, starship, znap, symlinks, ssh-keygen) -----------------
+# 3. install (zsh, starship, antidote, symlinks, ssh-keygen) -----------------
 if [ "$RUN_INSTALL" -eq 1 ]; then
   if [ -f "$DEST/install" ]; then
     log "Running $DEST/install (interactive)"

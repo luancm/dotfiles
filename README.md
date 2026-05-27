@@ -9,7 +9,7 @@ If using MacOS, homebrew is a good thing to have, the script tries to install de
 
 - zsh
 - starship (prompt)
-- znap (plugin manager)
+- antidote (plugin manager)
   
 Optional:
 - yay (who doesn't like yogurt?)

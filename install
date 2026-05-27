@@ -9,7 +9,7 @@ source $DOTFILES/lib/io_handlers.sh
 
 setup_ssh() {
 	if [ -f ~/.ssh/id_ed25519.pub ]; then
-		log_success 'SSH: Already configured in ~/.ssh/id_rsa.pub'
+		log_success 'SSH: Already configured in ~/.ssh/id_ed25519.pub'
 		return 0
 	fi
 

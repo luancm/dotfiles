@@ -23,6 +23,8 @@ vim.keymap.set("n", "<C-k>", "<cmd>wincmd k<cr>")
 vim.keymap.set("n", "<C-j>", "<cmd>wincmd j<cr>")
 vim.keymap.set("n", "<C-h>", "<cmd>wincmd h<cr>")
 vim.keymap.set("n", "<C-l>", "<cmd>wincmd l<cr>")
+vim.keymap.set({'n', 'v'}, '<C-j>', '<C-d>zz', { desc = 'Half page down' })
+vim.keymap.set({'n', 'v'}, '<C-k>', '<C-u>zz', { desc = 'Half page up' })
 
 vim.keymap.set("n", "<leader><space>", "<cmd>nohlsearch<cr>", { desc = "Clear search highlights" })
 

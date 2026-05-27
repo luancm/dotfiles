@@ -7,13 +7,19 @@ return {
     "MunifTanjim/nui.nvim",
     -- {"3rd/image.nvim", opts = {}}, -- Optional image support in preview window: See `# Preview Mode` for more information
   },
-  lazy = false, -- neo-tree will lazily load itself
+  lazy = false,
+  keys = {
+    { "<leader>tt", "<cmd>Neotree toggle<cr>", desc = "[T]oggle [T]ree (NeoTree)" },
+  },
   ---@module "neo-tree"
   ---@type neotree.Config?
   opts = {
-    -- fill any relevant options here
+    filesystem = {
+      follow_current_file = {
+        enabled = true,
+        leave_dirs_open = false,
+      },
+      use_libuv_file_watcher = true,
+    },
   },
-  config = function()
-    vim.keymap.set("n", "<leader>tt", "<cmd>neotree toggle<cr>", { desc = "[T]oogle [T]ree (NeoTree)" })
-  end
 }

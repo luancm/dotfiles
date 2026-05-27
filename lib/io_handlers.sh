@@ -25,8 +25,9 @@ fi
 
 indent_prefix() {
 	# Insert tab for each shell interpreted created (calling (bash/sh -c/zsh) <file>). REF=https://unix.stackexchange.com/questions/232384/argument-string-to-integer-in-bash
-	tab_count=$(($SHLVL - 1))
-	prefix=''
+	local tab_count=$(($SHLVL - 1))
+	local prefix=''
+	local i=0
 	if [ $tab_count -le 0 ]; then
 		echo $prefix
 	else

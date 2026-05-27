@@ -42,4 +42,6 @@ bash "$DOTFILES/lib/create_symlinks.sh"
 
 setup_ssh
 
+bash "$DOTFILES/lib/run_private_hook.sh" install
+
 log_success 'All installed!'

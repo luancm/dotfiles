@@ -24,3 +24,7 @@ Optional:
 git clone https://github.com/luancm/dotfiles ~/.dotfiles
 source ~/.dotfiles/install
 ```
+
+## Private dotfiles (optional)
+
+If a sibling repo exists at `~/.dotfiles-private` (or wherever `$DOTFILES_PRIVATE` points), its `install` script is invoked at the end of `./install`, and `./update` will `git pull` it and run its `update` (or `install` as a fallback) script. The private repo is expected to provide an executable `install` and may reuse helpers via `source "$DOTFILES/lib/io_handlers.sh"`.

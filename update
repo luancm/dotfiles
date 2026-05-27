@@ -26,4 +26,6 @@ fi
 log_info '❯❯ Refreshing symlinks'
 bash "$DOTFILES/lib/create_symlinks.sh"
 
+bash "$DOTFILES/lib/run_private_hook.sh" update
+
 log_success 'Update complete!'

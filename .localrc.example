@@ -1,0 +1,22 @@
+# ~/.localrc — machine-specific shell setup
+#
+# This file is sourced from zsh/zshrc.symlink. Put anything here that should
+# NOT be tracked in the dotfiles repo: secrets, machine-specific PATH
+# entries, work-only env vars, host-specific aliases.
+#
+# To use, copy to ~/.localrc and edit:
+#     cp .localrc.example ~/.localrc
+
+# --- SSH agent ---
+# eval "$(ssh-agent)"
+
+# --- PATH additions ---
+# export PATH="$PATH:$HOME/opt/some-tool/bin"
+# export PATH="$PATH:$HOME/go/bin"
+
+# --- Work / company env vars ---
+# export ACME_API_TOKEN="..."
+
+# --- Tool-specific overrides ---
+# export JAVA_HOME=/opt/homebrew/Cellar/openjdk@17/17.0.8.1
+# export HOMEBREW_CASK_OPTS="--appdir=~/Applications"

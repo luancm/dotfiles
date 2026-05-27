@@ -27,7 +27,9 @@ setup_git() {
 setup_git
 
 log_info 'Git: Creating aliases'
-
 source "$DOTFILES/git/aliases.sh"
+
+log_info 'Git: Applying defaults'
+source "$DOTFILES/git/defaults.sh"
 
 log_success 'Git: Successfully configured'

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#
+# update all things — counterpart to ./install
+set -euo pipefail
+
+export DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)"
+source "$DOTFILES/lib/io_handlers.sh"
+
+[ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
+
+# ================================================ #
+# ================ Start Update ================== #
+# ================================================ #
+
+log_info '❯❯ Pulling latest dotfiles'
+git -C "$DOTFILES" pull --ff-only
+
+log_info '❯❯ Re-running dependency installers (idempotent)'
+bash "$DOTFILES/lib/install_dependencies.sh"
+
+if $is_mac_os; then
+    log_info '❯❯ Upgrading Homebrew packages'
+    bash "$DOTFILES/homebrew/upgrade.sh"
+fi
+
+log_info '❯❯ Refreshing symlinks'
+bash "$DOTFILES/lib/create_symlinks.sh"
+
+log_success 'Update complete!'

@@ -34,7 +34,7 @@ if command -v yay > /dev/null; then
     # Bootstrap Wallpaper
     WALLPAPER_DIR="$HOME/Pictures/wallpapers"
     WALLPAPER_PATH="$WALLPAPER_DIR/landscape.jpg"
-    CACHE_WALLPAPER="$HOME/.cache/current_wallpaper.jpg"
+    CACHE_WALLPAPER="$HOME/.cache/current_wallpaper"
     
     if [ ! -f "$WALLPAPER_PATH" ]; then
          log_info "Bootstrapping wallpaper..."

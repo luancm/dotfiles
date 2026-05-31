@@ -64,7 +64,7 @@ return {
       vim.keymap.set('n', '<leader>bl', builtin.buffers, { desc = '[B]uffer [L]ist' })
       vim.keymap.set('n', '<C-i>', builtin.buffers, { desc = 'Telescope buffers' })
 
-      -- From
+      -- Live grep scoped to the git root when inside a repo.
       local function live_grep()
         local function is_git_repo()
           vim.fn.system("git rev-parse --is-inside-work-tree")
@@ -83,16 +83,13 @@ return {
           }
         else
           opts = {
-            -- print working directory for debugging
-            
-            print("Not a git repository, using current working directory: " .. vim.fn.getcwd()),
             cwd = vim.fn.getcwd(),
           }
-          end
+        end
 
         builtin.live_grep(opts)
       end
-      vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Telescope live grep' })
+      vim.keymap.set('n', '<leader>fg', live_grep, { desc = 'Telescope live grep' })
     end
   },
   {

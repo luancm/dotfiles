@@ -41,7 +41,7 @@ GREETD_DIR="/etc/greetd"
 GREETD_CONFIG="$GREETD_DIR/config.toml"
 REGREET_CONFIG="$GREETD_DIR/regreet.toml"
 SOURCE_DIR="$DOTFILES/system_configs/etc/greetd"
-WALLPAPER_SRC="$HOME/.cache/current_wallpaper"
+WALLPAPER_SRC="$HOME/.cache/current_wallpaper.jpg"
 WALLPAPER_DEST="$GREETD_DIR/wallpaper"
 
 if [ -d "$GREETD_DIR" ]; then

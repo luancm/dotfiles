@@ -9,25 +9,7 @@ else
   install_package zsh
 fi
 
-if ! is_package_installed  zsh-syntax-highlighting; then
-  install_package zsh-syntax-highlighting
-  log_success "> zsh-syntax-highlighting installed"
-else
-  log_info "> zsh-syntax-highlighting already installed"
-fi
-
-if ! is_package_installed zsh-autosuggestions; then
-  install_package zsh-autosuggestions
-  log_success "> zsh-autosuggestions installed"
-else
-  log_info "> zsh-autosuggestions already installed"
-fi
-
-if ! is_package_installed  zsh-completions; then
-  install_package zsh-completions
-  log_success "> zsh-completions installed"
-else
-  log_info "> zsh-completions already installed"
-fi
+# zsh plugins (syntax-highlighting, autosuggestions, completions) are managed
+# by antidote via zsh/zsh_plugins.txt, not the system package manager.
 
 log_success 'Dependency `zsh` installed successfully'

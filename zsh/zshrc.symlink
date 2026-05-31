@@ -67,10 +67,16 @@ fi
 
 # search history with fzf if installed, default otherwise
 if command -v fzf > /dev/null; then
+	# use fd for file listings (respects .gitignore, includes dotfiles)
+	if command -v fd > /dev/null; then
+		export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
+		export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+	fi
 	if $is_mac_os; then
 		. $HOME/.fzf.zsh
 	else
 		. /usr/share/fzf/key-bindings.zsh
+		[ -f /usr/share/fzf/completion.zsh ] && . /usr/share/fzf/completion.zsh
 	fi
 else
 	bindkey '^R' history-incremental-search-backward

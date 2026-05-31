@@ -61,8 +61,8 @@ get_input() {
 	prefix=$(IFS= indent_prefix)
 	local result
 	printf "%s%s[%s ?? %s]%s %s " "${prefix}" "${bold}" "${yellow}" "${rcolor}" "${reset}" "$1" >&2
-	read result
-	echo $result
+	read -r result
+	echo "$result"
 }
 
 prompt_confirmation() {

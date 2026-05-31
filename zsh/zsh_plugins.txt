@@ -1,4 +1,6 @@
 # Core plugins
-zsh-users/zsh-syntax-highlighting
 zsh-users/zsh-autosuggestions
+zsh-users/zsh-completions
 agkozak/zsh-z
+# zsh-syntax-highlighting must be loaded last
+zsh-users/zsh-syntax-highlighting

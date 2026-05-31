@@ -4,13 +4,17 @@ This is a simple dotfile for my basic setup
 
 ## Dependencies
 
-If using MacOS, homebrew is a good thing to have, the script tries to install dependencies automatically
-(for Arch, yay is installed for AUR packages)
+The `install` script tries to install dependencies automatically. On macOS,
+homebrew is a good thing to have; on Arch, `yay` is installed for AUR packages.
 
+Core:
 - zsh
 - starship (prompt)
 - antidote (plugin manager)
-  
+- ripgrep, fd (search, used by fzf and Neovim/Telescope)
+- luarocks, wget (Neovim plugin tooling)
+- go, nvm (toolchains, lazy-loaded in the shell)
+
 Optional:
 - yay (who doesn't like yogurt?)
 - ssh-keygen (openssh)
@@ -22,9 +26,27 @@ Optional:
 
 ```shell
 git clone https://github.com/luancm/dotfiles ~/.dotfiles
-source ~/.dotfiles/install
+bash ~/.dotfiles/install
 ```
 
-## Private dotfiles (optional)
+## Updating
 
-If a sibling repo exists at `~/.dotfiles-private` (or wherever `$DOTFILES_PRIVATE` points), its `install` script is invoked at the end of `./install`, and `./update` will `git pull` it and run its `update` (or `install` as a fallback) script. The private repo is expected to provide an executable `install` and may reuse helpers via `source "$DOTFILES/lib/io_handlers.sh"`.
+Pull the latest changes, re-run the (idempotent) dependency installers, and
+refresh symlinks:
+
+```shell
+bash ~/.dotfiles/update
+```
+
+## Machine-specific config
+
+Anything that should not be tracked in the repo (secrets, work env vars,
+host-specific PATH entries) goes in `~/.localrc`, which is sourced from the
+zshrc if present:
+
+```shell
+cp ~/.dotfiles/.localrc.example ~/.localrc
+```
+
+On macOS, list any Homebrew formulae to skip during `update` (one substring
+per line) in `homebrew/exclude.local`. The file is gitignored.

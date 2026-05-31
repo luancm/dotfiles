@@ -56,6 +56,7 @@ create_symlinks_for_folder() {
   local source_folder="$1"
   local destination_folder="$2"
   local pattern="$3"
+  local exclude_patterns=("${@:4}")
     
   # Check if source folder exists
   if [ ! -d "$source_folder" ]; then

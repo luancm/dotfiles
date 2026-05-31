@@ -17,3 +17,14 @@ setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_SPACE
 setopt HIST_VERIFY
 setopt HIST_EXPIRE_DUPS_FIRST
+# skip duplicates when searching history (Ctrl-R)
+setopt HIST_FIND_NO_DUPS
+
+# directory navigation
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt PUSHD_SILENT
+
+# extended globbing (^, #, ~ operators)
+setopt EXTENDED_GLOB

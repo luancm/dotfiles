@@ -3,6 +3,15 @@ set -eo pipefail
 
 source "$DOTFILES/lib/io_handlers.sh"
 
+[ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
+
+# Linux/Wayland-only app configs that have no meaning on macOS. Excluded from
+# symlinking there so ~/.config is not littered with dead configs.
+config_excludes=()
+if $is_mac_os; then
+  config_excludes+=("hypr/*" "waybar/*" "wlogout/*" "walker/*" "satty/*")
+fi
+
 # Function to create a symlink, handling existing files/links
 # Usage: create_symlink <source_file> <target_link>
 create_symlink() {
@@ -96,5 +105,5 @@ create_symlinks_for_folder() {
 }
 
 create_symlink "$HOME/.dotfiles/zsh/zshrc.symlink" "$HOME/.zshrc"
-create_symlinks_for_folder "$HOME/.dotfiles/.config" "$HOME/.config" "*"
+create_symlinks_for_folder "$HOME/.dotfiles/.config" "$HOME/.config" "*" "${config_excludes[@]}"
 

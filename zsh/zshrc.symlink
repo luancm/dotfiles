@@ -67,16 +67,28 @@ fi
 
 # search history with fzf if installed, default otherwise
 if command -v fzf > /dev/null; then
-	# use fd for file listings (respects .gitignore, includes dotfiles)
+	# use fd for file listings (respects .gitignore, includes dotfiles).
+	# Debian/Ubuntu ship the binary as `fdfind` to avoid a name clash.
 	if command -v fd > /dev/null; then
 		export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
-		export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+	elif command -v fdfind > /dev/null; then
+		export FZF_DEFAULT_COMMAND='fdfind --type f --hidden --exclude .git'
 	fi
+	[ -n "$FZF_DEFAULT_COMMAND" ] && export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
 	if $is_mac_os; then
 		. $HOME/.fzf.zsh
+	elif fzf --zsh > /dev/null 2>&1; then
+		# fzf >= 0.48 ships the shell integration via `fzf --zsh`
+		source <(fzf --zsh)
 	else
-		. /usr/share/fzf/key-bindings.zsh
-		[ -f /usr/share/fzf/completion.zsh ] && . /usr/share/fzf/completion.zsh
+		# older fzf: shell files live in distro-specific dirs
+		# (Arch: /usr/share/fzf, Debian/Ubuntu: /usr/share/doc/fzf/examples)
+		for _fzf_dir in /usr/share/fzf /usr/share/doc/fzf/examples; do
+			[ -f "$_fzf_dir/key-bindings.zsh" ] && . "$_fzf_dir/key-bindings.zsh"
+			[ -f "$_fzf_dir/completion.zsh" ] && . "$_fzf_dir/completion.zsh"
+		done
+		unset _fzf_dir
 	fi
 else
 	bindkey '^R' history-incremental-search-backward

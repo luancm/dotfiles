@@ -75,3 +75,27 @@ prompt_confirmation() {
         esac
     done
 }
+
+# Prompt a multi-choice question, re-asking until the answer matches one of the
+# given choices (by full word or first letter, case-insensitive). Echoes the
+# matched choice lowercased to stdout; prompts and warnings go to stderr so the
+# result can be captured via command substitution.
+# Usage: answer=$(prompt_choice 'Install git tools?' All Some No)
+prompt_choice() {
+    local question="$1"; shift
+    local choices=("$@")
+    local labels choice c lc
+    labels=$(IFS=/; echo "${choices[*]}")
+    while true; do
+        choice=$(get_input "$question [$labels]")
+        choice=${choice,,}
+        for c in "${choices[@]}"; do
+            lc=${c,,}
+            if [[ "$choice" == "$lc" || "$choice" == "${lc:0:1}" ]]; then
+                echo "$lc"
+                return 0
+            fi
+        done
+        log_warn "Please answer one of: $labels" >&2
+    done
+}

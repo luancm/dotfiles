@@ -60,24 +60,16 @@ install_go_tarball() {
   rm -f "$tmpfile"
 }
 
-# Idempotency: skip if go is already installed at the target version.
+# Idempotency: skip if any Go is already installed, regardless of version.
 if command -v go > /dev/null; then
   current="$(go version 2>/dev/null | awk '{print $3}' | sed 's/^go//')"
-  if [[ "$current" == "$GO_VERSION" ]]; then
-    log_success "Dependency \`go\` already installed (go${current})"
-    return 0
-  else
-    log_info "Go ${current} is installed; target version is ${GO_VERSION}."
-    if ! prompt_confirmation "Replace existing Go ${current} with ${GO_VERSION}?"; then
-      log_info 'Skipping Go installation'
-      return 0
-    fi
-  fi
-else
-  if ! prompt_confirmation "Install Go ${GO_VERSION}?"; then
-    log_info 'Skipping Go installation'
-    return 0
-  fi
+  log_success "Dependency \`go\` already installed (go${current})"
+  return 0
+fi
+
+if ! prompt_confirmation "Install Go ${GO_VERSION}?"; then
+  log_info 'Skipping Go installation'
+  return 0
 fi
 
 if [[ "$PKG_MANAGER" == "brew" ]]; then

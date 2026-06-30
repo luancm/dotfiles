@@ -49,7 +49,7 @@
   <h1>tmux cheatsheet</h1>
   <p class="sub">Prefix is <code>C-a</code> — hold Ctrl, tap <code>a</code>, release, then press the next key.</p>
 </header>
-<p class="legend"><span class="star">★</span> = custom binding from your <code>tmux.conf</code>. Everything else is a tmux / tmux-sensible default.</p>
+<p class="legend"><span class="star">★</span> = custom binding from your <code>tmux.conf</code>. Everything else is a tmux default.</p>
 
 <div class="grid">
 
@@ -120,9 +120,9 @@
   <h2>Nested / SSH tmux</h2>
   <table>
     <tr><td><kbd>C-a</kbd></td><td>talks to the <b>outer</b> (local) tmux</td></tr>
-    <tr><td><span class="star">★</span> <kbd>C-a</kbd> <kbd>a</kbd></td><td>talks to the <b>inner</b> (remote) tmux — send-prefix</td></tr>
+    <tr><td><span class="star">★</span> <kbd>C-a</kbd> <kbd>C-a</kbd></td><td>talks to the <b>inner</b> (remote) tmux — send-prefix</td></tr>
   </table>
-  <p class="muted" style="margin:.5rem 0 0">e.g. new window on the remote: <kbd>C-a</kbd> <kbd>a</kbd> <kbd>c</kbd></p>
+  <p class="muted" style="margin:.5rem 0 0">e.g. new window on the remote: <kbd>C-a</kbd> <kbd>C-a</kbd> <kbd>c</kbd></p>
 </section>
 
 <section>

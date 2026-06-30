@@ -21,6 +21,18 @@ Optional:
 - xclip (I like pbcopy and pbpaste 😂)
 - some nerd-font
 - fzf (fuzzy search change lives)
+- tmux (terminal multiplexer; ships with [TPM](https://github.com/tmux-plugins/tpm) and a Catppuccin status bar)
+- zoxide (smarter `cd`; adds `z`/`zi`)
+- sesh (fzf-powered tmux session manager; `prefix + T` inside tmux)
+
+### tmux
+
+Config lives at `~/.config/tmux/tmux.conf`. The prefix is `C-a` (press `C-a a` to pass through nested/SSH tmux).
+On first launch press `prefix + I` to install plugins via TPM.
+
+Interactive zsh sessions auto-attach to (or create) a tmux session named `main`. 
+
+Aliases: `tma`, `tmat`, `tms`, `tml`, `tmk`, `tmm`.
 
 ## Setting Up
 

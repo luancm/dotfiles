@@ -146,12 +146,16 @@ eval "$(starship init zsh)"
 
 log_success 'Good to go!'
 
-# tmux auto-attach: on an interactive shell, attach to (or create) a session
-# named `main`. The guards below prevent the usual footguns:
+# tmux auto-attach: on an interactive shell, land in tmux. The guards below
+# prevent the usual footguns:
 #   $TMUX set        -> already inside tmux (avoids infinite nesting)
 #   non-interactive  -> scripts and `zsh -c '…'` stay plain shells
 #   $NVIM / vscode   -> editor terminals stay quick scratch shells
 #   NO_AUTO_TMUX=1   -> manual opt-out: `NO_AUTO_TMUX=1 zsh` for a bare shell
+# Session policy (independent tabs, reuse `main` when free):
+#   no `main` yet          -> create it (first terminal)
+#   `main` exists, no client-> reattach it (reopened after a detach/close)
+#   `main` busy            -> start a fresh independent session (no mirroring)
 # Non-exec on purpose: detaching (prefix d) drops you back here at a normal
 # zsh prompt instead of closing the terminal.
 if command -v tmux > /dev/null \
@@ -160,5 +164,11 @@ if command -v tmux > /dev/null \
 	&& [ -z "$NO_AUTO_TMUX" ] \
 	&& [ -z "$NVIM" ] \
 	&& [ "$TERM_PROGRAM" != "vscode" ]; then
-	tmux new-session -A -s main
+	if ! tmux has-session -t main 2>/dev/null; then
+		tmux new-session -s main
+	elif [ -z "$(tmux list-clients -t main 2>/dev/null)" ]; then
+		tmux attach -t main
+	else
+		tmux new-session
+	fi
 fi

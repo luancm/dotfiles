@@ -22,6 +22,14 @@ SAVEHIST=1000000000
 
 log_info "Welcome, let's zsh!"
 
+# Initialise Homebrew before compinit: `brew shellenv` adds Homebrew's
+# completions dir to FPATH, and compinit only indexes what is on FPATH at
+# the moment it runs. Sourcing this afterwards would miss brew completions
+# until the next daily ~/.zcompdump rebuild.
+if $is_mac_os; then
+	source $DOTFILES/homebrew/config.sh
+fi
+
 # Basic auto/tab complete (compinit with daily cache rebuild).
 # `-C` skips the cache integrity check for a faster startup; the glob
 # qualifier (#qN.mh+24) matches if ~/.zcompdump is older than 24h, in
@@ -60,10 +68,6 @@ fi
 # Initialize antidote
 source "$DOTFILES/zsh/antidote/antidote.zsh"
 antidote load "$DOTFILES/zsh/zsh_plugins.txt"
-
-if $is_mac_os; then
-	source $DOTFILES/homebrew/config.sh
-fi
 
 # search history with fzf if installed, default otherwise
 if command -v fzf > /dev/null; then

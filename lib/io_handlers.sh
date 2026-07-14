@@ -65,12 +65,25 @@ get_input() {
 	echo "$result"
 }
 
+# Ask a yes/no question, yay-style: the default choice is shown capitalised in
+# the hint (e.g. [Y/n]) and hitting Enter with no input selects it.
+# Usage: prompt_confirmation <question> [default]
+#   default: 'y' (the default when omitted) or 'n'.
 prompt_confirmation() {
+    local question="$1"
+    local default="${2:-y}"
+    local hint answer
+    if [[ "${default,,}" == "n" ]]; then
+        default="n"; hint="[y/N]"
+    else
+        default="y"; hint="[Y/n]"
+    fi
     while true; do
-        answer=$(get_input "$1")
+        answer=$(get_input "$question $hint")
+        [[ -z "$answer" ]] && answer="$default"
         case $answer in
-            Y|y|Yes|yes) return 0; break;;
-            N|n|No|no) return 1; break;;
+            Y|y|Yes|yes) return 0;;
+            N|n|No|no) return 1;;
             *) log_warn "Please answer yes or no.";;
         esac
     done

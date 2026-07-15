@@ -80,13 +80,21 @@ if command -v fzf > /dev/null; then
 	fi
 	[ -n "$FZF_DEFAULT_COMMAND" ] && export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
-	if $is_mac_os; then
-		. $HOME/.fzf.zsh
-	elif fzf --zsh > /dev/null 2>&1; then
-		# fzf >= 0.48 ships the shell integration via `fzf --zsh`
+	# Ctrl-R history search: use exact matching so each space-separated term must
+	# be a contiguous substring. This drops fzf's noisy low-score matches where
+	# the query letters are scattered across an unrelated line.
+	export FZF_CTRL_R_OPTS="--exact"
+
+	if fzf --zsh > /dev/null 2>&1; then
+		# fzf >= 0.48 ships the shell integration via `fzf --zsh` (all platforms).
+		# Preferred everywhere: it does not depend on generated dotfiles existing.
 		source <(fzf --zsh)
+	elif $is_mac_os && [ -f "$HOME/.fzf.zsh" ]; then
+		# older fzf on macOS: brew's installer writes ~/.fzf.zsh. Guard its
+		# existence so a missing file does not silently drop the Ctrl-R binding.
+		. "$HOME/.fzf.zsh"
 	else
-		# older fzf: shell files live in distro-specific dirs
+		# older fzf on Linux: shell files live in distro-specific dirs
 		# (Arch: /usr/share/fzf, Debian/Ubuntu: /usr/share/doc/fzf/examples)
 		for _fzf_dir in /usr/share/fzf /usr/share/doc/fzf/examples; do
 			[ -f "$_fzf_dir/key-bindings.zsh" ] && . "$_fzf_dir/key-bindings.zsh"
@@ -176,3 +184,22 @@ if command -v tmux > /dev/null \
 		tmux new-session
 	fi
 fi
+
+# pnpm
+export PNPM_HOME="/Users/lms02/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
+
+# locstat GIT_CONFIG begin
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0=notes.augment.mergeStrategy
+export GIT_CONFIG_VALUE_0=union
+export GIT_CONFIG_KEY_1=core.hooksPath
+export GIT_CONFIG_VALUE_1=/Users/lms02/.locstat/git/hooks
+# locstat GIT_CONFIG end
+
+# locstat PATH
+export PATH="/Users/lms02/.locstat:$PATH"

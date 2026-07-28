@@ -28,4 +28,7 @@ bash "$DOTFILES/lib/create_symlinks.sh"
 
 bash "$DOTFILES/lib/run_private_hook.sh" update
 
+log_info '❯❯ Linking shared agent configuration'
+bash "$DOTFILES/lib/create_agent_symlinks.sh"
+
 log_success 'Update complete!'

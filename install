@@ -44,4 +44,7 @@ setup_ssh
 
 bash "$DOTFILES/lib/run_private_hook.sh" install
 
+log_info '❯❯ Linking shared agent configuration'
+bash "$DOTFILES/lib/create_agent_symlinks.sh"
+
 log_success 'All installed!'

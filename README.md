@@ -34,6 +34,12 @@ Interactive zsh sessions auto-attach to (or create) a tmux session named `main`.
 
 Aliases: `tma`, `tmat`, `tms`, `tml`, `tmk`, `tmm`.
 
+## Shared agent configuration
+
+Cross-agent guidance and skills are owned by `~/.agents`. Provider-specific directories only link to that canonical source: Codex receives `~/.codex/AGENTS.md` and one symlink per shared skill in `~/.codex/skills/`. This keeps Claude, Codex, and other supported agents on the same configuration without copying files.
+
+`./install` and `./update` refresh these Codex links after the private configuration hook has prepared `~/.agents`. If the shared configuration is unavailable, the linker reports a warning and leaves existing provider configuration unchanged.
+
 ## Setting Up
 
 ```shell

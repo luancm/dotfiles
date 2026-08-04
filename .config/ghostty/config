@@ -11,7 +11,7 @@ keybind = ctrl+z=close_surface
 # keybind = ctrl+d=new_split:right
 
 # Empty values reset the configuration to the default value
-font-family = FiraCode Nerd Font Med
+font-family = FiraCode Nerd Font
 
 # Send one scroll event per wheel notch (default 3). Stops tmux scrolling
 # from feeling jittery, since the multiplier no longer compounds with tmux's

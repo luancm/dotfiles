@@ -1,0 +1,39 @@
+## Atuin client config (managed by dotfiles).
+## Docs: https://docs.atuin.sh/latest/configuration/config/
+##
+## Local-first defaults. Sync stays off until you explicitly register/login:
+##   atuin register -u <user> -e <email>
+##   atuin sync
+## Then set auto_sync = true if you want background sync.
+
+## Do not phone home for release checks (no network unless you enable sync).
+update_check = false
+auto_sync = false
+
+## Search
+search_mode = "fuzzy"
+## Start filtered to this host; Ctrl-R cycles global/host/session/directory.
+filter_mode = "host"
+workspaces = true
+
+## UI
+style = "compact"
+inline_height = 24
+show_preview = true
+max_preview_height = 4
+enter_accept = false
+## Prefer Tab to edit on the command line; Enter still runs when enter_accept=true.
+
+## Quiet secrets / failures you usually do not want in history.
+secrets_filter = true
+store_failed = true
+
+## Inside tmux: floating popup instead of drawing over the pane.
+[tmux]
+enabled = true
+width = "80%"
+height = "60%"
+
+## Columns in the search UI (left → right).
+[ui]
+columns = ["duration", "time", "command"]

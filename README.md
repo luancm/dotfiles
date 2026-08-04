@@ -20,7 +20,8 @@ Optional:
 - ssh-keygen (openssh)
 - xclip (I like pbcopy and pbpaste 😂)
 - some nerd-font
-- fzf (fuzzy search change lives)
+- fzf (fuzzy search for files and scripted pickers; Ctrl-T / sesh)
+- atuin (SQLite shell history on Ctrl-R; local by default, optional sync)
 - tmux (terminal multiplexer; ships with [TPM](https://github.com/tmux-plugins/tpm) and a Catppuccin status bar)
 - zoxide (smarter `cd`; adds `z`/`zi`)
 - sesh (fzf-powered tmux session manager; `prefix + T` inside tmux)

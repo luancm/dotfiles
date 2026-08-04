@@ -69,7 +69,9 @@ fi
 source "$DOTFILES/zsh/antidote/antidote.zsh"
 antidote load "$DOTFILES/zsh/zsh_plugins.txt"
 
-# search history with fzf if installed, default otherwise
+# fzf: fuzzy file picker (Ctrl-T), directory jump (Alt-C), and general glue
+# for tools like sesh. History search (Ctrl-R) is handled by atuin when
+# present; otherwise fzf's widget is the fallback.
 if command -v fzf > /dev/null; then
 	# use fd for file listings (respects .gitignore, includes dotfiles).
 	# Debian/Ubuntu ship the binary as `fdfind` to avoid a name clash.
@@ -80,10 +82,12 @@ if command -v fzf > /dev/null; then
 	fi
 	[ -n "$FZF_DEFAULT_COMMAND" ] && export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
-	# Ctrl-R history search: use exact matching so each space-separated term must
-	# be a contiguous substring. This drops fzf's noisy low-score matches where
-	# the query letters are scattered across an unrelated line.
-	export FZF_CTRL_R_OPTS="--exact"
+	# Only tune fzf history when atuin is not taking over Ctrl-R.
+	if ! command -v atuin > /dev/null; then
+		# Exact matching: each space-separated term must be a contiguous
+		# substring. Drops noisy low-score matches from scattered letters.
+		export FZF_CTRL_R_OPTS="--exact"
+	fi
 
 	if fzf --zsh > /dev/null 2>&1; then
 		# fzf >= 0.48 ships the shell integration via `fzf --zsh` (all platforms).
@@ -102,8 +106,16 @@ if command -v fzf > /dev/null; then
 		done
 		unset _fzf_dir
 	fi
-else
+elif ! command -v atuin > /dev/null; then
 	bindkey '^R' history-incremental-search-backward
+fi
+
+# atuin: SQLite-backed shell history. Loaded after fzf so its Ctrl-R binding
+# wins. Up-arrow is left alone so zsh-autosuggestions stays the light "peek
+# at history" path; open the full Atuin TUI with Ctrl-R instead.
+# Config: ~/.config/atuin/config.toml (symlinked from the dotfiles repo).
+if command -v atuin > /dev/null; then
+	eval "$(atuin init zsh --disable-up-arrow)"
 fi
 
 # zoxide: smarter `cd` (adds `z` to jump to frecent dirs, `zi` for an

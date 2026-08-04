@@ -8,8 +8,8 @@
 # This is the cross-platform answer to "I need to compile something /
 # run a Makefile that calls gcc/cc".
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 build_tools_already_installed() {
   case "$PKG_MANAGER" in

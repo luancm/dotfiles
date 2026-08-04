@@ -13,8 +13,8 @@
 # hypr/hyprland/autostart.conf, and browsed via a Walker dmenu keybind in
 # hypr/hyprland/input.conf.
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 # macOS uses Raycast for clipboard history; nothing to do here.
 if [ "${is_mac_os:-false}" = true ]; then

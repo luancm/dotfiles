@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
 
 # Session management tools are Arch Linux + Hyprland specific
 # Skip on other distributions (packages not available in Ubuntu repos)

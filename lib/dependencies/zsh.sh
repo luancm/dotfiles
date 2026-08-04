@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 if  command -v zsh > /dev/null && grep "$(command -v zsh)" /etc/shells > /dev/null; then
 	log_success 'Dependency `zsh` already installed'

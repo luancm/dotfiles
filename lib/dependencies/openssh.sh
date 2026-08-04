@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 if ! command -v ssh-keygen > /dev/null; then # Installed in mac by default
   if ! is_installer_available; then

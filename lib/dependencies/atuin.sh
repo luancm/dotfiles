@@ -7,8 +7,8 @@
 #
 # https://docs.atuin.sh/latest/
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 if command -v atuin > /dev/null; then
   log_success 'Dependency `atuin` already installed'

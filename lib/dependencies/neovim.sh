@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 if ! command -v nvim > /dev/null; then
 	if remembered_confirmation neovim 'Do you want to install neovim?'; then

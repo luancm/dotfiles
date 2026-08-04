@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 # Screenshot stack for Wayland: grim (capture) + slurp (region) + satty (annotate).
 # Not needed on macOS.

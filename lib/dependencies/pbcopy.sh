@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 # xclip for pbcopy and pbpaste aliases (not needed on macOS)
 if ! $is_mac_os; then

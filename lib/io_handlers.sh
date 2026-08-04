@@ -57,10 +57,21 @@ log_error() {
 	echo ''
 }
 
+# Non-interactive mode: set DOTFILES_YES=1 or pass --yes to install/update.
+# Prompts then accept their default without reading stdin.
+dotfiles_noninteractive() {
+	[[ "${DOTFILES_YES:-0}" == "1" ]] || [[ "${DOTFILES_NONINTERACTIVE:-0}" == "1" ]] || [[ ! -t 0 ]]
+}
+
 get_input() {
 	prefix=$(IFS= indent_prefix)
 	local result
 	printf "%s%s[%s ?? %s]%s %s " "${prefix}" "${bold}" "${yellow}" "${rcolor}" "${reset}" "$1" >&2
+	if dotfiles_noninteractive; then
+		printf "(noninteractive)\n" >&2
+		echo ""
+		return 0
+	fi
 	read -r result
 	echo "$result"
 }

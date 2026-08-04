@@ -4,7 +4,13 @@
 #
 # Flags:
 #   --forget-answers  Clear cached install prompt answers and re-ask opt-in bundles.
+#   --yes             Accept prompt defaults (non-interactive / CI).
 set -euo pipefail
+
+if ((BASH_VERSINFO[0] < 4)); then
+    echo "Bash 4+ is required (found $BASH_VERSION). On macOS: brew install bash" >&2
+    exit 1
+fi
 
 export DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)"
 source "$DOTFILES/lib/io_handlers.sh"
@@ -15,12 +21,17 @@ FORGET_ANSWERS=0
 for arg in "$@"; do
     case "$arg" in
         --forget-answers) FORGET_ANSWERS=1 ;;
+        --yes|-y)
+            export DOTFILES_YES=1
+            export DOTFILES_NONINTERACTIVE=1
+            ;;
         -h|--help)
             cat <<'EOF'
-Usage: ./update [--forget-answers]
+Usage: ./update [--forget-answers] [--yes]
 
   --forget-answers  Clear cached answers under cache/install-answers and
                     re-prompt for optional dependency bundles on this run.
+  --yes, -y         Non-interactive: accept each prompt's default answer.
 EOF
             exit 0
             ;;

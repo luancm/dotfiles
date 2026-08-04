@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 # sesh is a smart tmux session manager. It is fzf-driven (already a dotfiles
 # dependency) and integrates with zoxide for directory suggestions. The tmux

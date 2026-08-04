@@ -61,6 +61,17 @@ bash ~/.dotfiles/install --forget-answers
 bash ~/.dotfiles/update --forget-answers
 ```
 
+Non-interactive / CI (accept each prompt default without a TTY):
+
+```shell
+bash ~/.dotfiles/install --yes
+# equivalent: DOTFILES_YES=1 bash ~/.dotfiles/install
+```
+
+Requires **Bash 4+** (`brew install bash` on macOS if `bash --version` is 3.x).
+Core tools (curl, openssh, zsh, build tools, yay) install before optional
+bundles. `apt update` runs at most once per install run.
+
 ## Updating
 
 Pull the latest changes, re-run the (idempotent) dependency installers, and

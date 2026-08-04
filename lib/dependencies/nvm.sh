@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
 
 NVM_VERSION="v0.40.1"
 NVM_DIR_PATH="${NVM_DIR:-$HOME/.nvm}"

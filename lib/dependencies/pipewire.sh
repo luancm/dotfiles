@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source "$DOTFILES/lib/io_handlers.sh"
+source "$DOTFILES/lib/package_installer.sh"
 
 # PipeWire is the Linux audio/video stack; it has no meaning on macOS
 # (which uses CoreAudio). Skip entirely there.
@@ -21,17 +21,35 @@ packages=(
   pwvucontrol
 )
 
+missing=()
+for pkg in "${packages[@]}"; do
+  if is_package_installed "$pkg"; then
+    log_success "Dependency \`$pkg\` already installed"
+  else
+    missing+=("$pkg")
+  fi
+done
+
+if [[ ${#missing[@]} -eq 0 ]]; then
+  return 0
+fi
+
 if ! is_installer_available; then
   log_warn "Auto install not supported for your system, please install: ${packages[*]}"
   return 0
 fi
 
-for pkg in "${packages[@]}"; do
-  if is_package_installed "$pkg"; then
-    log_success "Dependency \`$pkg\` already installed"
-  else
-    install_package "$pkg"
+if ! remembered_confirmation pipewire \
+    'Install PipeWire audio stack (pipewire + wireplumber)?'; then
+  log_info 'Skipping PipeWire installation'
+  return 0
+fi
+
+for pkg in "${missing[@]}"; do
+  if install_package "$pkg"; then
     log_success "Dependency \`$pkg\` installed successfully"
+  else
+    log_error "Failed to install \`$pkg\`"
   fi
 done
 
@@ -39,7 +57,7 @@ if command -v systemctl >/dev/null 2>&1; then
   if systemctl --user enable --now pipewire.service pipewire-pulse.service wireplumber.service >/dev/null 2>&1; then
     log_success 'Enabled PipeWire + WirePlumber user services'
   else
-    log_warn 'Could not enable PipeWire services automatically; run `systemctl --user enable --now pipewire pipewire-pulse wireplumber`'
+    log_warn 'Could not enable PipeWire services automatically; enable them with systemctl --user'
   fi
 else
   log_warn 'systemctl not detected; enable PipeWire services manually'

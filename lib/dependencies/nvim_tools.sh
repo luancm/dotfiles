@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source "$DOTFILES/lib/io_handlers.sh"
+source "$DOTFILES/lib/package_installer.sh"
 
 # Packages required by Neovim plugins (e.g., Telescope, Luarocks-based tooling)
 declare -A NVIM_DEPENDENCIES=(
@@ -26,7 +26,8 @@ for package in "${!NVIM_DEPENDENCIES[@]}"; do
     continue
   fi
 
-  if prompt_confirmation "Install Neovim dependency '$package'? (required for Telescope and plugin tooling)"; then
+  if remembered_confirmation "nvim_tools_$package" \
+      "Install Neovim dependency '$package'? (required for Telescope and plugin tooling)"; then
     if install_package "$package"; then
       # Debian/Ubuntu ships fd as `fdfind` to avoid clashing with another tool.
       # Expose it as `fd` (what nvim plugins expect) via ~/.local/bin.

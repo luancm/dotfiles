@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source $DOTFILES/lib/io_handlers.sh
-source $DOTFILES/lib/package_installer.sh
+source \"$DOTFILES/lib/io_handlers.sh\"
+source \"$DOTFILES/lib/package_installer.sh\"
 
 # gpg (GnuPG) provides encryption and signing; commonly used to sign git
 # commits and manage keys. The binary is `gpg`, shipped by the `gnupg` package

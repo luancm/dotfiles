@@ -67,7 +67,7 @@ if command -v go > /dev/null; then
   return 0
 fi
 
-if ! prompt_confirmation "Install Go ${GO_VERSION}?"; then
+if ! remembered_confirmation go "Install Go ${GO_VERSION}?"; then
   log_info 'Skipping Go installation'
   return 0
 fi

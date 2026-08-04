@@ -47,6 +47,19 @@ git clone https://github.com/luancm/dotfiles ~/.dotfiles
 bash ~/.dotfiles/install
 ```
 
+Optional bundles (kubernetes, clipboard, docker, git tools, Hyprland session
+management, …) only prompt when something is actually missing. Multi-choice
+prompts default to the first option on Enter (shown as `[ALL/some/no]`).
+
+Answers are remembered under `cache/install-answers` (gitignored) so re-runs of
+`./install` / `./update` stay quiet. Forget them and re-prompt with:
+
+```shell
+bash ~/.dotfiles/install --forget-answers
+# or
+bash ~/.dotfiles/update --forget-answers
+```
+
 ## Updating
 
 Pull the latest changes, re-run the (idempotent) dependency installers, and

@@ -31,7 +31,8 @@ if ! is_installer_available; then
   return 0
 fi
 
-if ! prompt_confirmation 'Do you want to install Kubernetes tools (kubectl + k9s)?'; then
+if ! remembered_confirmation kubernetes \
+    'Do you want to install Kubernetes tools (kubectl + k9s)?'; then
   log_info 'Skipping Kubernetes tools installation'
   return 0
 fi

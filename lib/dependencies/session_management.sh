@@ -9,51 +9,66 @@ if ! command -v pacman > /dev/null; then
     return 0
 fi
 
-# If in arch, install session management tools
-if command -v Hyprland > /dev/null; then
-     if ! prompt_confirmation "Hyprland detected. Install Session Management tools (greetd, hyprlock, etc)?"; then
-        log_info '(Arch) Skipping Session Management tools installation.'
-        return 0
-    fi
-else
+if ! command -v Hyprland > /dev/null; then
     log_info '(Arch) Hyprland not detected. Skipping Session Management tools.'
     return 0
 fi
 
-
-log_info '(Arch) Installing Session Management tools...'
-
 # Core tools: greetd (login), hyprlock (lock), hypridle (idle), wlogout (logout menu)
 # gnome-keyring (secrets), wget (asset downloading), cage (compositor for greeter)
-PACKAGES="greetd greetd-regreet hyprlock hypridle wlogout gnome-keyring wget cage"
+PACKAGES=(greetd greetd-regreet hyprlock hypridle wlogout gnome-keyring wget cage)
 
-if command -v yay > /dev/null; then
-    yay -S --needed --noconfirm $PACKAGES
-    log_success '(Arch) Installed Session Management tools successfully'
-    
-    # Bootstrap Wallpaper
-    WALLPAPER_DIR="$HOME/Pictures/wallpapers"
-    WALLPAPER_PATH="$WALLPAPER_DIR/landscape.jpg"
-    CACHE_WALLPAPER="$HOME/.cache/current_wallpaper"
-    
-    if [ ! -f "$WALLPAPER_PATH" ]; then
-         log_info "Bootstrapping wallpaper..."
-         mkdir -p "$WALLPAPER_DIR"
-         # High quality landscape from Unsplash
-         wget -O "$WALLPAPER_PATH" "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop"
-         log_success "Wallpaper downloaded to $WALLPAPER_PATH"
+session_mgmt_missing=()
+for pkg in "${PACKAGES[@]}"; do
+    if ! pacman -Qi "$pkg" > /dev/null 2>&1; then
+        session_mgmt_missing+=("$pkg")
+    fi
+done
+
+if [[ ${#session_mgmt_missing[@]} -eq 0 ]]; then
+    log_success '(Arch) Session Management tools already installed'
+    # Still keep wallpaper symlink healthy on re-runs without re-prompting.
+else
+    if ! remembered_confirmation session_management \
+        'Hyprland detected. Install Session Management tools (greetd, hyprlock, etc)?'; then
+        log_info '(Arch) Skipping Session Management tools installation.'
+        return 0
     fi
 
-    # Ensure symlink for lockscreen/greeter stability
-    mkdir -p "$HOME/.cache"
-    if [ ! -L "$CACHE_WALLPAPER" ]; then
-         ln -sf "$WALLPAPER_PATH" "$CACHE_WALLPAPER"
-         log_success "Wallpaper symlinked to $CACHE_WALLPAPER"
-    fi
+    log_info '(Arch) Installing Session Management tools...'
 
+    if command -v yay > /dev/null; then
+        yay -S --needed --noconfirm "${PACKAGES[@]}"
+        log_success '(Arch) Installed Session Management tools successfully'
+    else
+        log_error '(Arch) `yay` not found. Please install `yay` first.'
+        return 0
+    fi
+fi
+
+# Bootstrap Wallpaper (idempotent)
+WALLPAPER_DIR="$HOME/Pictures/wallpapers"
+WALLPAPER_PATH="$WALLPAPER_DIR/landscape.jpg"
+CACHE_WALLPAPER="$HOME/.cache/current_wallpaper"
+
+if [ ! -f "$WALLPAPER_PATH" ]; then
+    if command -v wget > /dev/null; then
+        log_info "Bootstrapping wallpaper..."
+        mkdir -p "$WALLPAPER_DIR"
+        # High quality landscape from Unsplash
+        wget -O "$WALLPAPER_PATH" "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop"
+        log_success "Wallpaper downloaded to $WALLPAPER_PATH"
+    fi
+fi
+
+# Ensure symlink for lockscreen/greeter stability
+mkdir -p "$HOME/.cache"
+if [ -f "$WALLPAPER_PATH" ] && [ ! -L "$CACHE_WALLPAPER" ]; then
+    ln -sf "$WALLPAPER_PATH" "$CACHE_WALLPAPER"
+    log_success "Wallpaper symlinked to $CACHE_WALLPAPER"
+fi
+
+if [[ ${#session_mgmt_missing[@]} -gt 0 ]]; then
     log_info "To complete the setup (Enable greetd & PAM auto-unlock), run:"
     log_info "bash scripts/setup_session_management.sh"
-
-else
-    log_error '(Arch) `yay` not found. Please install `yay` first.'
 fi

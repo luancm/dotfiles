@@ -64,10 +64,29 @@ maybe_install_git_tool() {
   fi
 }
 
+# Skip the prompt entirely when every tool is already present.
+git_tools_missing=()
+for pkg in "${git_tool_pkgs[@]}"; do
+  cmd=$(git_tool_cmd "$pkg")
+  if command -v "$cmd" > /dev/null; then
+    log_success "Dependency \`$pkg\` already installed"
+  else
+    git_tools_missing+=("$pkg")
+  fi
+done
+
+if [[ ${#git_tools_missing[@]} -eq 0 ]]; then
+  configure_delta
+  configure_difftastic
+  return 0
+fi
+
 # All  -> install delta, difftastic and lazygit
 # Some -> confirm each one individually
 # No   -> install none
-git_tools_mode=$(prompt_choice 'Install git diff tools (delta, difftastic, lazygit)?' All Some No)
+# Default = ALL (Enter accepts). Answer is remembered across install/update runs.
+git_tools_mode=$(remembered_choice git_tools \
+  'Install git diff tools (delta, difftastic, lazygit)?' All Some No)
 
 if [[ "$git_tools_mode" = 'no' ]]; then
   log_info 'Skipping git tools installation'

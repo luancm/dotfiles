@@ -93,14 +93,30 @@ prompt_confirmation() {
 # given choices (by full word or first letter, case-insensitive). Echoes the
 # matched choice lowercased to stdout; prompts and warnings go to stderr so the
 # result can be captured via command substitution.
+#
+# The first choice is the default: shown UPPERCASED in the hint (e.g. [ALL/some/no])
+# and selected when the user hits Enter with no input.
 # Usage: answer=$(prompt_choice 'Install git tools?' All Some No)
 prompt_choice() {
     local question="$1"; shift
     local choices=("$@")
-    local labels choice c lc
-    labels=$(IFS=/; echo "${choices[*]}")
+    local default="${choices[0]}"
+    local labels=() choice c lc label
+    for c in "${choices[@]}"; do
+        if [[ "${c,,}" == "${default,,}" ]]; then
+            labels+=("${c^^}")
+        else
+            labels+=("${c,,}")
+        fi
+    done
+    local labels_joined
+    labels_joined=$(IFS=/; echo "${labels[*]}")
     while true; do
-        choice=$(get_input "$question [$labels]")
+        choice=$(get_input "$question [$labels_joined]")
+        if [[ -z "$choice" ]]; then
+            echo "${default,,}"
+            return 0
+        fi
         choice=${choice,,}
         for c in "${choices[@]}"; do
             lc=${c,,}
@@ -109,6 +125,109 @@ prompt_choice() {
                 return 0
             fi
         done
-        log_warn "Please answer one of: $labels" >&2
+        log_warn "Please answer one of: $labels_joined" >&2
     done
+}
+
+# ---------------------------------------------------------------------------
+# Remembered install answers
+#
+# Optional bundles (kubernetes, clipboard, docker, git tools, …) store the
+# user's choice under $DOTFILES/cache/install-answers so re-running
+# ./install or ./update does not re-prompt. `./install --forget-answers`
+# clears the file and forces every prompt again.
+# Format: one KEY=value line per answer (value is lowercase yes/no or choice).
+# ---------------------------------------------------------------------------
+
+install_answers_path() {
+    echo "${DOTFILES_ANSWERS_FILE:-${DOTFILES}/cache/install-answers}"
+}
+
+clear_install_answers() {
+    local f
+    f=$(install_answers_path)
+    if [[ -f "$f" ]]; then
+        rm -f "$f"
+        log_info "Cleared remembered install answers ($f)"
+    else
+        log_info 'No remembered install answers to clear'
+    fi
+}
+
+# Echo the stored value for KEY, or return 1 if unset.
+get_install_answer() {
+    local key="$1" f line
+    f=$(install_answers_path)
+    [[ -f "$f" ]] || return 1
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        [[ "$line" == "$key="* ]] || continue
+        echo "${line#*=}"
+        return 0
+    done < "$f"
+    return 1
+}
+
+# Persist KEY=VALUE, replacing any previous value for KEY.
+set_install_answer() {
+    local key="$1" value="$2" f tmp dir
+    f=$(install_answers_path)
+    dir=$(dirname "$f")
+    mkdir -p "$dir"
+    tmp=$(mktemp "${dir}/.install-answers.XXXXXX")
+    if [[ -f "$f" ]]; then
+        # Drop any existing line for this key (exact match on key=).
+        grep -v "^${key}=" "$f" > "$tmp" || true
+    fi
+    printf '%s=%s\n' "$key" "$value" >> "$tmp"
+    mv "$tmp" "$f"
+}
+
+# Like prompt_confirmation, but caches the answer under KEY.
+# Usage: remembered_confirmation <key> <question> [default]
+remembered_confirmation() {
+    local key="$1" question="$2" default="${3:-y}"
+    local stored
+    if stored=$(get_install_answer "$key"); then
+        case "${stored,,}" in
+            y|yes)
+                log_info "Using remembered answer for \`$key\`: yes"
+                return 0
+                ;;
+            n|no)
+                log_info "Using remembered answer for \`$key\`: no"
+                return 1
+                ;;
+        esac
+    fi
+    if prompt_confirmation "$question" "$default"; then
+        set_install_answer "$key" "yes"
+        return 0
+    fi
+    set_install_answer "$key" "no"
+    return 1
+}
+
+# Like prompt_choice, but caches the answer under KEY.
+# Usage: answer=$(remembered_choice <key> <question> Choice1 Choice2 ...)
+remembered_choice() {
+    local key="$1" question="$2"
+    shift 2
+    local choices=("$@")
+    local stored c lc choice
+    if stored=$(get_install_answer "$key"); then
+        stored=${stored,,}
+        for c in "${choices[@]}"; do
+            lc=${c,,}
+            if [[ "$stored" == "$lc" ]]; then
+                log_info "Using remembered answer for \`$key\`: $stored" >&2
+                echo "$stored"
+                return 0
+            fi
+        done
+        # Stale/invalid cached value — fall through and re-prompt.
+        log_warn "Ignoring invalid remembered answer for \`$key\`: $stored" >&2
+    fi
+    choice=$(prompt_choice "$question" "${choices[@]}")
+    set_install_answer "$key" "$choice"
+    echo "$choice"
 }

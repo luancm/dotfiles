@@ -11,7 +11,8 @@ if command -v sesh > /dev/null; then
   return 0
 fi
 
-if ! prompt_confirmation 'Do you want to install sesh (smart, fzf-powered tmux session manager)?'; then
+if ! remembered_confirmation sesh \
+    'Do you want to install sesh (smart, fzf-powered tmux session manager)?'; then
   log_info 'Skipping sesh installation'
   return 0
 fi

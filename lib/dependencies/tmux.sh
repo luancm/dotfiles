@@ -10,7 +10,7 @@ TPM_DIR="$HOME/.config/tmux/plugins/tpm"
 if command -v tmux > /dev/null; then
   log_success 'Dependency `tmux` already installed'
 else
-  if prompt_confirmation 'Do you want to install tmux (terminal multiplexer)?'; then
+  if remembered_confirmation tmux 'Do you want to install tmux (terminal multiplexer)?'; then
     if ! is_installer_available; then
       log_warn "Auto install not supported for your system, you will need to install tmux manually"
       return 0

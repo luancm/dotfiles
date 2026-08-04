@@ -34,49 +34,49 @@ link_compose_plugin() {
   log_info 'Linked docker-compose into ~/.docker/cli-plugins (enables `docker compose`)'
 }
 
-# Idempotency: skip if the docker CLI is present. On macOS the CLI is useless
-# without a runtime, so also require colima before considering it done.
+# Idempotency: skip the docker install when the CLI (and on brew, colima) is
+# already present. Still fall through so lazydocker can be considered.
+docker_ready=0
 if command -v docker > /dev/null; then
   if [[ "$PKG_MANAGER" != "brew" ]] || command -v colima > /dev/null; then
     log_success 'Dependency `docker` already installed'
-    return 0
+    docker_ready=1
   fi
 fi
 
-if ! is_installer_available; then
-  log_warn 'Auto install not supported for your system; install Docker manually.'
-  return 0
-fi
-
-if ! prompt_confirmation 'Do you want to install Docker (Colima + docker + compose)?'; then
-  log_info 'Skipping Docker installation'
-  return 0
-fi
-
-if [[ "$PKG_MANAGER" == "brew" ]]; then
-  ensure_package colima
-  ensure_package docker
-  ensure_package docker-compose
-  link_compose_plugin
-  log_info 'Start the runtime with `colima start`, then `docker`/`docker compose` work.'
-elif [[ "$PKG_MANAGER" == "yay" || "$PKG_MANAGER" == "pacman" ]]; then
-  # Docker runs natively on Linux; no Colima needed.
-  ensure_package docker
-  ensure_package docker-compose
-  if command -v systemctl > /dev/null; then
-    log_info 'Enable the daemon: `sudo systemctl enable --now docker`'
+if [[ "$docker_ready" -eq 0 ]]; then
+  if ! is_installer_available; then
+    log_warn 'Auto install not supported for your system; install Docker manually.'
+  elif ! remembered_confirmation docker \
+      'Do you want to install Docker (Colima + docker + compose)?'; then
+    log_info 'Skipping Docker installation'
+  elif [[ "$PKG_MANAGER" == "brew" ]]; then
+    ensure_package colima
+    ensure_package docker
+    ensure_package docker-compose
+    link_compose_plugin
+    log_info 'Start the runtime with `colima start`, then `docker`/`docker compose` work.'
+  elif [[ "$PKG_MANAGER" == "yay" || "$PKG_MANAGER" == "pacman" ]]; then
+    # Docker runs natively on Linux; no Colima needed.
+    ensure_package docker
+    ensure_package docker-compose
+    if command -v systemctl > /dev/null; then
+      log_info 'Enable the daemon: `sudo systemctl enable --now docker`'
+    fi
+    log_info 'Add yourself to the docker group: `sudo usermod -aG docker $USER` (re-login after)'
+  else
+    log_warn "Don't know how to install Docker on $PKG_MANAGER automatically; install manually."
   fi
-  log_info 'Add yourself to the docker group: `sudo usermod -aG docker $USER` (re-login after)'
-else
-  log_warn "Don't know how to install Docker on $PKG_MANAGER automatically; install manually."
-  return 0
 fi
 
 # lazydocker: optional terminal UI for managing containers, images and logs.
 # Available on both Homebrew and the Arch repos as `lazydocker`.
 if command -v lazydocker > /dev/null; then
   log_success 'Dependency `lazydocker` already installed'
-elif prompt_confirmation 'Also install lazydocker (a terminal UI for Docker)?'; then
+elif ! is_installer_available; then
+  :
+elif remembered_confirmation lazydocker \
+    'Also install lazydocker (a terminal UI for Docker)?'; then
   ensure_package lazydocker
 else
   log_info 'Skipping lazydocker installation'

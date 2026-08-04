@@ -10,7 +10,8 @@ if command -v zoxide > /dev/null; then
   return 0
 fi
 
-if ! prompt_confirmation 'Do you want to install zoxide (smarter cd; powers `z` and sesh)?'; then
+if ! remembered_confirmation zoxide \
+    'Do you want to install zoxide (smarter cd; powers `z` and sesh)?'; then
   log_info 'Skipping zoxide installation'
   return 0
 fi

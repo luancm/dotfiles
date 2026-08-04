@@ -20,7 +20,8 @@ if ! command -v starship > /dev/null; then
     # Package not in repos - use official curl installer
     log_info "Starship not available in $PKG_MANAGER repos. Using official installer..."
     
-    if prompt_confirmation "Install starship using official installer (curl -sS https://starship.rs/install.sh | sh)?"; then
+    if remembered_confirmation starship_official \
+          "Install starship using official installer (curl -sS https://starship.rs/install.sh | sh)?"; then
       if ! command -v curl > /dev/null; then
         log_info "Starship installer requires curl; running curl dependency installer..."
         source "$DOTFILES/lib/dependencies/curl.sh"

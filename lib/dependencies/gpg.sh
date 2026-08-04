@@ -11,7 +11,8 @@ if command -v gpg > /dev/null; then
   return 0
 fi
 
-if ! prompt_confirmation 'Do you want to install gpg (GnuPG; encryption and commit signing)?'; then
+if ! remembered_confirmation gpg \
+    'Do you want to install gpg (GnuPG; encryption and commit signing)?'; then
   log_info 'Skipping gpg installation'
   return 0
 fi

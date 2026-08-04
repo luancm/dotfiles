@@ -13,7 +13,7 @@ if command -v tldr > /dev/null; then
 	return 0
 fi
 
-if prompt_confirmation 'Do you want to install tealdeer (a fast tldr client)?'; then
+if remembered_confirmation tealdeer 'Do you want to install tealdeer (a fast tldr client)?'; then
 	if ! is_installer_available; then
 		log_warn 'Auto install not supported for your system, you will need to install it manually'
 		return 0

@@ -53,7 +53,8 @@ if ! is_installer_available; then
   return 0
 fi
 
-if ! prompt_confirmation 'Do you want to install the clipboard manager (cliphist + wl-clipboard)?'; then
+if ! remembered_confirmation clipboard \
+    'Do you want to install the clipboard manager (cliphist + wl-clipboard)?'; then
   log_info 'Skipping clipboard manager installation'
   return 0
 fi

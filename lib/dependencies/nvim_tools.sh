@@ -9,6 +9,8 @@ declare -A NVIM_DEPENDENCIES=(
   [fd]="fd"
   [luarocks]="luarocks"
   [wget]="wget"
+  # Required by nvim-treesitter `main` to compile language parsers.
+  [tree-sitter-cli]="tree-sitter"
 )
 
 for package in "${!NVIM_DEPENDENCIES[@]}"; do

@@ -1,36 +1,43 @@
-return { {
-  "nvim-treesitter/nvim-treesitter",
-  build = ":TSUpdate",
-  config = function()
-    local configs = require("nvim-treesitter.configs")
+return {
+  {
+    -- nvim-treesitter `main` is a full rewrite (Nvim 0.12+).
+    -- Highlight/indent are no longer configured via nvim-treesitter.configs.
+    "nvim-treesitter/nvim-treesitter",
+    lazy = false,
+    build = ":TSUpdate",
+    config = function()
+      require("nvim-treesitter").setup({})
 
-    configs.setup({
-      ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "zig" },
-      sync_install = false,
-      auto_install = true,
-      indent = {
-        enable = true
-      },
-      highlight = {
-        enable = true,
-        -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
-        disable = function(lang, buf)
+      local ensure_installed = {
+        "c",
+        "lua",
+        "vim",
+        "vimdoc",
+        "query",
+        "markdown",
+        "markdown_inline",
+        "zig",
+      }
+
+      -- Async; no-op for parsers already installed.
+      require("nvim-treesitter").install(ensure_installed)
+
+      vim.api.nvim_create_autocmd("FileType", {
+        desc = "Enable treesitter highlight + indent",
+        callback = function(args)
           local max_filesize = 100 * 1024 -- 100 KB
-          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+          local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(args.buf))
           if ok and stats and stats.size > max_filesize then
-            return true
+            return
           end
-        end,
 
-        -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-        -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-        -- Using this option may slow down your editor, and you may see some duplicate highlights.
-        -- Instead of true it can also be a list of languages
-        additional_vim_regex_highlighting = false,
-      },
-      ignore_install = {
-      },
-      modules = {},
-    })
-  end
-} }
+          -- Provided by Neovim core.
+          pcall(vim.treesitter.start)
+
+          -- Experimental indent from nvim-treesitter.
+          vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end,
+      })
+    end,
+  },
+}

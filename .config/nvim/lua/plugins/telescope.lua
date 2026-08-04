@@ -5,6 +5,7 @@ return {
     dependencies = {
       'nvim-lua/plenary.nvim',
       { 'echasnovski/mini.icons', version = '*' },
+      'nvim-telescope/telescope-ui-select.nvim',
     },
     config = function()
       local config = require('telescope')
@@ -39,30 +40,22 @@ return {
           },
           buffers = {
             sort_mru = true,
-            mappings = {
-              i = {
-                -- Map Ctrl+Tab to cycle to next item when in insert mode
-                ["<C-i>"] = function(...)
-                  require("telescope.actions").move_selection_next(...)
-                end,
-              },
-              n = {
-                -- Map Ctrl+Tab to cycle to next item when in normal mode
-                ["<C-i>"] = function(...)
-                  require("telescope.actions").move_selection_next(...)
-                end,
-              },
-            },
           }
         },
+        extensions = {
+          ["ui-select"] = {
+            require("telescope.themes").get_dropdown {},
+          },
+        },
       })
+
+      config.load_extension("ui-select")
 
       local builtin = require('telescope.builtin')
       vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })
       vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help tags' })
       vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = 'Telescope find files' })
       vim.keymap.set('n', '<leader>bl', builtin.buffers, { desc = '[B]uffer [L]ist' })
-      vim.keymap.set('n', '<C-i>', builtin.buffers, { desc = 'Telescope buffers' })
 
       -- Live grep scoped to the git root when inside a repo.
       local function live_grep()
@@ -92,22 +85,4 @@ return {
       vim.keymap.set('n', '<leader>fg', live_grep, { desc = 'Telescope live grep' })
     end
   },
-  {
-    "nvim-telescope/telescope-ui-select.nvim",
-    config = function()
-      local telescope = require("telescope")
-
-      telescope.setup {
-        extensions = {
-          ["ui-select"] = {
-            require("telescope.themes").get_dropdown {
-              -- even more opts
-            }
-          }
-        }
-      }
-
-      telescope.load_extension("ui-select")
-    end
-  }
 }

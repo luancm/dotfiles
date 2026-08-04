@@ -3,164 +3,110 @@ return {
     "mason-org/mason.nvim",
     config = function()
       require("mason").setup()
-    end
+    end,
   },
   {
     "mason-org/mason-lspconfig.nvim",
     config = function()
-      require("mason-lspconfig").setup {
-        ensure_installed = { "ts_ls", "bashls", "hyprls", "jsonls", "gradle_ls", "kotlin_language_server", "clangd", "gopls", "rust_analyzer", "zls" },
+      -- hyprls is Linux/Hyprland-only; skip ensure on macOS.
+      local ensure = {
+        "lua_ls",
+        "ts_ls",
+        "bashls",
+        "jsonls",
+        "gradle_ls",
+        "kotlin_language_server",
+        "clangd",
+        "gopls",
+        "rust_analyzer",
+        "zls",
       }
-    end
+      if vim.fn.has("mac") == 0 then
+        table.insert(ensure, "hyprls")
+      end
+      require("mason-lspconfig").setup({
+        ensure_installed = ensure,
+      })
+    end,
   },
   {
     "neovim/nvim-lspconfig",
     dependencies = {
-      "ziglang/zig.vim"
+      "ziglang/zig.vim",
     },
     config = function()
-      vim.lsp.config.ts_ls = {
-        cmd = { 'typescript-language-server', '--stdio' },
-        filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
-        root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json' },
-      }
-      
-      vim.lsp.config.bashls = {
-        cmd = { 'bash-language-server', 'start' },
-        filetypes = { 'bash', 'sh', 'zsh' },
-      }
-      
-      vim.lsp.config.hyprls = {
-        cmd = { 'hyprls', '--stdio' },
-        filetypes = { 'hyprlang' },
-      }
-      
-      vim.lsp.config.jsonls = {
-        cmd = { 'vscode-json-language-server', '--stdio' },
-        filetypes = { 'json', 'jsonc' },
-      }
-      
-      vim.lsp.config.gradle_ls = {
-        cmd = { 'gradle-language-server' },
-        filetypes = { 'groovy' },
-        root_markers = { 'settings.gradle', 'settings.gradle.kts' },
-      }
-      
-      vim.lsp.config.kotlin_language_server = {
-        cmd = { 'kotlin-language-server' },
-        filetypes = { 'kotlin' },
-      }
-      
-      vim.lsp.config.clangd = {
-        cmd = { 'clangd' },
-        filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
-      }
-      
-      vim.lsp.config.gopls = {
-        cmd = { 'gopls' },
-        filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
-        root_markers = { 'go.work', 'go.mod', '.git' },
-      }
+      -- Prefer nvim-lspconfig defaults; only override settings that differ.
+      vim.lsp.config("lua_ls", {
+        settings = {
+          Lua = {
+            completion = { callSnippet = "Replace" },
+            diagnostics = { globals = { "vim" } },
+            workspace = { checkThirdParty = false },
+            telemetry = { enable = false },
+          },
+        },
+      })
 
-      vim.lsp.config.rust_analyzer = {
-        cmd = { 'rust-analyzer' },
-        filetypes = { 'rust' },
-        root_markers = { 'Cargo.toml', 'rust-project.json', '.git' },
-      }
-      
-      -- Enable all configured LSP servers
-      vim.lsp.enable({ 'ts_ls', 'bashls', 'hyprls', 'jsonls', 'gradle_ls', 'kotlin_language_server', 'clangd', 'gopls', 'rust_analyzer', 'zls' })
+      vim.lsp.config("zls", {
+        settings = {
+          zls = {
+            -- Neovim already provides basic syntax highlighting
+            semantic_tokens = "partial",
+          },
+        },
+      })
 
       -- don't show parse errors in a separate window
       vim.g.zig_fmt_parse_errors = 0
-      -- disable format-on-save from `ziglang/zig.vim`
+      -- disable format-on-save from zig.vim (conform handles format-on-save)
       vim.g.zig_fmt_autosave = 0
-      -- enable  format-on-save from nvim-lspconfig + ZLS
-      --
-      -- Formatting with ZLS matches `zig fmt`.
-      -- The Zig FAQ answers some questions about `zig fmt`:
-      -- https://github.com/ziglang/zig/wiki/FAQ
-      vim.api.nvim_create_autocmd('BufWritePre', {
-        pattern = { "*.zig", "*.zon" },
-        callback = function(ev)
-          vim.lsp.buf.format()
-        end
-      })
 
-      vim.lsp.config.zls = {
-        cmd = { 'zls' },
-        filetypes = { 'zig', 'zon' },
-        root_markers = { 'zls.json', 'build.zig', '.git' },
-        -- Server-specific settings. See `:help lspconfig-setup`
-        -- omit the following line if `zls` is in your PATH
-        -- cmd = { '/path/to/zls_executable' },
-        -- There are two ways to set config options:
-        --   - edit your `zls.json` that applies to any editor that uses ZLS
-        --   - set in-editor config options with the `settings` field below.
-        --
-        -- Further information on how to configure ZLS:
-        -- https://zigtools.org/zls/configure/
-        settings = {
-          zls = {
-            -- Whether to enable build-on-save diagnostics
-            --
-            -- Further information about build-on save:
-            -- https://zigtools.org/zls/guides/build-on-save/
-            -- enable_build_on_save = true,
-
-            -- Neovim already provides basic syntax highlighting
-            semantic_tokens = "partial",
-
-            -- omit the following line if `zig` is in your PATH
-            -- zig_exe_path = '/path/to/zig_executable'
-          }
-        }
+      local servers = {
+        "lua_ls",
+        "ts_ls",
+        "bashls",
+        "jsonls",
+        "gradle_ls",
+        "kotlin_language_server",
+        "clangd",
+        "gopls",
+        "rust_analyzer",
+        "zls",
       }
+      if vim.fn.has("mac") == 0 then
+        table.insert(servers, "hyprls")
+      end
+      vim.lsp.enable(servers)
 
-      vim.keymap.set("n", "K", vim.lsp.buf.hover)
+      vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "LSP hover" })
       vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "[C]ode [A]ction" })
-
-
-      vim.cmd("command! LspDef lua vim.lsp.buf.definition()")
-      vim.cmd("command! LspDefTab tab split | lua vim.lsp.buf.definition()")
-      vim.cmd("command! LspHover lua vim.lsp.buf.hover()")
-      vim.cmd("command! LspRename lua vim.lsp.buf.rename()")
-      vim.cmd("command! LspReferences lua vim.lsp.buf.references()")
-      vim.cmd("command! GoToPreview lua require('goto-preview').goto_preview_definition()")
-      vim.cmd("command! GoToPreviewImpl lua require('goto-preview').goto_preview_implementation()")
-      vim.cmd("command! CloseGoToPreview lua require('goto-preview').close_all_win()")
-      vim.cmd("command! OpenFloatDiag lua vim.diagnostic.open_float()")
-      vim.keymap.set("n", "gd", ":LspDef<CR>", { desc = "[G]o to [D]efinition (LSP)" }) 
-      vim.keymap.set("n", "gD", ":LspDefTab<CR>", { desc = "[G]o to [D]efinition [T]ab (LSP)" })
-      vim.keymap.set("n", "<leader>cr", ":LspRename<CR>", { desc = "[C]ode [R]ename" })
-      vim.keymap.set("n", "gpd", ":GoToPreview<CR>", { desc = "[G]o to [P]review [D]efinition (LSP)" })
-      vim.keymap.set("n", "gpi", ":GoToPreviewImpl<CR>", { desc = "[G]o to [P]review [I]mplementation (LSP)" })
-      vim.keymap.set("n", "gpc", ":CloseGoToPreview<CR>", { desc = "[G]o to [P]review [C]lose (LSP)" })
-      vim.keymap.set("n", "gr", ":LspReferences <CR>", { desc = "[G]o to [R]eferences (LSP)" })
-      vim.keymap.set("n", "<leader>tf", ":OpenFloatDiag<CR>", { desc = "[T]oggle [F]loat Diagnostics (LSP)" })
-    end
+      vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "[G]o to [D]efinition (LSP)" })
+      vim.keymap.set("n", "gD", function()
+        vim.cmd("tab split")
+        vim.lsp.buf.definition()
+      end, { desc = "[G]o to [D]efinition in tab (LSP)" })
+      vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { desc = "[C]ode [R]ename" })
+      vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "[G]o to [R]eferences (LSP)" })
+      vim.keymap.set("n", "gpd", function()
+        require("goto-preview").goto_preview_definition()
+      end, { desc = "[G]o to [P]review [D]efinition (LSP)" })
+      vim.keymap.set("n", "gpi", function()
+        require("goto-preview").goto_preview_implementation()
+      end, { desc = "[G]o to [P]review [I]mplementation (LSP)" })
+      vim.keymap.set("n", "gpc", function()
+        require("goto-preview").close_all_win()
+      end, { desc = "[G]o to [P]review [C]lose (LSP)" })
+      vim.keymap.set("n", "<leader>tf", vim.diagnostic.open_float, { desc = "[T]oggle [F]loat Diagnostics (LSP)" })
+    end,
   },
   {
     "folke/lazydev.nvim",
-    ft = "lua", -- only load on lua files
+    ft = "lua",
     opts = {
       library = {
-        -- See the configuration section for more details
-        -- Load luvit types when the `vim.uv` word is found
         { path = "${3rd}/luv/library", words = { "vim%.uv" } },
       },
     },
-  },
-  {
-    "ray-x/lsp_signature.nvim",
-    opts = {
-      floating_window = false,
-      hint_prefix = {
-        above = "↙ ", -- when the hint is on the line above the current line
-        current = "← ", -- when the hint is on the same line
-        below = "↖ " -- when the hint is on the line below the current line
-      }
-    }
   },
   {
     "rmagatti/goto-preview",

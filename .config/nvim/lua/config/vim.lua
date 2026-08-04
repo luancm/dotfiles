@@ -18,13 +18,10 @@ vim.g.have_nerd_font = true
 vim.g.loaded_snippet = 1
 
 -- Keymaps
-
-vim.keymap.set("n", "<C-k>", "<cmd>wincmd k<cr>")
-vim.keymap.set("n", "<C-j>", "<cmd>wincmd j<cr>")
-vim.keymap.set("n", "<C-h>", "<cmd>wincmd h<cr>")
-vim.keymap.set("n", "<C-l>", "<cmd>wincmd l<cr>")
-vim.keymap.set({'n', 'v'}, '<C-j>', '<C-d>zz', { desc = 'Half page down' })
-vim.keymap.set({'n', 'v'}, '<C-k>', '<C-u>zz', { desc = 'Half page up' })
+-- C-h/j/k/l are owned by vim-tmux-navigator (see plugins/vim-tmux-navigator.lua).
+-- Half-page scroll stays on the native C-d / C-u (with zz recenter).
+vim.keymap.set({ "n", "v" }, "<C-d>", "<C-d>zz", { desc = "Half page down" })
+vim.keymap.set({ "n", "v" }, "<C-u>", "<C-u>zz", { desc = "Half page up" })
 
 vim.keymap.set("n", "<leader><space>", "<cmd>nohlsearch<cr>", { desc = "Clear search highlights" })
 

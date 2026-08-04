@@ -30,11 +30,24 @@ return { { -- Autoformat
     end,
     formatters_by_ft = {
       lua = { 'stylua' },
-      -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
-      --
-      -- You can use 'stop_after_first' to run the first available formatter from the list
-      -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      -- Prefer LSP formatters for these via lsp_format = 'fallback' when no
+      -- external binary is available (gopls, rust-analyzer, zls, ts_ls, ...).
+      go = { 'gofmt', 'goimports', stop_after_first = true },
+      rust = { 'rustfmt' },
+      zig = { 'zigfmt' },
+      javascript = { 'prettierd', 'prettier', stop_after_first = true },
+      javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+      typescript = { 'prettierd', 'prettier', stop_after_first = true },
+      typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+      json = { 'prettierd', 'prettier', stop_after_first = true },
+      jsonc = { 'prettierd', 'prettier', stop_after_first = true },
+    },
+    formatters = {
+      zigfmt = {
+        command = 'zig',
+        args = { 'fmt', '--stdin' },
+        stdin = true,
+      },
     },
   },
 } }

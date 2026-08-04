@@ -14,11 +14,12 @@ return {
       set({ "n", "x" }, "<leader><C-up>", function() mc.lineSkipCursor(-1) end)
       set({ "n", "x" }, "<leader><C-down>", function() mc.lineSkipCursor(1) end)
 
-      -- Add or skip adding a new cursor by matching word/selection
-      set({ "n", "x" }, "<C-d>", function() mc.matchAddCursor(1) end)
-      set({ "n", "x" }, "<C-M-d>", function() mc.matchSkipCursor(1) end)
-      set({ "n", "x" }, "<C-S-d>", function() mc.matchAddCursor(-1) end)
-      set({ "n", "x" }, "<C-M-S-d>", function() mc.matchSkipCursor(-1) end)
+      -- Add or skip adding a new cursor by matching word/selection.
+      -- Avoid <C-d>/<C-u> so half-page scroll keeps those keys.
+      set({ "n", "x" }, "<leader>md", function() mc.matchAddCursor(1) end, { desc = "Multicursor: add next match" })
+      set({ "n", "x" }, "<leader>ms", function() mc.matchSkipCursor(1) end, { desc = "Multicursor: skip next match" })
+      set({ "n", "x" }, "<leader>mD", function() mc.matchAddCursor(-1) end, { desc = "Multicursor: add prev match" })
+      set({ "n", "x" }, "<leader>mS", function() mc.matchSkipCursor(-1) end, { desc = "Multicursor: skip prev match" })
 
       -- Add and remove cursors with control + left click.
       set("n", "<c-leftmouse>", mc.handleMouse)

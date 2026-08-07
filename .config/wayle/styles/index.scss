@@ -1,0 +1,10 @@
+/* Keep structure, fonts, and palette in config.toml; use this file for small visual overrides. */
+
+menubutton.bar-button {
+    --bar-btn-label-weight: 600;
+}
+
+menubutton.bar-button.center-clock {
+    font-family: "FiraCode Nerd Font";
+    color: var(--palette-primary);
+}

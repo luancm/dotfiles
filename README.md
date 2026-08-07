@@ -25,6 +25,8 @@ Optional:
 - tmux (terminal multiplexer; ships with [TPM](https://github.com/tmux-plugins/tpm) and a Catppuccin status bar)
 - zoxide (smarter `cd`; adds `z`/`zi`)
 - sesh (fzf-powered tmux session manager; `prefix + T` inside tmux)
+- Wayle (bar; replaces Waybar on Hyprland/Linux; Walker remains the app
+  launcher)
 
 ### tmux
 

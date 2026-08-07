@@ -1,0 +1,97 @@
+# Wayle v0.7 file-first bar configuration.
+# GUI and CLI changes belong in runtime.toml and override this file.
+
+[bar]
+location = "top"
+exclusive = true
+layer = "top"
+bg = "bg-base"
+background-opacity = 70
+module-gap = 0.5
+button-variant = "basic"
+button-opacity = 100
+button-bg-opacity = 0
+button-label-weight = "semibold"
+button-rounding = "none"
+button-border-location = "none"
+
+[[bar.layout]]
+monitor = "*"
+left = ["hyprland-workspaces"]
+center = [{ module = "clock", class = "center-clock" }]
+right = [
+  "systray",
+  "idle-inhibit",
+  "bluetooth",
+  "network",
+  "volume",
+  "microphone",
+  "cpu",
+]
+
+[modules.systray]
+
+[styling]
+theme-provider = "wayle"
+rounding = "none"
+
+[styling.palette]
+bg = "#1e1e2e"
+surface = "#313244"
+elevated = "#45475a"
+fg = "#cdd6f4"
+fg-muted = "#a6adc8"
+primary = "#cba6f7"
+red = "#f38ba8"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+blue = "#89b4fa"
+
+[general]
+font-sans = "CaskaydiaCove NF SemiBold"
+font-mono = "FiraCode Nerd Font"
+
+[modules.hyprland-workspaces]
+display-mode = "label"
+divider = " "
+app-icons-show = true
+app-icons-dedupe = true
+active-indicator = "background"
+active-color = "accent"
+occupied-color = "fg-muted"
+empty-color = "fg-subtle"
+container-bg-color = "transparent"
+
+[modules.clock]
+format = "%A %H:%M"
+icon-show = false
+label-color = "accent"
+button-bg-color = "transparent"
+
+[modules.idle-inhibit]
+icon-show = true
+label-show = false
+button-bg-color = "transparent"
+
+[modules.bluetooth]
+label-show = false
+button-bg-color = "transparent"
+
+[modules.network]
+label-show = false
+button-bg-color = "transparent"
+
+[modules.volume]
+format = "{{ percent }}%"
+button-bg-color = "transparent"
+
+[modules.microphone]
+label-show = true
+button-bg-color = "transparent"
+
+[modules.cpu]
+poll-interval-ms = 5000
+format = ""
+label-show = false
+icon-name = "ld-cpu-symbolic"
+button-bg-color = "transparent"

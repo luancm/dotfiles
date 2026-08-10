@@ -1,4 +1,5 @@
 cache/
 zsh/antidote
+# legacy static path (pre-harden); kept so an old leftover never gets committed
 zsh/zsh_plugins.zsh
 homebrew/exclude.local

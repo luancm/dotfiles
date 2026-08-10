@@ -50,14 +50,12 @@ zstyle ':completion:*' insert-tab pending # pasting with tabs doesn't perform co
 zstyle ':completion:*' rehash true # rehash if command not found (possibly recently installed)
 zstyle ':completion:*' menu select=2 # menu if nb items > 2
 
-# load zsh files
-zsh_files=($DOTFILES/zsh/*.zsh)
-
-for file in $zsh_files; do
+# load zsh files (top-level modules only; skip any generated bundle leftovers)
+for file in $DOTFILES/zsh/*.zsh(N); do
+  [[ ${file:t} == zsh_plugins.zsh ]] && continue
   source "$file"
 done
-
-unset zsh_files 
+unset file
 
 # Plugins managed by Antidote
 # Ensure antidote is installed
@@ -65,9 +63,53 @@ if [[ ! -d "$DOTFILES/zsh/antidote" ]]; then
   git clone --depth=1 https://github.com/mattmc3/antidote.git "$DOTFILES/zsh/antidote"
 fi
 
-# Initialize antidote
+# Keep clones out of ~/Library/Caches (macOS may purge it) and keep the
+# generated static load script out of zsh/*.zsh (that glob sources modules).
+export ANTIDOTE_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/antidote"
+_antidote_old_home="$HOME/Library/Caches/antidote"
+if [[ ! -d "$ANTIDOTE_HOME/github.com" && -d "$_antidote_old_home/github.com" ]]; then
+  mkdir -p "$ANTIDOTE_HOME"
+  cp -a "$_antidote_old_home/github.com" "$ANTIDOTE_HOME/"
+fi
+unset _antidote_old_home
+
 source "$DOTFILES/zsh/antidote/antidote.zsh"
-antidote load "$DOTFILES/zsh/zsh_plugins.txt"
+
+# Hardened static load: antidote's `load` rebuilds with `>|` (truncate-first),
+# which races when many shells start together (login / Ghostty restore / tmux)
+# and can leave a 0-byte sticky bundle that never self-heals. We rebuild
+# atomically, treat empty as dirty, and lock so only one writer runs.
+_antidote_bundle="$DOTFILES/zsh/zsh_plugins.txt"
+_antidote_static="${XDG_CACHE_HOME:-$HOME/.cache}/antidote/zsh_plugins.zsh"
+_antidote_lock="${_antidote_static}.lock"
+mkdir -p "${_antidote_static:h}"
+
+if [[ ! -s $_antidote_static || ! $_antidote_static -nt $_antidote_bundle ]]; then
+  if mkdir "$_antidote_lock" 2>/dev/null; then
+    _antidote_tmp="${_antidote_static}.tmp.$$"
+    if antidote bundle <"$_antidote_bundle" >"$_antidote_tmp" && [[ -s $_antidote_tmp ]]; then
+      mv -f "$_antidote_tmp" "$_antidote_static"
+    else
+      rm -f "$_antidote_tmp"
+      print -ru2 -- "antidote: failed to generate plugin bundle from $_antidote_bundle"
+    fi
+    rmdir "$_antidote_lock" 2>/dev/null
+  else
+    # Another shell is regenerating; wait briefly for a non-empty file.
+    for _antidote_i in {1..50}; do
+      [[ -s $_antidote_static ]] && break
+      sleep 0.1
+    done
+    unset _antidote_i
+  fi
+fi
+
+if [[ -s $_antidote_static ]]; then
+  source "$_antidote_static"
+else
+  print -ru2 -- "antidote: plugin bundle missing or empty ($_antidote_static); syntax-highlighting/autosuggestions skipped"
+fi
+unset _antidote_bundle _antidote_static _antidote_lock _antidote_tmp
 
 # fzf: fuzzy file picker (Ctrl-T), directory jump (Alt-C), and general glue
 # for tools like sesh. History search (Ctrl-R) is handled by atuin when

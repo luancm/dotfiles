@@ -26,7 +26,7 @@ local function M(vars)
                 scroll_factor        = 0.5,
             },
             special_fallthrough = true,
-            follow_mouse = 1,
+            follow_mouse = 2,
         },
         binds = {
             scroll_event_delay = 0,

@@ -6,8 +6,8 @@ local mainMod     = "SUPER"
 local terminal    = "ghostty"
 local fileManager = "dolphin"
 local browser     = "firefox"
--- Walker service socket (uid-portable via XDG_RUNTIME_DIR).
-local menu        = "nc -U " .. os.getenv("XDG_RUNTIME_DIR") .. "/walker/walker.sock"
+-- Launcher toggle (Vicinae deeplink; also accepts raycast://).
+local menu        = "vicinae vicinae://toggle"
 
 -- Export for sub-modules via a shared table.
 local vars = {

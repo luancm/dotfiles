@@ -47,8 +47,8 @@ local function M(vars)
     -- Color picker
     hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprpicker -a"))
 
-    -- Clipboard history (cliphist via Walker service socket)
-    hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | walker --dmenu | cliphist decode | wl-copy"))
+    -- Clipboard history (Vicinae built-in)
+    hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("vicinae 'vicinae://launch/clipboard/history?toggle=true'"))
 
     -- Screenshots: region (slurp) and full outputs
     hl.bind("Print",            hl.dsp.exec_cmd('grim -g "$(slurp)" -t ppm - | satty --filename -'))

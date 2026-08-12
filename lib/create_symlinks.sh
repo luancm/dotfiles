@@ -13,7 +13,7 @@ source "$DOTFILES/lib/io_handlers.sh"
 # Linux/Wayland-only app configs that have no meaning on macOS.
 config_excludes=()
 if $is_mac_os; then
-  config_excludes+=("hypr/*" "waybar/*" "wlogout/*" "walker/*" "satty/*" "wayle/*")
+  config_excludes+=("hypr/*" "waybar/*" "wlogout/*" "vicinae/*" "satty/*" "wayle/*")
 fi
 
 create_symlink() {

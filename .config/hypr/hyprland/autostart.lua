@@ -15,13 +15,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("sh -c 'if command -v wayle >/dev/null 2>&1; then exec wayle panel start; else exec waybar; fi'")
     hl.exec_cmd("swaync")
 
-    -- Launcher stack
-    hl.exec_cmd("elephant")
-    hl.exec_cmd("walker --gapplication-service")
-
-    -- Clipboard history (text + image)
-    hl.exec_cmd("wl-paste --type text --watch cliphist store")
-    hl.exec_cmd("wl-paste --type image --watch cliphist store")
+    -- Launcher (Vicinae handles clipboard history internally)
+    hl.exec_cmd("vicinae server")
 
     -- IME + idle
     hl.exec_cmd("fcitx5")

@@ -69,13 +69,13 @@ local function M(vars)
     hl.bind(mainMod .. " + SHIFT + minus", hl.dsp.window.move({ workspace = "special:magic" }))
 
     -- Fullscreen (0) vs maximize (1)
-    hl.bind(mainMod .. " + F", function() hl.window.fullscreen({ mode = "fullscreen", action = "toggle" }) end)
-    hl.bind(mainMod .. " + D", function() hl.window.fullscreen({ mode = "maximized", action = "toggle" }) end)
+    hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
+    hl.bind(mainMod .. " + D", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
 
-    -- Alt-Tab cycle (no typed Lua wrapper; route through hyprctl dispatch).
+    -- Alt-Tab cycles windows and raises the selected window.
     hl.bind("ALT + Tab", function()
-        hl.dsp.exec_cmd("hyprctl dispatch cyclenext")
-        hl.dsp.exec_cmd("hyprctl dispatch bringactivetotop")
+        hl.dispatch(hl.dsp.window.cycle_next())
+        hl.dispatch(hl.dsp.window.bring_to_top())
     end)
 
     -- Move focus with mainMod + arrow keys / hjkl
@@ -96,14 +96,14 @@ local function M(vars)
     end
 
     -- Swap windows directionally (tiled) with mainMod + SHIFT + hjkl
-    hl.bind(mainMod .. " + SHIFT + H",     function() hl.window.swap({ direction = "left"  }) end)
-    hl.bind(mainMod .. " + SHIFT + L",     function() hl.window.swap({ direction = "right" }) end)
-    hl.bind(mainMod .. " + SHIFT + K",     function() hl.window.swap({ direction = "up"    }) end)
-    hl.bind(mainMod .. " + SHIFT + J",     function() hl.window.swap({ direction = "down"  }) end)
-    hl.bind(mainMod .. " + SHIFT + left",  function() hl.window.swap({ direction = "left"  }) end)
-    hl.bind(mainMod .. " + SHIFT + right", function() hl.window.swap({ direction = "right" }) end)
-    hl.bind(mainMod .. " + SHIFT + up",    function() hl.window.swap({ direction = "up"    }) end)
-    hl.bind(mainMod .. " + SHIFT + down",  function() hl.window.swap({ direction = "down"  }) end)
+    hl.bind(mainMod .. " + SHIFT + H",     hl.dsp.window.swap({ direction = "left"  }))
+    hl.bind(mainMod .. " + SHIFT + L",     hl.dsp.window.swap({ direction = "right" }))
+    hl.bind(mainMod .. " + SHIFT + K",     hl.dsp.window.swap({ direction = "up"    }))
+    hl.bind(mainMod .. " + SHIFT + J",     hl.dsp.window.swap({ direction = "down"  }))
+    hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.swap({ direction = "left"  }))
+    hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.swap({ direction = "right" }))
+    hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.swap({ direction = "up"    }))
+    hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.swap({ direction = "down"  }))
 
     -- Move/resize windows with mainMod + LMB/RMB and dragging
     hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })

@@ -47,6 +47,7 @@ return {              -- Useful plugin to show you pending keybinds.
       { 'g',         group = '[G]o to' },
       { 'gp',        group = '[G]oto [P]review' },
       { '<leader>9', group = '[9] AI' },
+      { '<leader>o', group = '[O]pencode' },
       { '<leader>b', group = '[B]uffer' },
       { '<leader>c', group = '[C]ode' },
       { '<leader>f', group = '[F]ind' },

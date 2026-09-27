@@ -17,6 +17,24 @@ vim.g.have_nerd_font = true
 
 vim.g.loaded_snippet = 1
 
+-- npm-global CLIs (opencode, ...) live under nvm's node bin, which is only
+-- added to PATH when nvm lazy-loads in zsh. nvim spawns binaries directly
+-- with its inherited PATH, so make the newest nvm-managed bin dir findable.
+if vim.fn.executable("opencode") == 0 then
+  local matches = vim.fn.glob(vim.fs.normalize("~/.nvm/versions/node/*/bin/opencode"), true, true)
+  table.sort(matches, function(a, b)
+    local function ver(p)
+      local ok, v = pcall(vim.version.parse, p:match("node/(.-)/bin/"))
+      return ok and v or vim.version.parse("0")
+    end
+    return ver(a) < ver(b)
+  end)
+  local best = matches[#matches]
+  if best then
+    vim.env.PATH = vim.fs.dirname(best) .. ":" .. vim.env.PATH
+  end
+end
+
 -- Keymaps
 -- C-h/j/k/l are owned by vim-tmux-navigator (see plugins/vim-tmux-navigator.lua).
 -- Half-page scroll stays on the native C-d / C-u (with zz recenter).

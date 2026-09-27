@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Install/upgrade Neovim from GitHub releases (latest stable by default).
+# Self-contained: downloads the official AppImage and pre-extracts it, so no
+# FUSE/kernel module is required at runtime.
+#
+# Usage:
+#   nvim-update              install latest stable
+#   nvim-update v0.12.5      install/rollback to a pinned version
+set -euo pipefail
+
+APPDIR="$HOME/.local/lib/nvim-appimage"
+LIVE="$APPDIR/nvim-squashfs"
+LINK="$HOME/.local/bin/nvim"
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+if [[ $# -gt 1 ]]; then
+  echo "usage: nvim-update [version]" >&2
+  exit 1
+fi
+
+version="${1:-}"
+if [[ -z "$version" ]]; then
+  version="$(curl -fsSL https://api.github.com/repos/neovim/neovim/releases/latest |
+    sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')"
+  [[ -n "$version" ]] || { echo "error: could not determine latest release" >&2; exit 1; }
+fi
+
+current=""
+[[ -x "$LINK" ]] && current="$("$LINK" --version | head -1 | sed 's/^NVIM //')"
+if [[ "${current#v}" == "${version#v}" ]]; then
+  echo "already on $current, nothing to do"
+  exit 0
+fi
+
+echo "installing $version (current: ${current:-none})"
+
+if pgrep -x nvim >/dev/null 2>&1; then
+  echo "warning: nvim is running; finish your sessions before switching versions" >&2
+fi
+
+curl -fsSL -o "$TMP/nvim.appimage" \
+  "https://github.com/neovim/neovim/releases/download/$version/nvim-linux-x86_64.appimage"
+chmod +x "$TMP/nvim.appimage"
+
+(cd "$TMP" && ./nvim.appimage --appimage-extract >/dev/null)
+"$TMP/squashfs-root/usr/bin/nvim" --version | head -1
+
+mkdir -p "$APPDIR" "$HOME/.local/bin"
+rm -rf "$APPDIR/nvim-squashfs.new"
+mv "$TMP/squashfs-root" "$APPDIR/nvim-squashfs.new"
+
+if [[ -d "$LIVE" ]]; then
+  mv "$LIVE" "$APPDIR/.prev.$$"
+fi
+mv "$APPDIR/nvim-squashfs.new" "$LIVE"
+ln -sfn "$LIVE/usr/bin/nvim" "$LINK"
+[[ -d "$APPDIR/.prev.$$" ]] && rm -rf "$APPDIR/.prev.$$"
+
+echo "done: $("$LINK" --version | head -1)"

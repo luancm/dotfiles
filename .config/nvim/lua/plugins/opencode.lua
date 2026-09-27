@@ -5,6 +5,10 @@
 return {
   'nickjvandyke/opencode.nvim',
   version = '*',
+  -- opencode-profile machines only (config/profile.lua)
+  cond = function()
+    return require('config.profile').ai_backend == 'opencode'
+  end,
   keys = {
     { '<leader>oa', function() require('opencode').ask('@this: ') end, mode = { 'n', 'x' }, desc = '[O]pencode [A]sk' },
     { '<leader>os', function() require('opencode').select() end, mode = { 'n', 'x' }, desc = '[O]pencode [S]elect' },

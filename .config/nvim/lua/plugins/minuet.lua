@@ -5,6 +5,10 @@ return {
   {
     'milanglacier/minuet-ai.nvim',
     event = 'InsertEnter',
+    -- opencode-profile machines only (config/profile.lua)
+    cond = function()
+      return require('config.profile').ai_backend == 'opencode'
+    end,
     config = function()
       -- opencode go requires a stable session id sent as x-opencode-session.
       -- Persist one per machine so every request shares the same "conversation".

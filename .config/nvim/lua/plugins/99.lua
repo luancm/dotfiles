@@ -1,6 +1,11 @@
 return {
     {
 		"ThePrimeagen/99",
+		-- rides on the opencode provider; opencode-profile machines only
+		-- (config/profile.lua)
+		cond = function()
+			return require('config.profile').ai_backend == 'opencode'
+		end,
 		config = function()
 			local _99 = require("99")
 

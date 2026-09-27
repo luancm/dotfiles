@@ -2,6 +2,10 @@
 # GUI and CLI changes belong in runtime.toml and override this file.
 
 [bar]
+# Popovers are dismissed instantly under Hyprland 0.56.2 (grab lost on map, dropdown
+# stays 0x0). Disabling autohide keeps them open; toggle closes with a second click.
+# Upstream: wayle-rs/wayle#242.
+dropdown-autohide = false
 location = "top"
 exclusive = true
 layer = "top"

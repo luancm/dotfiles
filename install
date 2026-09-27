@@ -65,7 +65,7 @@ setup_ssh() {
 # ============== Start Installation ============== #
 # ================================================ #
 
-log_info '❯❯ Installing dependencies...'
+log_info "❯❯ Installing dependencies..."
 bash "$DOTFILES/lib/install_dependencies.sh"
 
 # Call installers
@@ -76,6 +76,10 @@ for installer in "${installers[@]}"; do
 done
 
 log_info "❯❯ Creating Symlinks"
+# Bootstrap the machine declaration (asks once, never overwrites); the AI
+# config gates below read it.
+source "$DOTFILES/lib/machine_profile.sh"
+ensure_machine_profile
 bash "$DOTFILES/lib/create_symlinks.sh"
 
 setup_ssh

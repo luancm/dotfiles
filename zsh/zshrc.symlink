@@ -7,11 +7,12 @@ export VEDITOR='code'
 export PATH="$HOME/.local/bin:$DOTFILES/bin:$HOME/.bin:$PATH"
 export GPG_TTY=$(tty)
 
-# opencode go API key (used by minuet-ai.nvim), sourced from opencode's auth store
-_local_share="${XDG_DATA_HOME:-$HOME/.local/share}"
-[[ -f "$_local_share/opencode/auth.json" ]] &&
-  export OPENCODE_GO_API_KEY="$(jq -r '.["opencode-go"].key // empty' "$_local_share/opencode/auth.json")"
-unset _local_share
+# Per-profile shell configuration (lib/machine_profile.sh derives the
+# profile from ~/.config/dotfiles/machine.conf).
+source "$DOTFILES/lib/machine_profile.sh"
+_current_profile="$(machine_profile 2> /dev/null)" || _current_profile='unknown'
+source "$DOTFILES/zsh/profiles/zprofile-${_current_profile}.zsh"
+unset _current_profile
 
 if [[ "${OSTYPE#*darwin}" = "$OSTYPE" ]]; then
   is_mac_os=false

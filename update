@@ -62,6 +62,8 @@ if $is_mac_os; then
 fi
 
 log_info '❯❯ Refreshing symlinks'
+# machine.conf is a declaration, not an answer — never re-asked or
+# overwritten here; reclassify by editing it (or rm + ./install).
 bash "$DOTFILES/lib/create_symlinks.sh"
 
 bash "$DOTFILES/lib/run_private_hook.sh" update

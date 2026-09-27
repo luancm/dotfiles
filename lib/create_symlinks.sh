@@ -16,6 +16,29 @@ if $is_mac_os; then
   config_excludes+=("hypr/*" "waybar/*" "wlogout/*" "vicinae/*" "satty/*" "wayle/*")
 fi
 
+# Linux/Wayland-only app configs that have no meaning on macOS.
+config_excludes=()
+if $is_mac_os; then
+  config_excludes+=("hypr/*" "waybar/*" "wlogout/*" "vicinae/*" "satty/*" "wayle/*")
+fi
+
+# Per-profile config excludes, keyed by the machine's declared profile
+# (lib/machine_profile.sh). Anything listed here is not linked on that
+# profile's machines, and stale links in $HOME are removed below.
+source "$DOTFILES/lib/machine_profile.sh"
+profile=$(machine_profile 2> /dev/null) || profile=unknown
+declare -A profile_config_excludes=(
+  [work]='opencode/*'
+)
+if ! machine_profile > /dev/null; then
+  log_warn 'Machine unclassified (no machine.conf): profile config excluded. Run ./install to classify.'
+fi
+profile_excludes="${profile_config_excludes[$profile]:-}"
+for pattern in $profile_excludes; do
+  config_excludes+=("$pattern")
+done
+unset profile profile_excludes pattern
+
 create_symlink() {
   local source_path="$1"
   local target_path="$2"
@@ -99,5 +122,25 @@ guard_hyprland_stub() {
 
 create_symlink "$DOTFILES/zsh/zshrc.symlink" "$HOME/.zshrc"
 create_symlinks_for_folder "$DOTFILES/.config" "$HOME/.config" "${config_excludes[@]}"
+
+# create_symlinks_for_folder only adds; remove links the machine profile no
+# longer wants (only links pointing back into this repo).
+remove_excluded_links() {
+  local source_folder="$1" destination_folder="$2"
+  shift 2
+  local pattern file target_link link_target
+  for pattern in "$@"; do
+    while IFS= read -r -d '' file; do
+      target_link="$destination_folder/${file#"$source_folder"/}"
+      [ -L "$target_link" ] || continue
+      link_target=$(readlink "$target_link")
+      [[ "$link_target" == "$DOTFILES"* ]] || continue
+      rm "$target_link"
+      log_info "Removed profile-excluded link: $target_link"
+    done < <(find "$source_folder" -path "$DOTFILES/.config/${pattern%\*}*" -type f -print0 2> /dev/null)
+  done
+}
+
+remove_excluded_links "$DOTFILES/.config" "$HOME/.config" "${config_excludes[@]}"
 
 guard_hyprland_stub

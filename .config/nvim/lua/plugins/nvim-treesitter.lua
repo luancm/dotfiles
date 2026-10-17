@@ -23,6 +23,7 @@ return {
       require("nvim-treesitter").install(ensure_installed)
 
       vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("dotfiles_treesitter", { clear = true }),
         desc = "Enable treesitter highlight + indent",
         callback = function(args)
           local max_filesize = 100 * 1024 -- 100 KB

@@ -145,3 +145,7 @@ them.
 
 On macOS, list any Homebrew formulae to skip during `update` (one substring
 per line) in `homebrew/exclude.local`. The file is gitignored.
+
+When you add a machine, read [docs/chezmoi-evaluation.md](docs/chezmoi-evaluation.md)
+before you extend the installer. It lists when to move to chezmoi and how this
+repository maps to it.

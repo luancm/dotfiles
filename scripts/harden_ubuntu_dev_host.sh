@@ -24,23 +24,29 @@
 #       SSH key alone does not equal full root.
 #
 # 4. Configures UFW (default deny in / allow out)
-#       SSH (22) and any --app-ports are opened only to --subnet. Even though
+#       SSH (22) and any --app-ports are opened only to each --subnet and,
+#       when Tailscale is present, to the tailscale0 interface. Even though
 #       the host is not exposed to the internet, defense-in-depth keeps
 #       things safe if the LAN ever gets compromised or reconfigured.
+#       Existing UFW rules are reset (ufw keeps a timestamped backup).
 #
 # 5. Hardens sshd
 #       Disables passwords, empty passwords, root login, X11/TCP/agent
 #       forwarding; caps auth attempts; sets sane keepalives. Standard
 #       OpenSSH best practice for key-only access.
 #
-# 6. Enables fail2ban sshd jail (LAN ignored, 1h bantime, maxretry 5).
+# 6. Enables fail2ban sshd jail (trusted subnets ignored, 1h bantime,
+#    maxretry 5).
 #
 # 7. Enables unattended-upgrades daily.
 #
 # SAFETY
 # ------
-# - sshd config is validated with sshd -t before reload.
-# - UFW SSH rule is added BEFORE enabling the firewall.
+# - sshd uses the first value it reads and loads sshd_config.d/ in lexical
+#   order, so the drop-in is 00-hardening.conf (before 50-cloud-init.conf).
+# - sshd config is validated with sshd -t, and the effective values with
+#   sshd -T, before reload.
+# - UFW SSH rules are added BEFORE enabling the firewall.
 # - Root SSH is only disabled after the new user has a key + sudo password.
 #
 # USAGE
@@ -56,8 +62,13 @@
 #   --user        <name>    Non-root user to create (required)
 #   --pubkey      <line>    SSH public key; if omitted, copies from
 #                           /root/.ssh/authorized_keys
-#   --subnet      <cidr>    Trusted source CIDR (default 192.168.1.0/24)
-#   --app-ports   <list>    Comma-separated TCP ports to open to --subnet
+#   --subnet      <cidr>    Trusted source CIDR; repeatable
+#                           (default 192.168.1.0/24)
+#   --app-ports   <list>    Comma-separated TCP ports to open to the trusted
+#                           sources
+#   --tailscale   auto|yes|no
+#                           Allow SSH/app ports on tailscale0 (default auto:
+#                           yes when the tailscale0 interface exists)
 #   --no-disable-root       Keep root SSH enabled (default: disable)
 #   --skip-upgrade          Skip apt upgrade (faster re-runs)
 # =============================================================================
@@ -66,8 +77,9 @@ set -euo pipefail
 
 NEW_USER=""
 SSH_PUBKEY=""
-SUBNET="192.168.1.0/24"
+SUBNETS=()
 APP_PORTS=""
+TAILSCALE="auto"
 DISABLE_ROOT=1
 SKIP_UPGRADE=0
 
@@ -75,14 +87,16 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --user)            NEW_USER="$2"; shift 2 ;;
     --pubkey)          SSH_PUBKEY="$2"; shift 2 ;;
-    --subnet)          SUBNET="$2"; shift 2 ;;
+    --subnet)          SUBNETS+=("$2"); shift 2 ;;
     --app-ports)       APP_PORTS="$2"; shift 2 ;;
+    --tailscale)       TAILSCALE="$2"; shift 2 ;;
     --no-disable-root) DISABLE_ROOT=0; shift ;;
     --skip-upgrade)    SKIP_UPGRADE=1; shift ;;
-    -h|--help)         sed -n '2,63p' "$0"; exit 0 ;;
+    -h|--help)         sed -n '2,74p' "$0"; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 2 ;;
   esac
 done
+[ "${#SUBNETS[@]}" -gt 0 ] || SUBNETS=("192.168.1.0/24")
 
 log()  { printf '\033[1;34m[..]\033[0m %s\n' "$*"; }
 ok()   { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
@@ -96,6 +110,18 @@ command -v apt-get >/dev/null || die "Debian/Ubuntu only (no apt-get found)."
 if [ -z "$SSH_PUBKEY" ] && [ ! -s /root/.ssh/authorized_keys ]; then
   die "No --pubkey provided and /root/.ssh/authorized_keys is empty."
 fi
+
+for s in "${SUBNETS[@]}"; do
+  [[ "$s" =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$ ]] || die "Invalid --subnet: $s (expected CIDR, e.g. 192.168.1.0/24)"
+done
+
+case "$TAILSCALE" in
+  yes|no) ;;
+  auto) ip link show tailscale0 >/dev/null 2>&1 && TAILSCALE=yes || TAILSCALE=no ;;
+  *) die "Invalid --tailscale: $TAILSCALE (expected auto, yes or no)" ;;
+esac
+TRUSTED_DESC="${SUBNETS[*]}"
+[ "$TAILSCALE" = yes ] && TRUSTED_DESC="$TRUSTED_DESC tailscale0"
 
 log "apt update"
 DEBIAN_FRONTEND=noninteractive apt-get update -qq
@@ -133,32 +159,48 @@ chmod 600 "$USER_HOME/.ssh/authorized_keys"
 ok "SSH key installed at $USER_HOME/.ssh/authorized_keys"
 
 # ---- UFW --------------------------------------------------------------------
-log "Configuring UFW (allow 22 and app-ports from $SUBNET)"
+log "Configuring UFW (allow 22 and app-ports from $TRUSTED_DESC)"
+log "Resetting existing UFW rules (ufw keeps a backup in /etc/ufw)"
 ufw --force reset >/dev/null
 ufw default deny incoming >/dev/null
 ufw default allow outgoing >/dev/null
-ufw allow from "$SUBNET" to any port 22 proto tcp comment "SSH from $SUBNET" >/dev/null
+
+PORTS=(22)
 if [ -n "$APP_PORTS" ]; then
-  IFS=',' read -ra PORTS <<< "$APP_PORTS"
-  for p in "${PORTS[@]}"; do
+  IFS=',' read -ra APP_PORT_LIST <<< "$APP_PORTS"
+  for p in "${APP_PORT_LIST[@]}"; do
     p_trimmed=$(echo "$p" | tr -d '[:space:]')
     [ -z "$p_trimmed" ] && continue
-    ufw allow from "$SUBNET" to any port "$p_trimmed" proto tcp \
-      comment "App $p_trimmed from $SUBNET" >/dev/null
-    ok "Opened ${p_trimmed}/tcp from $SUBNET"
+    [[ "$p_trimmed" =~ ^[0-9]+$ ]] || die "Invalid --app-ports entry: $p_trimmed"
+    PORTS+=("$p_trimmed")
   done
 fi
+
+for port in "${PORTS[@]}"; do
+  label="App $port"
+  [ "$port" = 22 ] && label="SSH"
+  for s in "${SUBNETS[@]}"; do
+    ufw allow from "$s" to any port "$port" proto tcp comment "$label from $s" >/dev/null
+    ok "Opened ${port}/tcp from $s"
+  done
+  if [ "$TAILSCALE" = yes ]; then
+    ufw allow in on tailscale0 to any port "$port" proto tcp comment "$label via Tailscale" >/dev/null
+    ok "Opened ${port}/tcp on tailscale0"
+  fi
+done
 ufw logging low >/dev/null
-yes | ufw enable >/dev/null
+ufw --force enable >/dev/null
 ok "UFW enabled."
 
 # ---- sshd hardening ---------------------------------------------------------
-log "Writing /etc/ssh/sshd_config.d/99-hardening.conf"
+SSHD_DROPIN=/etc/ssh/sshd_config.d/00-hardening.conf
+log "Writing $SSHD_DROPIN"
 mkdir -p /etc/ssh/sshd_config.d
+rm -f /etc/ssh/sshd_config.d/99-hardening.conf
 ROOT_LOGIN_VALUE="prohibit-password"
 [ "$DISABLE_ROOT" -eq 1 ] && ROOT_LOGIN_VALUE="no"
 
-cat > /etc/ssh/sshd_config.d/99-hardening.conf <<EOF
+cat > "$SSHD_DROPIN" <<EOF
 # Managed by harden_ubuntu_dev_host.sh
 PermitRootLogin ${ROOT_LOGIN_VALUE}
 PasswordAuthentication no
@@ -175,7 +217,7 @@ ClientAliveCountMax 2
 AllowTcpForwarding no
 AllowAgentForwarding no
 EOF
-chmod 644 /etc/ssh/sshd_config.d/99-hardening.conf
+chmod 644 "$SSHD_DROPIN"
 
 if [ "$DISABLE_ROOT" -eq 1 ]; then
   # Safety: refuse to disable root unless the new user has a key AND a password.
@@ -189,18 +231,29 @@ if [ "$DISABLE_ROOT" -eq 1 ]; then
 fi
 
 sshd -t && ok "sshd config valid"
+EFFECTIVE=$(sshd -T 2>/dev/null)
+grep -qx 'passwordauthentication no' <<< "$EFFECTIVE" \
+  || die "sshd still allows passwords; another file in /etc/ssh/sshd_config.d overrides $SSHD_DROPIN"
+# sshd -T prints prohibit-password under its older alias, without-password.
+ROOT_LOGIN_PATTERN="$ROOT_LOGIN_VALUE"
+[ "$ROOT_LOGIN_VALUE" = prohibit-password ] && ROOT_LOGIN_PATTERN="(prohibit|without)-password"
+grep -Eqx "permitrootlogin ${ROOT_LOGIN_PATTERN}" <<< "$EFFECTIVE" \
+  || die "sshd PermitRootLogin is not '${ROOT_LOGIN_VALUE}'; another file overrides $SSHD_DROPIN"
+ok "sshd effective config verified (sshd -T)"
 systemctl reload ssh
 ok "sshd reloaded"
 
 # ---- fail2ban ---------------------------------------------------------------
-log "Configuring fail2ban (LAN $SUBNET ignored)"
+IGNORE_IPS="127.0.0.1/8 ::1 ${SUBNETS[*]}"
+[ "$TAILSCALE" = yes ] && IGNORE_IPS="$IGNORE_IPS 100.64.0.0/10"
+log "Configuring fail2ban (ignoring $IGNORE_IPS)"
 cat > /etc/fail2ban/jail.local <<EOF
 [DEFAULT]
 bantime  = 1h
 findtime = 10m
 maxretry = 5
 backend  = systemd
-ignoreip = 127.0.0.1/8 ::1 ${SUBNET}
+ignoreip = ${IGNORE_IPS}
 
 [sshd]
 enabled  = true
@@ -226,7 +279,7 @@ echo
 ok "Hardening complete."
 echo "  User:           $NEW_USER (sudo, key-only SSH)"
 echo "  Root SSH:       $([ "$DISABLE_ROOT" -eq 1 ] && echo disabled || echo key-only)"
-echo "  Allowed in:     22/tcp from $SUBNET${APP_PORTS:+, $APP_PORTS/tcp from $SUBNET}"
+echo "  Allowed in:     ${PORTS[*]}/tcp from $TRUSTED_DESC"
 echo "  Services:       ssh, ufw, fail2ban, unattended-upgrades"
 echo
 warn "Before closing this root session, test from your workstation:"

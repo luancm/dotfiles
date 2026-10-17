@@ -120,7 +120,48 @@ guard_hyprland_stub() {
   fi
 }
 
-create_symlink "$DOTFILES/zsh/zshrc.symlink" "$HOME/.zshrc"
+# ~/.zshrc is a local file that sources the tracked zshrc. Installers that
+# append to ~/.zshrc (locstat, sdkman) then write there, not into the repo.
+ensure_zshrc_stub() {
+  local zshrc="$HOME/.zshrc"
+  local tracked="${DOTFILES/#"$HOME"/\$HOME}/zsh/zshrc.symlink"
+  local stub backup
+  stub=$(printf '%s\n%s\n' \
+    '# Machine-local stub (untracked). Installers such as locstat append below.' \
+    "[ -r \"$tracked\" ] && source \"$tracked\"")
+
+  if [[ -L "$zshrc" ]]; then
+    if [[ "$(readlink "$zshrc")" == "$DOTFILES/zsh/zshrc.symlink" ]]; then
+      rm "$zshrc"
+      log_info "Replaced the $zshrc link with a local file"
+      if [[ -d "$HOME/.locstat" ]]; then
+        log_warn 'locstat: put its PATH and GIT_CONFIG blocks in ~/.zshrc below the source line, or run `locstat install` from a clean shell'
+      fi
+    else
+      backup="$zshrc.backup.$(date +%Y%m%d%H%M%S)"
+      mv "$zshrc" "$backup"
+      log_success "Backed up $zshrc to $backup"
+    fi
+  fi
+
+  if [[ -f "$zshrc" ]]; then
+    if grep -qF 'zsh/zshrc.symlink' "$zshrc"; then
+      log_success "Skipping $zshrc. Already sources the dotfiles zshrc"
+      return 0
+    fi
+    # Keep lines that other installers added; load the dotfiles zshrc first.
+    backup="$zshrc.backup.$(date +%Y%m%d%H%M%S)"
+    cp -p "$zshrc" "$backup"
+    { printf '%s\n\n' "$stub"; cat "$backup"; } > "$zshrc"
+    log_success "Added the dotfiles source line to $zshrc (backup: $backup)"
+    return 0
+  fi
+
+  printf '%s\n' "$stub" > "$zshrc"
+  log_success "Created $zshrc"
+}
+
+ensure_zshrc_stub
 create_symlinks_for_folder "$DOTFILES/.config" "$HOME/.config" "${config_excludes[@]}"
 
 # create_symlinks_for_folder only adds; remove links the machine profile no

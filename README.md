@@ -85,13 +85,15 @@ bash ~/.dotfiles/update
 
 ## Machine-specific config
 
-Anything that should not be tracked in the repo (secrets, work env vars,
-host-specific PATH entries) goes in `~/.localrc`, which is sourced from the
-zshrc if present:
+`~/.zshrc` is a small local file, not a link. It sources `zsh/zshrc.symlink`.
+Tools that append to `~/.zshrc` (locstat, sdkman) write to this local file, not
+into the repo. Keep their blocks below the source line.
 
-```shell
-cp ~/.dotfiles/.localrc.example ~/.localrc
-```
+Anything that should not be tracked in the repo (work env vars, host-specific
+PATH entries) goes in `~/.localrc`, which is sourced from the zshrc if present.
+`./install` creates it from `.localrc.example` and keeps it private
+(`chmod go-rwx`). Do not export secrets there; read them when a command needs
+them.
 
 On macOS, list any Homebrew formulae to skip during `update` (one substring
 per line) in `homebrew/exclude.local`. The file is gitignored.

@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source "$DOTFILES/lib/io_handlers.sh"
-source "$DOTFILES/lib/package_installer.sh"
-
 # Git diff/review tools. delta renders readable line diffs (used as git's pager),
 # difftastic gives on-demand structural diffs (`git dft`), lazygit is a git TUI.
 # delta + difftastic make AUR PKGBUILD / supply-chain diff review legible.

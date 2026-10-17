@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source \"$DOTFILES/lib/io_handlers.sh\"
-source \"$DOTFILES/lib/package_installer.sh\"
-
 # TPM (Tmux Plugin Manager) lives under XDG so it sits next to the symlinked
 # ~/.config/tmux/tmux.conf and powers the `@plugin` lines in that config.
 TPM_DIR="$HOME/.config/tmux/plugins/tpm"

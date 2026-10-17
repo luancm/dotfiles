@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source "$DOTFILES/lib/io_handlers.sh"
-source "$DOTFILES/lib/package_installer.sh"
-
 if command -v ghostty > /dev/null; then
   log_success 'Dependency `ghostty` already installed'
   return 0

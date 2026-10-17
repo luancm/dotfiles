@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source \"$DOTFILES/lib/io_handlers.sh\"
-source \"$DOTFILES/lib/package_installer.sh\"
-
 # zoxide is a smarter `cd` (provides `z`/`zi`). It also backs sesh's directory
 # suggestions, so it pairs well with the tmux session switcher.
 if command -v zoxide > /dev/null; then

@@ -5,9 +5,6 @@
 #
 # Available on Homebrew (macOS) and the Arch repos (pacman/yay) as `tealdeer`.
 
-source \"$DOTFILES/lib/io_handlers.sh\"
-source \"$DOTFILES/lib/package_installer.sh\"
-
 if command -v tldr > /dev/null; then
 	log_success 'Dependency `tealdeer` already installed'
 	return 0

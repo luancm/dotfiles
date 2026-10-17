@@ -2,7 +2,6 @@
 
 # Wayle is a Linux/Hyprland bar. The supported automatic install path is the
 # Arch Linux AUR binary package; other systems can install it manually.
-source "$DOTFILES/lib/io_handlers.sh"
 
 if [[ "${OSTYPE:-}" != linux-* ]]; then
   log_warn 'Wayle is Linux/Hyprland-only; skipping on this OS.'

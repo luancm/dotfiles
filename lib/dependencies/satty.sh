@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source \"$DOTFILES/lib/io_handlers.sh\"
-source \"$DOTFILES/lib/package_installer.sh\"
-
 # Screenshot stack for Wayland: grim (capture) + slurp (region) + satty (annotate).
 # Not needed on macOS.
 if $is_mac_os; then
@@ -12,14 +9,18 @@ fi
 ensure_cmd_pkg() {
   local cmd="$1" pkg="${2:-$1}"
   if command -v "$cmd" > /dev/null; then
-    log_success "Dependency `$pkg` already installed"
+    log_success "Dependency \`$pkg\` already installed"
     return 0
   fi
   if ! is_package_available "$pkg"; then
-    log_warn "Package `$pkg` not available in $PKG_MANAGER repositories. Skipping."
+    log_warn "Package \`$pkg\` not available in $PKG_MANAGER repositories. Skipping."
     return 1
   fi
-  install_package "$pkg" && log_success "Dependency `$pkg` installed successfully"
+  if ! install_package "$pkg"; then
+    log_error "Failed to install \`$pkg\`"
+    return 1
+  fi
+  log_success "Dependency \`$pkg\` installed successfully"
 }
 
 if command -v grim > /dev/null && command -v slurp > /dev/null && command -v satty > /dev/null; then

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-source "$DOTFILES/lib/io_handlers.sh"
-
 # If on Arch, optionally install yay (AUR helper).
 if ! command -v pacman > /dev/null; then
 	return 0

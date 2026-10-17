@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source \"$DOTFILES/lib/io_handlers.sh\"
-source \"$DOTFILES/lib/package_installer.sh\"
-
 if command -v curl > /dev/null; then
   log_success 'Dependency `curl` already installed'
 else
@@ -11,6 +8,9 @@ else
     return 0
   fi
 
-  install_package curl
-  log_success 'Dependency `curl` installed successfully'
+  if install_package curl; then
+    log_success 'Dependency `curl` installed successfully'
+  else
+    log_error 'Failed to install curl'
+  fi
 fi

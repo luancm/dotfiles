@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source "$DOTFILES/lib/io_handlers.sh"
-source "$DOTFILES/lib/package_installer.sh"
-
 # Packages required by Neovim plugins (e.g., Telescope, Luarocks-based tooling)
 declare -A NVIM_DEPENDENCIES=(
   [ripgrep]="rg"

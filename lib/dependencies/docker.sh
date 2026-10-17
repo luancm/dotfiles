@@ -11,9 +11,6 @@
 #
 # Avoids Docker Desktop (its license is paid for larger orgs) and the GUI.
 
-source \"$DOTFILES/lib/io_handlers.sh\"
-source \"$DOTFILES/lib/package_installer.sh\"
-
 ensure_package() {
   local pkg=$1
   if is_package_installed "$pkg"; then

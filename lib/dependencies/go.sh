@@ -10,9 +10,6 @@
 # `go` command and tools installed via `go install` to be available.
 # This script does not modify your shell rc.
 
-source \"$DOTFILES/lib/io_handlers.sh\"
-source \"$DOTFILES/lib/package_installer.sh\"
-
 GO_VERSION="1.26.3"
 GO_INSTALL_DIR="/usr/local/go"
 

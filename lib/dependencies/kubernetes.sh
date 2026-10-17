@@ -7,9 +7,6 @@
 # Both are available on Homebrew (macOS) and the Arch repos (pacman/yay).
 # The whole installer is opt-in behind a confirmation prompt.
 
-source \"$DOTFILES/lib/io_handlers.sh\"
-source \"$DOTFILES/lib/package_installer.sh\"
-
 ensure_package() {
   local pkg=$1
   if is_package_installed "$pkg"; then

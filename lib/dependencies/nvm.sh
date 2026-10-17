@@ -3,6 +3,11 @@
 NVM_VERSION="v0.40.1"
 NVM_DIR_PATH="${NVM_DIR:-$HOME/.nvm}"
 
+if command -v mise > /dev/null && [[ ! -d "$NVM_DIR_PATH" ]]; then
+  log_success 'Node is managed by mise; skipping nvm'
+  return 0
+fi
+
 # Load nvm into the current shell if it's already installed, so the
 # `command -v nvm` check below works in non-interactive shells too.
 if [[ -s "$NVM_DIR_PATH/nvm.sh" ]]; then

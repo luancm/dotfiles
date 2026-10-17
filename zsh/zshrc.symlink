@@ -183,12 +183,18 @@ fi
 log_info 'Loading .localrc configuration'
 [ -f ~/.localrc ] && . ~/.localrc
 
+# mise (Node and Java versions; ~/.config/mise/config.toml). When it is
+# installed, nvm and sdkman below are not loaded.
+if (( $+commands[mise] )); then
+  eval "$(mise activate zsh)"
+fi
+
 # NVM (Node Version Manager) — lazy-loaded to avoid the ~200ms cost of
 # sourcing nvm.sh on every shell start. Calling any of the shimmed
 # commands below sources nvm.sh on demand and then re-runs the command;
 # the shims unset themselves so subsequent calls hit the real nvm/node.
 export NVM_DIR="$HOME/.nvm"
-if [ -s "$NVM_DIR/nvm.sh" ]; then
+if (( ! $+commands[mise] )) && [ -s "$NVM_DIR/nvm.sh" ]; then
   _nvm_load() {
     unset -f nvm node npm npx yarn pnpm corepack _nvm_load 2>/dev/null
     \. "$NVM_DIR/nvm.sh"
@@ -265,10 +271,11 @@ esac
 # sdkman, lazy-loaded: sourcing sdkman-init.sh costs a large part of the start
 # time. Put the current candidates on PATH and set <NAME>_HOME (what
 # sdkman-init does), and load sdkman itself on the first `sdk` call. Skipped
-# when something (e.g. ~/.localrc) already loaded sdkman. Keep at the end so
+# when mise is installed, or when something (e.g. ~/.localrc) already loaded
+# sdkman. Keep at the end so
 # the candidates come first on PATH. Assumes sdkman_auto_env=false.
 export SDKMAN_DIR="$HOME/.sdkman"
-if [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && (( ! ${+functions[sdk]} )); then
+if (( ! $+commands[mise] )) && [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && (( ! ${+functions[sdk]} )); then
   for _sdk_current in "$SDKMAN_DIR"/candidates/*/current(N); do
     export "${(U)${_sdk_current:h:t}}_HOME=$_sdk_current"
     path=("$_sdk_current/bin" $path)

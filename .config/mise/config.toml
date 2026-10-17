@@ -1,0 +1,9 @@
+# Global tool versions for mise (https://mise.jdx.dev). A project overrides
+# them with mise.toml, or with the version files of other tools:
+# .nvmrc / .node-version (node) and .java-version / .sdkmanrc (java).
+[tools]
+node = "lts"
+java = "temurin-25"
+
+[settings]
+idiomatic_version_file_enable_tools = ["node", "java"]

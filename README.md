@@ -13,7 +13,7 @@ Core:
 - antidote (plugin manager)
 - ripgrep, fd (search, used by fzf and Neovim/Telescope)
 - luarocks, wget (Neovim plugin tooling)
-- go, nvm (toolchains, lazy-loaded in the shell)
+- go, mise (toolchains; mise manages Node and Java, see below)
 
 Optional:
 - yay (who doesn't like yogurt?)
@@ -27,6 +27,19 @@ Optional:
 - sesh (fzf-powered tmux session manager; `prefix + T` inside tmux)
 - Wayle (bar; replaces Waybar on Hyprland/Linux)
 - Vicinae (app launcher and clipboard history on Hyprland/Linux; replaces Walker and cliphist)
+
+On macOS, `homebrew/Brewfile` lists the same tools. `./install` offers it once
+(default no), or run `brew bundle --file ~/.dotfiles/homebrew/Brewfile`.
+
+### Node and Java (mise)
+
+[mise](https://mise.jdx.dev) sets the Node and Java versions. Global versions
+are in `.config/mise/config.toml` (Node LTS, Temurin 25). In a project, mise
+also reads `.nvmrc`, `.node-version`, `.java-version` and `.sdkmanrc`.
+
+When mise is not installed, the shell uses nvm and sdkman (both lazy-loaded)
+as before. To move to mise: install it, run `mise install`, then remove the
+nvm and sdkman lines from `~/.localrc` and `~/.zshrc`.
 
 ### tmux
 

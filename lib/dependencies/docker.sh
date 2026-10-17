@@ -24,7 +24,8 @@ ensure_package() {
 # Docker CLI plugins dir so `docker compose` works as a subcommand.
 link_compose_plugin() {
   command -v brew > /dev/null || return 0
-  local src="$(brew --prefix)/opt/docker-compose/bin/docker-compose"
+  local src
+  src="$(brew --prefix)/opt/docker-compose/bin/docker-compose"
   [ -x "$src" ] || return 0
   mkdir -p "$HOME/.docker/cli-plugins"
   ln -sfn "$src" "$HOME/.docker/cli-plugins/docker-compose"

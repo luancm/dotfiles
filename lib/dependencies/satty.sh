@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154 # is_mac_os is set by lib/install_dependencies.sh
 
 # Screenshot stack for Wayland: grim (capture) + slurp (region) + satty (annotate).
 # Not needed on macOS.

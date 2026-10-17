@@ -53,7 +53,8 @@ create_symlink() {
       log_success "Skipping ${source_path}. Already linked"
       return 0
     else
-      local backup="${target_path}.backup.$(date +%Y%m%d%H%M%S)"
+      local backup
+      backup="${target_path}.backup.$(date +%Y%m%d%H%M%S)"
       mv "$target_path" "$backup"
       log_success "Backed up $target_path to $backup"
     fi
@@ -69,6 +70,7 @@ should_skip() {
       return 1
   fi
   for pattern in "${exclude_patterns[@]}"; do
+      # shellcheck disable=SC2053 # exclude patterns are globs
       if [[ "$file_path" == $pattern ]]; then
           return 0
       fi

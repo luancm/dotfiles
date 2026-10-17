@@ -12,9 +12,8 @@ if ((BASH_VERSINFO[0] < 4)); then
 	exit 1
 fi
 
-[ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
-
-export DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)"
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)"
+export DOTFILES
 source "$DOTFILES/lib/io_handlers.sh"
 
 FORGET_ANSWERS=0
@@ -49,6 +48,12 @@ fi
 setup_ssh() {
 	if [ -f ~/.ssh/id_ed25519.pub ]; then
 		log_success 'SSH: Already configured in ~/.ssh/id_ed25519.pub'
+		return 0
+	fi
+
+	# ssh-keygen asks for a passphrase on the terminal.
+	if dotfiles_noninteractive; then
+		log_info 'SSH: No terminal; skipping key generation. Run `ssh-keygen -t ed25519` later.'
 		return 0
 	fi
 

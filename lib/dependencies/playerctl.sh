@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154 # is_mac_os is set by lib/install_dependencies.sh
 
 # playerctl: MPRIS media keys (play/pause/next/prev) used by Hyprland binds.
 if $is_mac_os; then

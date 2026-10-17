@@ -10,7 +10,6 @@ if tput sgr0 &>/dev/null; then
 	green=$(tput setaf 2)
 	blue=$(tput setaf 4)
 	yellow=$(tput setaf 3)
-	USE_TPUT=true
 else
 	# tput failed (unknown terminal) - use ANSI escape codes
 	reset=$'\033[0m'
@@ -20,7 +19,6 @@ else
 	green=$'\033[32m'
 	blue=$'\033[34m'
 	yellow=$'\033[33m'
-	USE_TPUT=false
 fi
 
 indent_prefix() {
@@ -112,7 +110,7 @@ prompt_choice() {
     local question="$1"; shift
     local choices=("$@")
     local default="${choices[0]}"
-    local labels=() choice c lc label
+    local labels=() choice c lc
     for c in "${choices[@]}"; do
         if [[ "${c,,}" == "${default,,}" ]]; then
             labels+=("${c^^}")

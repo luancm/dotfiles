@@ -2,7 +2,8 @@
 # This script modifies SYSTEM files. Run with sudo/root privileges.
 
 # Determine DOTFILES path (assuming script is in scripts/ subdir)
-export DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export DOTFILES
 
 # Source IO handlers
 if [ -f "$DOTFILES/lib/io_handlers.sh" ]; then

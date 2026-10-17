@@ -58,6 +58,7 @@ unset tools_path
 
 # Identity per directory: repos under these paths load ~/.gitconfig-personal
 # (machine-local). git skips include files that do not exist.
+# shellcheck disable=SC2088 # git expands ~ in these values itself
 for personal_dir in '~/Projects/personal/' '~/.dotfiles/' '~/.dotfiles-private/'; do
   git config --global "includeIf.gitdir:${personal_dir}.path" '~/.gitconfig-personal'
 done
@@ -67,6 +68,7 @@ unset personal_dir
 # (e.g. in ~/.gitconfig.local), so commits never fail for lack of a key.
 git config --global gpg.format ssh
 if [[ -f "$HOME/.config/git/allowed_signers" ]]; then
+  # shellcheck disable=SC2088 # git expands ~ itself
   git config --global gpg.ssh.allowedSignersFile '~/.config/git/allowed_signers'
 fi
 if git config --global --includes --get user.signingkey > /dev/null; then

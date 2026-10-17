@@ -23,7 +23,7 @@ sudo pacman -S --needed --noconfirm git base-devel
 	tmpdir="$(mktemp -d)"
 	trap 'rm -rf "$tmpdir"' EXIT
 	git clone https://aur.archlinux.org/yay.git "$tmpdir/yay"
-	cd "$tmpdir/yay"
+	cd "$tmpdir/yay" || exit 1
 	makepkg -si --noconfirm
 )
 if command -v yay > /dev/null; then

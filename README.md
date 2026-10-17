@@ -83,6 +83,15 @@ refresh symlinks:
 bash ~/.dotfiles/update
 ```
 
+## Testing
+
+CI (`.github/workflows/ci.yml`) runs both checks on each push and pull request:
+
+```shell
+test/lint.sh            # shellcheck (warning level) + zsh -n
+test/install-smoke.sh   # ./install --yes in a clean Ubuntu container (needs docker)
+```
+
 ## Machine-specific config
 
 `~/.zshrc` is a small local file, not a link. It sources `zsh/zshrc.symlink`.

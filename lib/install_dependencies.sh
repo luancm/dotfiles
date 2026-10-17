@@ -8,6 +8,7 @@ if [ -z "${DOTFILES:-}" ]; then echo 'Dotfiles were not installed, to install ru
 source "$DOTFILES/lib/io_handlers.sh"
 source "$DOTFILES/lib/package_installer.sh"
 
+# shellcheck disable=SC2034 # read by the sourced installers
 [ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true
 
 deps_dir="$DOTFILES/lib/dependencies"

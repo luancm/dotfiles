@@ -1,0 +1,6 @@
+.git/
+cache/
+nvim.log
+zsh/antidote/
+zsh/zsh_plugins.zsh
+homebrew/exclude.local

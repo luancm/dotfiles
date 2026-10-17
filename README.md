@@ -19,7 +19,7 @@ Optional:
 - yay (who doesn't like yogurt?)
 - ssh-keygen (openssh)
 - xclip (I like pbcopy and pbpaste 😂)
-- some nerd-font
+- FiraCode Nerd Font (the one font the configs use; Arch `ttf-firacode-nerd`, macOS cask `font-fira-code-nerd-font`)
 - fzf (fuzzy search for files and scripted pickers; Ctrl-T / sesh)
 - atuin (SQLite shell history on Ctrl-R; local by default, optional sync)
 - tmux (terminal multiplexer; ships with [TPM](https://github.com/tmux-plugins/tpm) and a Catppuccin status bar)
@@ -40,6 +40,19 @@ also reads `.nvmrc`, `.node-version`, `.java-version` and `.sdkmanrc`.
 When mise is not installed, the shell uses nvm and sdkman (both lazy-loaded)
 as before. To move to mise: install it, run `mise install`, then remove the
 nvm and sdkman lines from `~/.localrc` and `~/.zshrc`.
+
+### Themes
+
+The Hyprland, Waybar, wlogout, Ghostty, Wayle and ReGreet colours come from
+one Catppuccin palette. The templates are in `themes/*.tera`; the flavor is set
+in `themes/render.sh`. After you change a template, run the script (needs
+[whiskers](https://github.com/catppuccin/whiskers/releases)) and commit the
+generated files:
+
+```shell
+themes/render.sh          # write the generated files
+themes/render.sh --check  # CI: fail if a generated file is out of date
+```
 
 ### tmux
 

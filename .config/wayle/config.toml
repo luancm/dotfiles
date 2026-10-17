@@ -36,6 +36,7 @@ theme-provider = "wayle"
 rounding = "none"
 
 [styling.palette]
+# themes/render.sh: begin palette (generated from themes/wayle-palette.toml.tera)
 bg = "#1e1e2e"
 surface = "#313244"
 elevated = "#45475a"
@@ -46,9 +47,10 @@ red = "#f38ba8"
 yellow = "#f9e2af"
 green = "#a6e3a1"
 blue = "#89b4fa"
+# themes/render.sh: end palette
 
 [general]
-font-sans = "CaskaydiaCove NF SemiBold"
+font-sans = "FiraCode Nerd Font"
 font-mono = "FiraCode Nerd Font"
 
 [modules.hyprland-workspaces]

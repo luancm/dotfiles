@@ -26,7 +26,6 @@
     "window-rewrite-default": "",
     "window-rewrite": {
       // https://www.nerdfonts.com/cheat-sheet and https://fontawesome.com/icons
-      "class<Kitty>": "",
       "class<.*ghostty.*>": "",
       "class<Pcmanfm>": "",
       "class<com.github.weclaw1.ImageRoll|nomacs>": "",

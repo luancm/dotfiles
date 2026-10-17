@@ -186,4 +186,17 @@ remove_excluded_links() {
 
 remove_excluded_links "$DOTFILES/.config" "$HOME/.config" "${config_excludes[@]}"
 
+# Remove links into this repo whose source file was renamed or deleted.
+remove_dangling_links() {
+  local destination_folder="$1" link
+  while IFS= read -r -d '' link; do
+    [ -e "$link" ] && continue
+    [[ "$(readlink "$link")" == "$DOTFILES/"* ]] || continue
+    rm "$link"
+    log_info "Removed dangling link: $link"
+  done < <(find "$destination_folder" -type l -print0 2> /dev/null)
+}
+
+remove_dangling_links "$HOME/.config"
+
 guard_hyprland_stub

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Lint the tracked scripts: shellcheck (warning level) for bash and sh files,
-# zsh -n for zsh files. Needs shellcheck and zsh on PATH.
+# zsh -n for zsh files. Needs shellcheck and zsh on PATH. With whiskers on
+# PATH, also checks that the generated theme files are up to date.
 # Usage: test/lint.sh
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -29,5 +30,12 @@ echo "zsh -n: ${#zsh_files[@]} files"
 for f in "${zsh_files[@]}"; do
   zsh -n "$f"
 done
+
+if command -v whiskers > /dev/null; then
+  echo 'themes: themes/render.sh --check'
+  themes/render.sh --check
+else
+  echo 'themes: skipped (whiskers not on PATH)'
+fi
 
 echo 'lint OK'

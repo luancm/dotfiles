@@ -81,6 +81,7 @@ log_info "❯❯ Creating Symlinks"
 source "$DOTFILES/lib/machine_profile.sh"
 ensure_machine_profile
 bash "$DOTFILES/lib/create_symlinks.sh"
+bash "$DOTFILES/lib/secure_localrc.sh"
 
 setup_ssh
 

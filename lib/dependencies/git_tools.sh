@@ -3,6 +3,7 @@
 # Git diff/review tools. delta renders readable line diffs (used as git's pager),
 # difftastic gives on-demand structural diffs (`git dft`), lazygit is a git TUI.
 # delta + difftastic make AUR PKGBUILD / supply-chain diff review legible.
+# Their git config lives in git/defaults.sh.
 
 # Ordered list of <package>; command name resolved by git_tool_cmd.
 git_tool_pkgs=(git-delta difftastic lazygit)
@@ -98,22 +99,6 @@ install_git_tool_from_release() {
   esac
 }
 
-configure_delta() {
-  command -v delta > /dev/null || return 0
-  git config --global core.pager delta
-  git config --global interactive.diffFilter 'delta --color-only'
-  git config --global delta.navigate true
-  log_success 'Configured `delta` as git pager'
-}
-
-configure_difftastic() {
-  command -v difft > /dev/null || return 0
-  git config --global difftool.difftastic.cmd 'difft "$LOCAL" "$REMOTE"'
-  git config --global difftool.prompt false
-  git config --global alias.dft 'difftool -t difftastic'
-  log_success 'Configured `difftastic` as the `git dft` difftool'
-}
-
 # Install a single git tool, honouring 'some' mode (per-tool confirmation).
 maybe_install_git_tool() {
   local pkg="$1" cmd
@@ -159,8 +144,6 @@ for pkg in "${git_tool_pkgs[@]}"; do
 done
 
 if [[ ${#git_tools_missing[@]} -eq 0 ]]; then
-  configure_delta
-  configure_difftastic
   return 0
 fi
 
@@ -179,7 +162,3 @@ fi
 for pkg in "${git_tool_pkgs[@]}"; do
   maybe_install_git_tool "$pkg"
 done
-
-# Configure whichever tools ended up installed.
-configure_delta
-configure_difftastic

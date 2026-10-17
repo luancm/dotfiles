@@ -65,9 +65,16 @@ Aliases: `tma`, `tmat`, `tms`, `tml`, `tmk`, `tmm`.
 
 ## Shared agent configuration
 
-Cross-agent guidance and skills are owned by `~/.agents`. Provider-specific directories only link to that canonical source: Codex receives `~/.codex/AGENTS.md` and one symlink per shared skill in `~/.codex/skills/`. This keeps Claude, Codex, and other supported agents on the same configuration without copying files.
+Cross-agent guidance (`~/.agents/AGENTS.md`) and skills (`~/.agents/skills`) are owned by `~/.agents`. Each tool gets only symlinks to that source:
 
-`./install` and `./update` refresh these Codex links after the private configuration hook has prepared `~/.agents`. If the shared configuration is unavailable, the linker reports a warning and leaves existing provider configuration unchanged.
+| Tool | Guidance | Skills |
+| --- | --- | --- |
+| Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/skills` (one link; one link per skill if it is a real folder) |
+| Codex | `~/.codex/AGENTS.md` | one link per skill in `~/.codex/skills/` |
+| opencode | `~/.config/opencode/AGENTS.md` | reads `~/.agents/skills` itself |
+| Cursor | no global file (user rules are in Settings) | reads `~/.agents/skills` itself |
+
+`./install` and `./update` refresh these links (`lib/create_agent_symlinks.sh`) after the private configuration hook has prepared `~/.agents`. The linker never replaces a real file or a link to a different target; it shows a warning instead. It removes links to skills that no longer exist. If the shared configuration is unavailable, it leaves the provider configuration unchanged.
 
 ## Setting Up
 

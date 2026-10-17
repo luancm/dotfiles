@@ -6,8 +6,10 @@ cd "$HOME/.dotfiles"
 # Answer "no" to each optional bundle so the run covers the core path.
 answers="$HOME/.dotfiles/cache/install-answers"
 mkdir -p "$(dirname "$answers")"
-grep -ohE 'remembered_(confirmation|choice) [a-z_]+' lib/dependencies/*.sh \
-  | awk '{print $2 "=no"}' | sort -u > "$answers"
+{
+  grep -ohE 'remembered_(confirmation|choice) [a-z_]+' lib/dependencies/*.sh | awk '{print $2}'
+  awk '!/^#/ && NF && $5 != "-" {print $1}' lib/tools.list
+} | sed 's/$/=no/' | sort -u > "$answers"
 
 ./install --yes
 

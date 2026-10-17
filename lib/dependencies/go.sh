@@ -9,68 +9,28 @@
 # PATH note: /usr/local/go/bin and $HOME/go/bin must be on PATH for the
 # `go` command and tools installed via `go install` to be available.
 # This script does not modify your shell rc.
+#
+# GO_VERSION and the tarball sums are pinned in lib/versions.env.
 
-GO_VERSION="1.26.3"
 GO_INSTALL_DIR="/usr/local/go"
 
-detect_go_arch() {
-  case "$(uname -m)" in
-    x86_64|amd64) echo "amd64" ;;
-    aarch64|arm64) echo "arm64" ;;
-    armv6l) echo "armv6l" ;;
-    *) echo "" ;;
-  esac
-}
-
 install_go_tarball() {
-  local arch
-  arch=$(detect_go_arch)
+  local arch go_arch sha_var tmpfile
+  arch="$(release_arch)"
   if [[ -z "$arch" ]]; then
     log_error "Unsupported architecture: $(uname -m)"
     return 1
   fi
+  go_arch=amd64
+  [[ "$arch" == aarch64 ]] && go_arch=arm64
+  sha_var="GO_SHA256_${arch^^}"
 
-  if ! command -v curl > /dev/null; then
-    log_info 'Go installer requires curl; running curl dependency installer...'
-    source "$DOTFILES/lib/dependencies/curl.sh"
-  fi
-  if ! command -v curl > /dev/null; then
-    log_error 'curl is required but could not be installed; cannot install Go.'
-    return 1
-  fi
-
-  local tarball="go${GO_VERSION}.linux-${arch}.tar.gz"
-  local url="https://go.dev/dl/${tarball}"
-  local sum_url="${url}.sha256"
-  local tmpfile sumfile expected actual
   tmpfile=$(mktemp -t go-tarball.XXXXXX) || return 1
-  sumfile=$(mktemp -t go-sha.XXXXXX) || { rm -f "$tmpfile"; return 1; }
-
-  log_info "Downloading ${url}"
-  if ! curl -fSL --progress-bar -o "$tmpfile" "$url"; then
-    log_error "Failed to download $url"
-    rm -f "$tmpfile" "$sumfile"
+  if ! download_verified "https://go.dev/dl/go${GO_VERSION}.linux-${go_arch}.tar.gz" \
+      "${!sha_var}" "$tmpfile"; then
+    rm -f "$tmpfile"
     return 1
   fi
-
-  log_info "Verifying checksum"
-  if curl -fSL -o "$sumfile" "$sum_url" 2>/dev/null; then
-    expected=$(tr -d ' \n\r\t' <"$sumfile")
-    if command -v sha256sum >/dev/null; then
-      actual=$(sha256sum "$tmpfile" | awk '{print $1}')
-    else
-      actual=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
-    fi
-    if [[ "$expected" != "$actual" ]]; then
-      log_error "Checksum mismatch for $tarball (expected $expected, got $actual)"
-      rm -f "$tmpfile" "$sumfile"
-      return 1
-    fi
-    log_success "Checksum OK"
-  else
-    log_warn "Could not download checksum file; continuing without verification"
-  fi
-  rm -f "$sumfile"
 
   log_info "Installing Go ${GO_VERSION} to ${GO_INSTALL_DIR} (requires sudo)"
   sudo rm -rf "$GO_INSTALL_DIR"

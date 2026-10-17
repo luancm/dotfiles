@@ -31,6 +31,12 @@ Optional:
 On macOS, `homebrew/Brewfile` lists the same tools. `./install` offers it once
 (default no), or run `brew bundle --file ~/.dotfiles/homebrew/Brewfile`.
 
+To add a tool that only needs a package, add one line to `lib/tools.list`.
+Tools with extra steps have a file in `lib/dependencies/`. When there is no
+package, `./install` downloads a pinned release (starship, sesh, delta,
+difftastic, lazygit, Go, the nvm installer) and checks it against the sha256 in
+`lib/versions.env`. It does not use a download that does not match.
+
 ### Node and Java (mise)
 
 [mise](https://mise.jdx.dev) sets the Node and Java versions. Global versions

@@ -1,48 +1,38 @@
 #!/usr/bin/env bash
 
-if ! command -v starship > /dev/null; then
-  if ! is_installer_available; then
-    log_warn "Auto install not supported for your system, you will need to install it manually"
-    return 0
-  fi
-  
-  # Try to install via package manager first
-  if is_package_installed starship; then
-    log_success 'Dependency `starship` already installed'
-  elif is_package_available starship; then
-    # Package is available in repos
-    if install_package starship; then
-      log_success 'Dependency `starship` installed successfully'
-    else
-      log_error 'Failed to install starship'
-    fi
+# Starship prompt: from the package manager, or else the pinned release
+# binary (STARSHIP_VERSION in lib/versions.env) into ~/.local/bin.
+if command -v starship > /dev/null; then
+  log_success 'Dependency `starship` already installed'
+  return 0
+fi
+
+if is_installer_available && is_package_available starship; then
+  if install_package starship; then
+    log_success 'Dependency `starship` installed successfully'
   else
-    # Package not in repos - use official curl installer
-    log_info "Starship not available in $PKG_MANAGER repos. Using official installer..."
-    
-    if remembered_confirmation starship_official \
-          "Install starship using official installer (curl -sS https://starship.rs/install.sh | sh)?"; then
-      if ! command -v curl > /dev/null; then
-        log_info "Starship installer requires curl; running curl dependency installer..."
-        source "$DOTFILES/lib/dependencies/curl.sh"
-      fi
-
-      if ! command -v curl > /dev/null; then
-        log_error 'curl is required but could not be installed; cannot install starship.'
-        return 1
-      fi
-
-      curl -sS https://starship.rs/install.sh | sh
-
-      if command -v starship > /dev/null; then
-        log_success 'Dependency `starship` installed successfully'
-      else
-        log_error 'Starship installation failed'
-      fi
-    else
-      log_info 'Skipping starship installation'
-    fi
+    log_error 'Failed to install starship'
   fi
+  return 0
+fi
+
+arch="$(release_arch)"
+if [[ "$(uname -s)" != Linux || -z "$arch" ]]; then
+  log_warn 'No starship package or release binary for this system; install it manually: https://starship.rs'
+  return 0
+fi
+
+if ! remembered_confirmation starship_official \
+    "Install starship ${STARSHIP_VERSION} from its GitHub release (checksum verified)?"; then
+  log_info 'Skipping starship installation'
+  return 0
+fi
+
+sha_var="STARSHIP_SHA256_${arch^^}"
+if install_release_binary starship \
+    "https://github.com/starship/starship/releases/download/${STARSHIP_VERSION}/starship-${arch}-unknown-linux-musl.tar.gz" \
+    "${!sha_var}"; then
+  log_success 'Dependency `starship` installed successfully'
 else
-	log_success 'Dependency `starship` already installed'
+  log_error 'Starship installation failed'
 fi

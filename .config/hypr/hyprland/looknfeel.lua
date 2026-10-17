@@ -83,7 +83,7 @@ hl.config({
         session_lock_blur          = true,
         -- Window swallowing: terminal hidden while GUI launched from it runs.
         enable_swallow             = true,
-        swallow_regex              = "^(Ghostty)$",
+        swallow_regex              = "^(com\\.mitchellh\\.ghostty|ghostty)$",
     },
     cursor = {
         hide_on_key_press = true,

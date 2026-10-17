@@ -6,6 +6,9 @@ if $is_mac_os; then
   return 0
 fi
 
+# satty/config.toml saves screenshots here.
+mkdir -p "$HOME/Pictures/Screenshots"
+
 ensure_cmd_pkg() {
   local cmd="$1" pkg="${2:-$1}"
   if command -v "$cmd" > /dev/null; then

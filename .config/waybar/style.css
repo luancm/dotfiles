@@ -1,5 +1,5 @@
 /* Theme: Change this line to switch themes */
-@import "/home/luancm/.config/themes/catppuccin/waybar.css";
+@import "../themes/catppuccin/waybar.css";
 
 * {
   color: @text;

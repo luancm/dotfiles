@@ -2,8 +2,11 @@
 
 # shortcut to this dotfiles path is $DOTFILES
 export DOTFILES="$HOME/.dotfiles"
-export EDITOR='vim'
+export EDITOR='nvim'
 export VEDITOR='code'
+# One copy of each PATH entry (the first wins) when ~/.localrc and tools add
+# the same directories again.
+typeset -U path PATH
 export PATH="$HOME/.local/bin:$DOTFILES/bin:$HOME/.bin:$PATH"
 export GPG_TTY=$(tty)
 
@@ -37,34 +40,17 @@ if $is_mac_os; then
 	source $DOTFILES/homebrew/config.sh
 fi
 
-# Basic auto/tab complete (compinit with daily cache rebuild).
-# `-C` skips the cache integrity check for a faster startup; the glob
-# qualifier (#qN.mh+24) matches if ~/.zcompdump is older than 24h, in
-# which case we do a full compinit to pick up newly installed completions.
-autoload -Uz compinit
-zmodload zsh/complist
-if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
-  compinit
-else
-  compinit -C
-fi
-_comp_options+=(globdots)
-
-
-zstyle ':completion:*' completer _oldlist _expand _complete _match _ignored _approximate # forces zsh to realize new commands
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' # matches case insensitive for lowercase
-zstyle ':completion:*' insert-tab pending # pasting with tabs doesn't perform completion
-zstyle ':completion:*' rehash true # rehash if command not found (possibly recently installed)
-zstyle ':completion:*' menu select=2 # menu if nb items > 2
-
-# load zsh files (top-level modules only; skip any generated bundle leftovers)
+# load zsh files (top-level modules only; skip any generated bundle leftovers).
+# Before compinit: base_opts.zsh sets EXTENDED_GLOB, which the (#q...) cache
+# check below needs.
 for file in $DOTFILES/zsh/*.zsh(N); do
   [[ ${file:t} == zsh_plugins.zsh ]] && continue
   source "$file"
 done
 unset file
 
-# Plugins managed by Antidote
+# Plugins managed by Antidote. Before compinit, so that zsh-completions is on
+# FPATH when compinit runs.
 # Ensure antidote is installed
 if [[ ! -d "$DOTFILES/zsh/antidote" ]]; then
   git clone --depth=1 https://github.com/mattmc3/antidote.git "$DOTFILES/zsh/antidote"
@@ -117,6 +103,26 @@ else
   print -ru2 -- "antidote: plugin bundle missing or empty ($_antidote_static); syntax-highlighting/autosuggestions skipped"
 fi
 unset _antidote_bundle _antidote_static _antidote_lock _antidote_tmp
+
+# Basic auto/tab complete (compinit with daily cache rebuild).
+# `-C` skips the cache integrity check for a faster startup; the glob
+# qualifier (#qN.mh+24) matches if ~/.zcompdump is older than 24h, in
+# which case we do a full compinit to pick up newly installed completions.
+autoload -Uz compinit
+zmodload zsh/complist
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+_comp_options+=(globdots)
+
+
+zstyle ':completion:*' completer _oldlist _expand _complete _match _ignored _approximate # forces zsh to realize new commands
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' # matches case insensitive for lowercase
+zstyle ':completion:*' insert-tab pending # pasting with tabs doesn't perform completion
+zstyle ':completion:*' rehash true # rehash if command not found (possibly recently installed)
+zstyle ':completion:*' menu select=2 # menu if nb items > 2
 
 # fzf: fuzzy file picker (Ctrl-T), directory jump (Alt-C), and general glue
 # for tools like sesh. History search (Ctrl-R) is handled by atuin when
@@ -223,6 +229,7 @@ log_success 'Good to go!'
 # prevent the usual footguns:
 #   $TMUX set        -> already inside tmux (avoids infinite nesting)
 #   non-interactive  -> scripts and `zsh -c '…'` stay plain shells
+#   no terminal      -> `zsh -ic '…'` and agent tools stay plain shells
 #   $NVIM / vscode   -> editor terminals stay quick scratch shells
 #   NO_AUTO_TMUX=1   -> manual opt-out: `NO_AUTO_TMUX=1 zsh` for a bare shell
 # Session policy (independent tabs, reuse `main` when free):
@@ -233,6 +240,7 @@ log_success 'Good to go!'
 # zsh prompt instead of closing the terminal.
 if command -v tmux > /dev/null \
 	&& [[ -o interactive ]] \
+	&& [[ -t 0 && -t 1 ]] \
 	&& [ -z "$TMUX" ] \
 	&& [ -z "$NO_AUTO_TMUX" ] \
 	&& [ -z "$NVIM" ] \
@@ -254,6 +262,17 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+# sdkman, lazy-loaded: sourcing sdkman-init.sh costs a large part of the start
+# time. Put the current candidates on PATH and set <NAME>_HOME (what
+# sdkman-init does), and load sdkman itself on the first `sdk` call. Skipped
+# when something (e.g. ~/.localrc) already loaded sdkman. Keep at the end so
+# the candidates come first on PATH. Assumes sdkman_auto_env=false.
 export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+if [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && (( ! ${+functions[sdk]} )); then
+  for _sdk_current in "$SDKMAN_DIR"/candidates/*/current(N); do
+    export "${(U)${_sdk_current:h:t}}_HOME=$_sdk_current"
+    path=("$_sdk_current/bin" $path)
+  done
+  unset _sdk_current
+  sdk() { unset -f sdk; source "$SDKMAN_DIR/bin/sdkman-init.sh"; sdk "$@"; }
+fi

@@ -1,5 +1,9 @@
 # Copied and modified from https://wiki.archlinux.org/index.php/zsh (16/02/2021)
 
+# Emacs keymap. zsh picks the vi keymap when $EDITOR or $VISUAL contains
+# "vi" (vim, nvim). Set it first so the bindings below go to this keymap.
+bindkey -e
+
 # create a zkbd compatible hash;
 # to add other keys to this hash, see: man 5 terminfo
 typeset -g -A key

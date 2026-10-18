@@ -144,6 +144,8 @@ PATH entries) goes in `~/.localrc`, which is sourced from the zshrc if present.
 (`chmod go-rwx`). Do not export secrets there; read them when a command needs
 them.
 
+New shells start quietly. Set `DOTFILES_VERBOSE=1` to see the start-up steps.
+
 On macOS, list any Homebrew formulae to skip during `update` (one substring
 per line) in `homebrew/exclude.local`. The file is gitignored.
 

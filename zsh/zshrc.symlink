@@ -23,14 +23,20 @@ else
   is_mac_os=true
 fi
 
-source $DOTFILES/lib/io_handlers.sh
+# Start-up messages only with DOTFILES_VERBOSE=1 (io_handlers.sh runs tput).
+if [[ "${DOTFILES_VERBOSE:-0}" == 1 ]]; then
+  source "$DOTFILES/lib/io_handlers.sh"
+  _zshrc_log() { "$@"; }
+else
+  _zshrc_log() { : }
+fi
 
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
 SAVEHIST=100000
 
 
-log_info "Welcome, let's zsh!"
+_zshrc_log log_info "Welcome, let's zsh!"
 
 # Initialise Homebrew before compinit: `brew shellenv` adds Homebrew's
 # completions dir to FPATH, and compinit only indexes what is on FPATH at
@@ -180,7 +186,7 @@ if command -v zoxide > /dev/null; then
 	eval "$(zoxide init zsh)"
 fi
 
-log_info 'Loading .localrc configuration'
+_zshrc_log log_info 'Loading .localrc configuration'
 [ -f ~/.localrc ] && . ~/.localrc
 
 # mise (Node and Java versions; ~/.config/mise/config.toml). When it is
@@ -213,7 +219,7 @@ fi
 [[ -d "/usr/local/go/bin" ]] && export PATH="$PATH:/usr/local/go/bin"
 [[ -d "$HOME/go/bin" ]] && export PATH="$PATH:$HOME/go/bin"
 
-log_info 'Configuring prompt'
+_zshrc_log log_info 'Configuring prompt'
 autoload -U promptinit
 promptinit
 
@@ -229,7 +235,8 @@ eval "$(starship init zsh)"
 
 # export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
 
-log_success 'Good to go!'
+_zshrc_log log_success 'Good to go!'
+unset -f _zshrc_log
 
 # tmux auto-attach: on an interactive shell, land in tmux. The guards below
 # prevent the usual footguns:

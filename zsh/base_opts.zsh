@@ -24,3 +24,6 @@ setopt PUSHD_SILENT
 
 # extended globbing (^, #, ~ operators)
 setopt EXTENDED_GLOB
+# ...which makes HEAD^ and HEAD~2 globs. git expands its own pathspecs
+# (git add '*.lua'), so pass git arguments unexpanded.
+alias git='noglob git'

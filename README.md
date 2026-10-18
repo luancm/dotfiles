@@ -144,6 +144,10 @@ PATH entries) goes in `~/.localrc`, which is sourced from the zshrc if present.
 (`chmod go-rwx`). Do not export secrets there; read them when a command needs
 them.
 
+Machine-only opencode settings (for example a folder it may read without a
+prompt) go in an untracked JSON file. opencode merges it over the tracked
+config when `~/.localrc` has `export OPENCODE_CONFIG=~/.config/opencode/local.json`.
+
 New shells start quietly. Set `DOTFILES_VERBOSE=1` to see the start-up steps.
 
 On macOS, list any Homebrew formulae to skip during `update` (one substring

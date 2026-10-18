@@ -68,5 +68,5 @@ fi
 
 if [[ ${#session_mgmt_missing[@]} -gt 0 ]]; then
     log_info "To complete the setup (Enable greetd & PAM auto-unlock), run:"
-    log_info "bash scripts/setup_session_management.sh"
+    log_info "bash scripts/setup_greetd.sh"
 fi

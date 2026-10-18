@@ -29,26 +29,16 @@ key[Ctrl-Right]="${terminfo[kRIT5]}"
 [[ -n "${key[Insert]}"     ]] && bindkey -- "${key[Insert]}"      overwrite-mode
 [[ -n "${key[Backspace]}"  ]] && bindkey -- "${key[Backspace]}"   backward-delete-char
 [[ -n "${key[Delete]}"     ]] && bindkey -- "${key[Delete]}"      delete-char
-[[ -n "${key[Up]}"         ]] && bindkey -- "${key[Up]}"          up-line-or-history
-[[ -n "${key[Down]}"       ]] && bindkey -- "${key[Down]}"        down-line-or-history
 [[ -n "${key[Left]}"       ]] && bindkey -- "${key[Left]}"        backward-char
 [[ -n "${key[Right]}"      ]] && bindkey -- "${key[Right]}"       forward-char
 [[ -n "${key[PageUp]}"     ]] && bindkey -- "${key[PageUp]}"      beginning-of-buffer-or-history
 [[ -n "${key[PageDown]}"   ]] && bindkey -- "${key[PageDown]}"    end-of-buffer-or-history
 [[ -n "${key[Shift-Tab]}"  ]] && bindkey -- "${key[Shift-Tab]}"   reverse-menu-complete
 
-if ! $is_mac_os; then
-	[[ -n "${key[Ctrl-Left]}"  ]] && bindkey -- "${key[Ctrl-Left]}"   backward-word
-	[[ -n "${key[Ctrl-Right]}" ]] && bindkey -- "${key[Ctrl-Right]}"  forward-word
-	[[ -n "${key[Cmd-Left]}"   ]] && bindkey -- "${key[Cmd-Left]}"    beginning-of-line
-	[[ -n "${key[Cmd-Right]}"  ]] && bindkey -- "${key[Cmd-Right]}"   end-of-line
-else
-	# for iterm2, ensure that your profile have the key mapping 'Natural Text Editing' preset.
-	bindkey "^[f" forward-word
-	bindkey "^[b" backward-word
-	bindkey "^E" end-of-line
-	bindkey "^A" beginning-of-line
-fi
+[[ -n "${key[Ctrl-Left]}"  ]] && bindkey -- "${key[Ctrl-Left]}"   backward-word
+[[ -n "${key[Ctrl-Right]}" ]] && bindkey -- "${key[Ctrl-Right]}"  forward-word
+# Alt-f / Alt-b, Ctrl-a / Ctrl-e come from the emacs keymap. On macOS, have the
+# terminal send Option as Alt (Ghostty: macos-option-as-alt).
 
 WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'  ;# without /
 

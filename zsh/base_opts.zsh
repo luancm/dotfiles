@@ -2,6 +2,8 @@
 setopt NO_BEEP
 setopt PROMPT_SUBST
 setopt COMPLETE_IN_WORD
+# allow `# comments` on the command line (pasted snippets)
+setopt INTERACTIVE_COMMENTS
 
 # History. SHARE_HISTORY writes each command at once and reads other
 # sessions' commands; do not add INC_APPEND_HISTORY with it.

@@ -16,12 +16,6 @@ if $is_mac_os; then
   config_excludes+=("hypr/*" "waybar/*" "wlogout/*" "vicinae/*" "satty/*" "wayle/*")
 fi
 
-# Linux/Wayland-only app configs that have no meaning on macOS.
-config_excludes=()
-if $is_mac_os; then
-  config_excludes+=("hypr/*" "waybar/*" "wlogout/*" "vicinae/*" "satty/*" "wayle/*")
-fi
-
 # Per-profile config excludes, keyed by the machine's declared profile
 # (lib/machine_profile.sh). Anything listed here is not linked on that
 # profile's machines, and stale links in $HOME are removed below.
@@ -29,6 +23,7 @@ source "$DOTFILES/lib/machine_profile.sh"
 profile=$(machine_profile 2> /dev/null) || profile=unknown
 declare -A profile_config_excludes=(
   [work]='opencode/*'
+  [unknown]='opencode/*'
 )
 if ! machine_profile > /dev/null; then
   log_warn 'Machine unclassified (no machine.conf): profile config excluded. Run ./install to classify.'

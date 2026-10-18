@@ -26,5 +26,6 @@ mise                        mise         mise             all    mise (Node and 
 ghostty                     ghostty      ghostty          all    ghostty (terminal emulator)
 kubernetes                  kubectl      kubectl          all    Kubernetes tools (kubectl and k9s)
 kubernetes                  k9s          k9s              all    Kubernetes tools (kubectl and k9s)
-xclip                       xclip        xclip            linux  xclip (for the pbcopy and pbpaste aliases)
+wl_clipboard                wl-copy      wl-clipboard     linux  wl-clipboard (pbcopy and pbpaste on Wayland)
+xclip                       xclip        xclip            linux  xclip (pbcopy and pbpaste on X11)
 playerctl                   playerctl    playerctl        linux  playerctl (media keys for Hyprland)

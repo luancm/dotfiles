@@ -29,8 +29,8 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name  = "float-pavucontrol",
-    match = { class = "^(pavucontrol|org.pulseaudio.pavucontrol)$" },
+    name  = "float-pwvucontrol",
+    match = { class = "^(com.saivert.pwvucontrol|pwvucontrol)$" },
     float = true,
 })
 

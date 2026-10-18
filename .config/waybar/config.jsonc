@@ -150,7 +150,7 @@
   "pulseaudio": {
     "format": "{volume}% {icon} {format_source}",
     "on-click": "hyprctl dispatch exec '[float;size 800 600;center] pwvucontrol'",
-    "on-click-right": "pamixer -t",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
     "tooltip-format": "Playing at {volume}%",
     "scroll-step": 5,
     "format-bluetooth": "{volume}% {icon} {format_source}",

@@ -31,9 +31,10 @@
 #       Existing UFW rules are reset (ufw keeps a timestamped backup).
 #
 # 5. Hardens sshd
-#       Disables passwords, empty passwords, root login, X11/TCP/agent
-#       forwarding; caps auth attempts; sets sane keepalives. Standard
-#       OpenSSH best practice for key-only access.
+#       Disables passwords, empty passwords, root login, X11 and agent
+#       forwarding; caps auth attempts (6, the OpenSSH default, so a few
+#       agent keys still fit); sets sane keepalives. TCP forwarding stays on
+#       for remote editors (VS Code / Cursor Remote-SSH).
 #
 # 6. Enables fail2ban sshd jail (trusted subnets ignored, 1h bantime,
 #    maxretry 5).
@@ -60,8 +61,9 @@
 #
 # Flags (all optional except --user):
 #   --user        <name>    Non-root user to create (required)
-#   --pubkey      <line>    SSH public key; if omitted, copies from
-#                           /root/.ssh/authorized_keys
+#   --pubkey      <line>    SSH public key to add; if omitted, adds the keys
+#                           from /root/.ssh/authorized_keys. Existing keys
+#                           are kept.
 #   --subnet      <cidr>    Trusted source CIDR; repeatable
 #                           (default 192.168.1.0/24)
 #   --app-ports   <list>    Comma-separated TCP ports to open to the trusted
@@ -149,14 +151,25 @@ usermod -aG sudo "$NEW_USER"
 
 USER_HOME=$(getent passwd "$NEW_USER" | cut -d: -f6)
 install -d -m 700 -o "$NEW_USER" -g "$NEW_USER" "$USER_HOME/.ssh"
+AUTH_KEYS="$USER_HOME/.ssh/authorized_keys"
+touch "$AUTH_KEYS"
+add_keys() {
+  local line added=0
+  while IFS= read -r line || [ -n "$line" ]; do
+    [ -z "$line" ] && continue
+    grep -qxF "$line" "$AUTH_KEYS" && continue
+    printf '%s\n' "$line" >> "$AUTH_KEYS"
+    added=$((added + 1))
+  done
+  ok "Added $added new key(s) to $AUTH_KEYS"
+}
 if [ -n "$SSH_PUBKEY" ]; then
-  printf '%s\n' "$SSH_PUBKEY" > "$USER_HOME/.ssh/authorized_keys"
+  printf '%s\n' "$SSH_PUBKEY" | add_keys
 else
-  cp /root/.ssh/authorized_keys "$USER_HOME/.ssh/authorized_keys"
+  add_keys < /root/.ssh/authorized_keys
 fi
-chown "$NEW_USER:$NEW_USER" "$USER_HOME/.ssh/authorized_keys"
-chmod 600 "$USER_HOME/.ssh/authorized_keys"
-ok "SSH key installed at $USER_HOME/.ssh/authorized_keys"
+chown "$NEW_USER:$NEW_USER" "$AUTH_KEYS"
+chmod 600 "$AUTH_KEYS"
 
 # ---- UFW --------------------------------------------------------------------
 log "Configuring UFW (allow 22 and app-ports from $TRUSTED_DESC)"
@@ -210,11 +223,12 @@ PermitEmptyPasswords no
 ChallengeResponseAuthentication no
 UsePAM yes
 X11Forwarding no
-MaxAuthTries 3
+MaxAuthTries 6
 LoginGraceTime 30
 ClientAliveInterval 300
 ClientAliveCountMax 2
-AllowTcpForwarding no
+# Remote editors (VS Code / Cursor Remote-SSH) tunnel through TCP forwarding.
+AllowTcpForwarding yes
 AllowAgentForwarding no
 EOF
 chmod 644 "$SSHD_DROPIN"

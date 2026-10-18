@@ -73,10 +73,8 @@ local function M(vars)
     hl.bind(mainMod .. " + D", function() hl.window.fullscreen({ mode = "maximized", action = "toggle" }) end)
 
     -- Alt-Tab cycle (no typed Lua wrapper; route through hyprctl dispatch).
-    hl.bind("ALT + Tab", function()
-        hl.dsp.exec_cmd("hyprctl dispatch cyclenext")
-        hl.dsp.exec_cmd("hyprctl dispatch bringactivetotop")
-    end)
+    -- hl.dsp.* only builds a dispatcher, so bind it; one shell keeps the order.
+    hl.bind("ALT + Tab", hl.dsp.exec_cmd("sh -c 'hyprctl dispatch cyclenext && hyprctl dispatch bringactivetotop'"))
 
     -- Move focus with mainMod + arrow keys / hjkl
     hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left"  }))

@@ -78,7 +78,9 @@ return {
       end
       vim.lsp.enable(servers)
 
-      vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "LSP hover" })
+      -- Neovim's defaults cover K, grn, gra, grr, gri, grt, grx, gO and
+      -- insert <C-s> (see CHEATSHEET.md). Do not map "gr" itself: it would
+      -- make every gr* default wait for 'timeoutlen'.
       vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "[C]ode [A]ction" })
       vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "[G]o to [D]efinition (LSP)" })
       vim.keymap.set("n", "gD", function()
@@ -86,7 +88,6 @@ return {
         vim.lsp.buf.definition()
       end, { desc = "[G]o to [D]efinition in tab (LSP)" })
       vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { desc = "[C]ode [R]ename" })
-      vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "[G]o to [R]eferences (LSP)" })
       vim.keymap.set("n", "gpd", function()
         require("goto-preview").goto_preview_definition()
       end, { desc = "[G]o to [P]review [D]efinition (LSP)" })

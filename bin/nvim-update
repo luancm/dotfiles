@@ -19,6 +19,18 @@ if [[ $# -gt 1 ]]; then
   exit 1
 fi
 
+case "$(uname -s)" in
+  Linux) ;;
+  Darwin) echo "error: on macOS install Neovim with Homebrew (brew upgrade neovim)" >&2; exit 1 ;;
+  *) echo "error: unsupported OS: $(uname -s)" >&2; exit 1 ;;
+esac
+case "$(uname -m)" in
+  x86_64 | amd64) arch=x86_64 ;;
+  aarch64 | arm64) arch=arm64 ;;
+  *) echo "error: no Neovim AppImage for CPU type $(uname -m)" >&2; exit 1 ;;
+esac
+asset="nvim-linux-$arch.appimage"
+
 version="${1:-}"
 if [[ -z "$version" ]]; then
   version="$(curl -fsSL https://api.github.com/repos/neovim/neovim/releases/latest |
@@ -40,7 +52,7 @@ if pgrep -x nvim >/dev/null 2>&1; then
 fi
 
 curl -fsSL -o "$TMP/nvim.appimage" \
-  "https://github.com/neovim/neovim/releases/download/$version/nvim-linux-x86_64.appimage"
+  "https://github.com/neovim/neovim/releases/download/$version/$asset"
 chmod +x "$TMP/nvim.appimage"
 
 (cd "$TMP" && ./nvim.appimage --appimage-extract >/dev/null)

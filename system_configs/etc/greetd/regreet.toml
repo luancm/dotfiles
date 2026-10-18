@@ -17,4 +17,4 @@ reboot = [ "systemctl", "reboot" ]
 poweroff = [ "systemctl", "poweroff" ]
 
 [appearance]
-greeting_msg = "Welcome back, Luan"
+greeting_msg = "Welcome back"

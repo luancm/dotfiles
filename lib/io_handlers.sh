@@ -208,12 +208,11 @@ remembered_confirmation() {
                 ;;
         esac
     fi
-    if prompt_confirmation "$question" "$default"; then
-        set_install_answer "$key" "yes"
-        return 0
-    fi
-    set_install_answer "$key" "no"
-    return 1
+    local answer=no
+    prompt_confirmation "$question" "$default" && answer=yes
+    # Only cache answers a person gave; a later interactive run asks again.
+    dotfiles_noninteractive || set_install_answer "$key" "$answer"
+    [[ "$answer" == yes ]]
 }
 
 # Like prompt_choice, but caches the answer under KEY.
@@ -237,6 +236,6 @@ remembered_choice() {
         log_warn "Ignoring invalid remembered answer for \`$key\`: $stored" >&2
     fi
     choice=$(prompt_choice "$question" "${choices[@]}")
-    set_install_answer "$key" "$choice"
+    dotfiles_noninteractive || set_install_answer "$key" "$choice"
     echo "$choice"
 }

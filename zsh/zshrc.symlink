@@ -26,8 +26,8 @@ fi
 source $DOTFILES/lib/io_handlers.sh
 
 HISTFILE=~/.zsh_history
-HISTSIZE=1000000000
-SAVEHIST=1000000000
+HISTSIZE=100000
+SAVEHIST=100000
 
 
 log_info "Welcome, let's zsh!"

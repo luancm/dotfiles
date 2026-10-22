@@ -45,8 +45,10 @@
 # ------
 # - sshd uses the first value it reads and loads sshd_config.d/ in lexical
 #   order, so the drop-in is 00-hardening.conf (before 50-cloud-init.conf).
-# - sshd config is validated with sshd -t, and the effective values with
-#   sshd -T, before reload.
+# - sshd config is validated with sshd -t before reload. Match blocks may not
+#   re-enable password, keyboard-interactive or root login, and the effective
+#   values are checked with sshd -T -C for the new user and root from each
+#   trusted network and an outside address.
 # - UFW SSH rules are added BEFORE enabling the firewall.
 # - Root SSH is only disabled after the new user has a key + sudo password.
 #
@@ -219,7 +221,46 @@ ufw --force enable >/dev/null
 ok "UFW enabled."
 
 # ---- sshd hardening ---------------------------------------------------------
+SSHD_CONFIG=/etc/ssh/sshd_config
 SSHD_DROPIN=/etc/ssh/sshd_config.d/00-hardening.conf
+
+# Match blocks can key on any address, user or group, which no fixed set of
+# sshd -T -C probes covers, so reject auth settings inside them that are not
+# "no". Prints one FILE:LINE: entry per offending line.
+match_auth_overrides() {
+  awk -F'[ \t=]+' '
+    FNR == 1 { in_match = 0 }
+    { sub(/^[ \t]+/, "") }
+    tolower($1) == "match" { in_match = 1; next }
+    in_match && tolower($1) ~ /^(passwordauthentication|kbdinteractiveauthentication|challengeresponseauthentication|permitemptypasswords|permitrootlogin)$/ && tolower($2) != "no" {
+      print FILENAME ":" FNR ": " $0
+    }
+  ' "$@" 2>/dev/null
+}
+
+# sshd -T alone skips Match blocks; -C evaluates them for one connection.
+# Probe the new user and root from localhost, each trusted subnet, Tailscale
+# and an outside address.
+verify_sshd_effective() {
+  local user addr effective root_pattern="$ROOT_LOGIN_VALUE"
+  local addrs=(127.0.0.1 "${SUBNETS[@]%/*}" 203.0.113.1)
+  [ "$TAILSCALE" = yes ] && addrs+=(100.64.0.1)
+  # sshd -T prints prohibit-password under its older alias, without-password.
+  [ "$ROOT_LOGIN_VALUE" = prohibit-password ] && root_pattern="(prohibit|without)-password"
+  for user in "$NEW_USER" root; do
+    for addr in "${addrs[@]}"; do
+      effective=$(sshd -T -f "$SSHD_CONFIG" -C "user=$user,host=$addr,addr=$addr" 2>/dev/null) \
+        || die "sshd -T failed for user=$user addr=$addr"
+      grep -qx 'passwordauthentication no' <<< "$effective" \
+        || die "sshd allows passwords for $user from $addr; another setting overrides $SSHD_DROPIN"
+      grep -qx 'kbdinteractiveauthentication no' <<< "$effective" \
+        || die "sshd allows keyboard-interactive auth for $user from $addr; another setting overrides $SSHD_DROPIN"
+      grep -Eqx "permitrootlogin ${root_pattern}" <<< "$effective" \
+        || die "sshd PermitRootLogin is not '${ROOT_LOGIN_VALUE}' for $user from $addr; another setting overrides $SSHD_DROPIN"
+    done
+  done
+}
+
 log "Writing $SSHD_DROPIN"
 mkdir -p /etc/ssh/sshd_config.d
 rm -f /etc/ssh/sshd_config.d/99-hardening.conf
@@ -258,15 +299,11 @@ if [ "$DISABLE_ROOT" -eq 1 ]; then
 fi
 
 sshd -t && ok "sshd config valid"
-EFFECTIVE=$(sshd -T 2>/dev/null)
-grep -qx 'passwordauthentication no' <<< "$EFFECTIVE" \
-  || die "sshd still allows passwords; another file in /etc/ssh/sshd_config.d overrides $SSHD_DROPIN"
-# sshd -T prints prohibit-password under its older alias, without-password.
-ROOT_LOGIN_PATTERN="$ROOT_LOGIN_VALUE"
-[ "$ROOT_LOGIN_VALUE" = prohibit-password ] && ROOT_LOGIN_PATTERN="(prohibit|without)-password"
-grep -Eqx "permitrootlogin ${ROOT_LOGIN_PATTERN}" <<< "$EFFECTIVE" \
-  || die "sshd PermitRootLogin is not '${ROOT_LOGIN_VALUE}'; another file overrides $SSHD_DROPIN"
-ok "sshd effective config verified (sshd -T)"
+OVERRIDES=$(match_auth_overrides "$SSHD_CONFIG" /etc/ssh/sshd_config.d/*.conf)
+[ -z "$OVERRIDES" ] \
+  || die "Match blocks weaken SSH authentication; remove or set them to 'no':"$'\n'"$OVERRIDES"
+verify_sshd_effective
+ok "sshd effective config verified (sshd -T -C for $NEW_USER and root)"
 systemctl reload ssh
 ok "sshd reloaded"
 

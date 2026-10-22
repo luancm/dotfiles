@@ -215,6 +215,65 @@ case_add_keys_rejects_invalid_key() {
   [[ ! -s "$file" ]] || fail "wrote an invalid key"
 }
 
+# --- harden_ubuntu_dev_host.sh: sshd Match blocks ----------------------------
+
+load_sshd_checks() {
+  die() { printf '%s\n' "$*" >&2; exit 1; }
+  eval "$(sed -n -e '/^match_auth_overrides() {/,/^}/p' -e '/^verify_sshd_effective() {/,/^}/p' \
+    "$DOTFILES/scripts/harden_ubuntu_dev_host.sh")"
+  declare -F verify_sshd_effective > /dev/null || fail "sshd checks not found in the hardening script"
+  # shellcheck disable=SC2034 # read by the eval'd functions
+  NEW_USER="$(id -un)" SUBNETS=(192.168.1.0/24) TAILSCALE=no ROOT_LOGIN_VALUE=prohibit-password
+  # shellcheck disable=SC2034
+  SSHD_DROPIN=00-hardening.conf SSHD_CONFIG="$TEST_ROOT/sshd_config"
+  ssh-keygen -q -t ed25519 -N '' -f "$TEST_ROOT/host_key"
+}
+
+# sshd_config with the drop-in's auth settings, then the given extra lines.
+write_sshd_config() {
+  printf '%s\n' "HostKey $TEST_ROOT/host_key" 'PermitRootLogin prohibit-password' \
+    'PasswordAuthentication no' 'KbdInteractiveAuthentication no' "$@" > "$SSHD_CONFIG"
+}
+
+need_sshd() {
+  PATH="$PATH:/usr/sbin" command -v sshd > /dev/null || { echo "  (skipped: no sshd)"; exit 0; }
+  PATH="$PATH:/usr/sbin"
+}
+
+case_sshd_match_overrides_flags_weakened_auth() {
+  load_sshd_checks
+  write_sshd_config 'Match Address 10.0.0.0/8' '  PasswordAuthentication yes' \
+    'Match User deploy' '  PermitRootLogin=yes' '  KbdInteractiveAuthentication no'
+  local out
+  out="$(match_auth_overrides "$SSHD_CONFIG")"
+  [[ "$(wc -l <<< "$out")" -eq 2 ]] || fail "expected 2 overrides, got: $out"
+  [[ "$out" == *":6: PasswordAuthentication yes"* && "$out" == *":8: PermitRootLogin=yes"* ]] \
+    || fail "wrong overrides: $out"
+}
+
+case_sshd_match_overrides_ignores_global_and_no() {
+  load_sshd_checks
+  write_sshd_config 'Match Address 10.0.0.0/8' '  PasswordAuthentication no' '  X11Forwarding yes'
+  [[ -z "$(match_auth_overrides "$SSHD_CONFIG")" ]] || fail "flagged a safe Match block"
+}
+
+case_sshd_effective_passes_hardened_config() {
+  need_sshd
+  load_sshd_checks
+  write_sshd_config
+  verify_sshd_effective 2> "$TEST_ROOT/err" || fail "rejected a hardened config: $(< "$TEST_ROOT/err")"
+}
+
+case_sshd_effective_rejects_match_on_trusted_subnet() {
+  need_sshd
+  load_sshd_checks
+  write_sshd_config 'Match Address 192.168.1.0/24' '  PasswordAuthentication yes'
+  if (verify_sshd_effective 2> "$TEST_ROOT/err"); then
+    fail "accepted passwords from a trusted subnet"
+  fi
+  grep -q 'allows passwords' "$TEST_ROOT/err" || fail "wrong error: $(< "$TEST_ROOT/err")"
+}
+
 # --- git/defaults.sh: SSH signing --------------------------------------------
 
 # Run git/defaults.sh from DIR, like ./install does from ~/.dotfiles.

@@ -64,16 +64,30 @@ for personal_dir in '~/Projects/personal/' '~/.dotfiles/' '~/.dotfiles-private/'
 done
 unset personal_dir
 
-# Commit signing with SSH keys. On only when user.signingkey is set globally
-# (e.g. in ~/.gitconfig.local), so commits never fail for lack of a key.
+# Commit signing with SSH keys. On globally only when a key applies in every
+# repository (user.signingkey or gpg.ssh.defaultKeyCommand in ~/.gitconfig or
+# ~/.gitconfig.local), so commits never fail for lack of a key. A key that only
+# an includeIf file sets (~/.gitconfig-personal) needs commit.gpgsign and
+# tag.gpgsign in that same file.
 git config --global gpg.format ssh
 if [[ -f "$HOME/.config/git/allowed_signers" ]]; then
   # shellcheck disable=SC2088 # git expands ~ itself
   git config --global gpg.ssh.allowedSignersFile '~/.config/git/allowed_signers'
 fi
-if git config --global --includes --get user.signingkey > /dev/null; then
+# Read the config outside any repository, so includeIf sections do not match.
+outside_repo="$(mktemp -d)"
+global_signing_key() {
+  (cd "$outside_repo" && GIT_CEILING_DIRECTORIES="$outside_repo" \
+    git config --global --includes --get "$1") > /dev/null
+}
+if global_signing_key user.signingkey || global_signing_key gpg.ssh.defaultKeyCommand; then
   git config --global commit.gpgsign true
   git config --global tag.gpgsign true
 else
+  git config --global --unset-all commit.gpgsign || true
+  git config --global --unset-all tag.gpgsign || true
   log_info 'Git: SSH signing is off. Set user.signingkey in ~/.gitconfig.local to turn it on.'
 fi
+rmdir "$outside_repo"
+unset outside_repo
+unset -f global_signing_key

@@ -215,6 +215,51 @@ case_add_keys_rejects_invalid_key() {
   [[ ! -s "$file" ]] || fail "wrote an invalid key"
 }
 
+# --- git/defaults.sh: SSH signing --------------------------------------------
+
+# Run git/defaults.sh from DIR, like ./install does from ~/.dotfiles.
+run_git_defaults() { (cd "$1" && bash "$DOTFILES/git/defaults.sh" > /dev/null); }
+
+# Commit in a new repository outside the personal paths; print git's status.
+commit_elsewhere() {
+  local repo="$TEST_ROOT/elsewhere.$RANDOM"
+  git init -q "$repo"
+  git -C "$repo" -c user.name=t -c user.email=t@example.com \
+    commit -q --allow-empty -m test > /dev/null 2>&1
+}
+
+case_git_signing_ignores_key_from_includeif() {
+  local key
+  ssh-keygen -q -t ed25519 -N '' -f "$TEST_ROOT/sign" > /dev/null
+  git init -q "$HOME/.dotfiles"
+  git config -f "$HOME/.gitconfig-personal" user.signingkey "$TEST_ROOT/sign.pub"
+  run_git_defaults "$HOME/.dotfiles" || fail "defaults.sh failed"
+  key="$(git config --global --get commit.gpgsign || true)"
+  [[ "$key" != true ]] || fail "commit.gpgsign=true globally for a personal-only key"
+  commit_elsewhere || fail "commit in an unrelated repository failed"
+}
+
+case_git_signing_on_for_global_key() {
+  ssh-keygen -q -t ed25519 -N '' -f "$TEST_ROOT/sign" > /dev/null
+  git config --global include.path "$HOME/.gitconfig.local"
+  git config -f "$HOME/.gitconfig.local" user.signingkey "$TEST_ROOT/sign.pub"
+  run_git_defaults "$HOME" || fail "defaults.sh failed"
+  [[ "$(git config --global --get commit.gpgsign)" == true ]] || fail "commit.gpgsign not set"
+  [[ "$(git config --global --get tag.gpgsign)" == true ]] || fail "tag.gpgsign not set"
+}
+
+case_git_signing_off_after_key_removed() {
+  ssh-keygen -q -t ed25519 -N '' -f "$TEST_ROOT/sign" > /dev/null
+  git config --global include.path "$HOME/.gitconfig.local"
+  git config -f "$HOME/.gitconfig.local" user.signingkey "$TEST_ROOT/sign.pub"
+  run_git_defaults "$HOME" || fail "defaults.sh failed (first run)"
+  git config -f "$HOME/.gitconfig.local" --unset user.signingkey
+  run_git_defaults "$HOME" || fail "defaults.sh failed (second run)"
+  [[ -z "$(git config --global --get commit.gpgsign || true)" ]] || fail "commit.gpgsign still set"
+  [[ -z "$(git config --global --get tag.gpgsign || true)" ]] || fail "tag.gpgsign still set"
+  commit_elsewhere || fail "commit failed after the key was removed"
+}
+
 # --- run ---------------------------------------------------------------------
 
 pattern="${1:-}"

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 if [[ -z "${DOTFILES:-}" ]]; then echo 'Dotfiles were not installed, to install run `bash ~/.dotfiles/install`'; exit 1; fi
+source "$DOTFILES/lib/io_handlers.sh"
 
 # Pulling: rebase instead of merge to avoid noisy "Merge branch ..." commits.
 git config --global pull.rebase true
@@ -39,3 +40,54 @@ git config --global commit.verbose true
 
 # Typos: prompt to run the corrected command instead of erroring out.
 git config --global help.autocorrect prompt
+
+# Pager and diff tools, when installed (lib/dependencies/git_tools.sh puts
+# release binaries in ~/.local/bin, which may not be on PATH yet).
+tools_path="$HOME/.local/bin:$PATH"
+if PATH="$tools_path" command -v delta > /dev/null; then
+  git config --global core.pager delta
+  git config --global interactive.diffFilter 'delta --color-only'
+  git config --global delta.navigate true
+fi
+if PATH="$tools_path" command -v difft > /dev/null; then
+  git config --global difftool.difftastic.cmd 'difft "$LOCAL" "$REMOTE"'
+  git config --global difftool.prompt false
+  git config --global alias.dft 'difftool -t difftastic'
+fi
+unset tools_path
+
+# Identity per directory: repos under these paths load ~/.gitconfig-personal
+# (machine-local). git skips include files that do not exist.
+# shellcheck disable=SC2088 # git expands ~ in these values itself
+for personal_dir in '~/Projects/personal/' '~/.dotfiles/' '~/.dotfiles-private/'; do
+  git config --global "includeIf.gitdir:${personal_dir}.path" '~/.gitconfig-personal'
+done
+unset personal_dir
+
+# Commit signing with SSH keys. On globally only when a key applies in every
+# repository (user.signingkey or gpg.ssh.defaultKeyCommand in ~/.gitconfig or
+# ~/.gitconfig.local), so commits never fail for lack of a key. A key that only
+# an includeIf file sets (~/.gitconfig-personal) needs commit.gpgsign and
+# tag.gpgsign in that same file.
+git config --global gpg.format ssh
+if [[ -f "$HOME/.config/git/allowed_signers" ]]; then
+  # shellcheck disable=SC2088 # git expands ~ itself
+  git config --global gpg.ssh.allowedSignersFile '~/.config/git/allowed_signers'
+fi
+# Read the config outside any repository, so includeIf sections do not match.
+outside_repo="$(mktemp -d)"
+global_signing_key() {
+  (cd "$outside_repo" && GIT_CEILING_DIRECTORIES="$outside_repo" \
+    git config --global --includes --get "$1") > /dev/null
+}
+if global_signing_key user.signingkey || global_signing_key gpg.ssh.defaultKeyCommand; then
+  git config --global commit.gpgsign true
+  git config --global tag.gpgsign true
+else
+  git config --global --unset-all commit.gpgsign || true
+  git config --global --unset-all tag.gpgsign || true
+  log_info 'Git: SSH signing is off. Set user.signingkey in ~/.gitconfig.local to turn it on.'
+fi
+rmdir "$outside_repo"
+unset outside_repo
+unset -f global_signing_key

@@ -73,10 +73,8 @@ local function M(vars)
     hl.bind(mainMod .. " + D", function() hl.window.fullscreen({ mode = "maximized", action = "toggle" }) end)
 
     -- Alt-Tab cycle (no typed Lua wrapper; route through hyprctl dispatch).
-    hl.bind("ALT + Tab", function()
-        hl.dsp.exec_cmd("hyprctl dispatch cyclenext")
-        hl.dsp.exec_cmd("hyprctl dispatch bringactivetotop")
-    end)
+    -- hl.dsp.* only builds a dispatcher, so bind it; one shell keeps the order.
+    hl.bind("ALT + Tab", hl.dsp.exec_cmd("sh -c 'hyprctl dispatch cyclenext && hyprctl dispatch bringactivetotop'"))
 
     -- Move focus with mainMod + arrow keys / hjkl
     hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left"  }))
@@ -113,15 +111,15 @@ local function M(vars)
     hl.bind(mainMod .. " + S", hl.dsp.layout("togglesplit"))
 
     -- Window split ratio
-    hl.bind(mainMod .. " + Equal",    hl.dsp.layout("splitratio +0.1"))
-    hl.bind(mainMod .. " + Semicolon", hl.dsp.layout("splitratio -0.1"))
-    hl.bind(mainMod .. " + Apostrophe", hl.dsp.layout("splitratio +0.1"))
+    hl.bind(mainMod .. " + Equal",    hl.dsp.layout("splitratio +0.1"), { repeating = true })
+    hl.bind(mainMod .. " + Semicolon", hl.dsp.layout("splitratio -0.1"), { repeating = true })
+    hl.bind(mainMod .. " + Apostrophe", hl.dsp.layout("splitratio +0.1"), { repeating = true })
 
     -- Multimedia: volume + brightness + playerctl
     hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),      { locked = true, repeating = true })
     hl.bind("XF86AudioLowerVolume",  hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),           { locked = true, repeating = true })
-    hl.bind("XF86AudioMute",         hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),          { locked = true, repeating = true })
-    hl.bind("XF86AudioMicMute",      hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),        { locked = true, repeating = true })
+    hl.bind("XF86AudioMute",         hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),          { locked = true })
+    hl.bind("XF86AudioMicMute",      hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),        { locked = true })
     hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                       { locked = true, repeating = true })
     hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                       { locked = true, repeating = true })
     hl.bind("XF86AudioPlay",         hl.dsp.exec_cmd("playerctl play-pause"),                                 { locked = true })

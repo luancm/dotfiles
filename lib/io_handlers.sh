@@ -10,7 +10,6 @@ if tput sgr0 &>/dev/null; then
 	green=$(tput setaf 2)
 	blue=$(tput setaf 4)
 	yellow=$(tput setaf 3)
-	USE_TPUT=true
 else
 	# tput failed (unknown terminal) - use ANSI escape codes
 	reset=$'\033[0m'
@@ -20,7 +19,6 @@ else
 	green=$'\033[32m'
 	blue=$'\033[34m'
 	yellow=$'\033[33m'
-	USE_TPUT=false
 fi
 
 indent_prefix() {
@@ -112,7 +110,7 @@ prompt_choice() {
     local question="$1"; shift
     local choices=("$@")
     local default="${choices[0]}"
-    local labels=() choice c lc label
+    local labels=() choice c lc
     for c in "${choices[@]}"; do
         if [[ "${c,,}" == "${default,,}" ]]; then
             labels+=("${c^^}")
@@ -210,12 +208,11 @@ remembered_confirmation() {
                 ;;
         esac
     fi
-    if prompt_confirmation "$question" "$default"; then
-        set_install_answer "$key" "yes"
-        return 0
-    fi
-    set_install_answer "$key" "no"
-    return 1
+    local answer=no
+    prompt_confirmation "$question" "$default" && answer=yes
+    # Only cache answers a person gave; a later interactive run asks again.
+    dotfiles_noninteractive || set_install_answer "$key" "$answer"
+    [[ "$answer" == yes ]]
 }
 
 # Like prompt_choice, but caches the answer under KEY.
@@ -239,6 +236,6 @@ remembered_choice() {
         log_warn "Ignoring invalid remembered answer for \`$key\`: $stored" >&2
     fi
     choice=$(prompt_choice "$question" "${choices[@]}")
-    set_install_answer "$key" "$choice"
+    dotfiles_noninteractive || set_install_answer "$key" "$choice"
     echo "$choice"
 }

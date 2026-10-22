@@ -1,22 +1,20 @@
 # remove annoying beep
 setopt NO_BEEP
-# share history between sessions
+setopt PROMPT_SUBST
+setopt COMPLETE_IN_WORD
+# allow `# comments` on the command line (pasted snippets)
+setopt INTERACTIVE_COMMENTS
+
+# History. SHARE_HISTORY writes each command at once and reads other
+# sessions' commands; do not add INC_APPEND_HISTORY with it.
 setopt SHARE_HISTORY
 # add timestamps to history
 setopt EXTENDED_HISTORY
-setopt PROMPT_SUBST
-setopt COMPLETE_IN_WORD
-# adds history
-setopt APPEND_HISTORY
-# adds history incrementally and share it across sessions
-setopt INC_APPEND_HISTORY
-# don't record dupes in history
+# keep one copy of each command (also covers HIST_IGNORE_DUPS)
 setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_REDUCE_BLANKS
-setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_SPACE
 setopt HIST_VERIFY
-setopt HIST_EXPIRE_DUPS_FIRST
 # skip duplicates when searching history (Ctrl-R)
 setopt HIST_FIND_NO_DUPS
 
@@ -28,3 +26,6 @@ setopt PUSHD_SILENT
 
 # extended globbing (^, #, ~ operators)
 setopt EXTENDED_GLOB
+# ...which makes HEAD^ and HEAD~2 globs. git expands its own pathspecs
+# (git add '*.lua'), so pass git arguments unexpanded.
+alias git='noglob git'

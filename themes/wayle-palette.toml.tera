@@ -1,0 +1,14 @@
+---
+whiskers:
+  version: "^2.9.0"
+---
+bg = "#{{ base.hex }}"
+surface = "#{{ surface0.hex }}"
+elevated = "#{{ surface1.hex }}"
+fg = "#{{ text.hex }}"
+fg-muted = "#{{ subtext0.hex }}"
+primary = "#{{ mauve.hex }}"
+red = "#{{ red.hex }}"
+yellow = "#{{ yellow.hex }}"
+green = "#{{ green.hex }}"
+blue = "#{{ blue.hex }}"

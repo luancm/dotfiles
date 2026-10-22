@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source \"$DOTFILES/lib/io_handlers.sh\"
-source \"$DOTFILES/lib/package_installer.sh\"
-
 # sesh is a smart tmux session manager. It is fzf-driven (already a dotfiles
 # dependency) and integrates with zoxide for directory suggestions. The tmux
 # config binds `prefix + T` to a sesh picker popup.
@@ -17,15 +14,20 @@ if ! remembered_confirmation sesh \
   return 0
 fi
 
-# sesh has no first-party pacman/apt package; fall back to `go install`.
-install_sesh_via_go() {
-  if ! command -v go > /dev/null; then
-    log_warn 'sesh has no native package here and Go is not installed.'
-    log_info 'Install Go (rerun the installer) or install sesh manually from https://github.com/joshmedeski/sesh'
+# sesh has no pacman/apt package: use the pinned release binary
+# (SESH_VERSION in lib/versions.env).
+install_sesh_release() {
+  local arch sha_var
+  arch="$(release_arch)"
+  if [[ "$(uname -s)" != Linux || -z "$arch" ]]; then
+    log_warn 'No sesh release binary for this system; install it manually from https://github.com/joshmedeski/sesh'
     return 1
   fi
-  log_info 'Installing sesh via `go install`...'
-  GOBIN="$HOME/go/bin" go install github.com/joshmedeski/sesh/v2@latest
+  sha_var="SESH_SHA256_${arch^^}"
+  [[ "$arch" == aarch64 ]] && arch=arm64
+  install_release_binary sesh \
+    "https://github.com/joshmedeski/sesh/releases/download/${SESH_VERSION}/sesh_Linux_${arch}.tar.gz" \
+    "${!sha_var}"
 }
 
 case "$PKG_MANAGER" in
@@ -35,15 +37,11 @@ case "$PKG_MANAGER" in
     # AUR package (Provides/Conflicts: sesh).
     yay -S --needed sesh-bin ;;
   *)
-    # pacman-only, apt, or no package manager: build from source via Go.
-    install_sesh_via_go ;;
+    install_sesh_release ;;
 esac
 
-if command -v sesh > /dev/null || [ -x "$HOME/go/bin/sesh" ]; then
+if command -v sesh > /dev/null; then
   log_success 'Dependency `sesh` installed successfully'
-  if ! command -v sesh > /dev/null; then
-    log_info 'Ensure $HOME/go/bin is on your PATH (handled by the dotfiles zshrc).'
-  fi
 else
   log_error 'Failed to install sesh'
 fi

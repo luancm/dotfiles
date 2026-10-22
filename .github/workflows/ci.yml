@@ -31,6 +31,7 @@ jobs:
           echo "${WHISKERS_SHA256}  whiskers" | sha256sum -c -
           sudo install whiskers /usr/local/bin/whiskers
       - run: test/lint.sh
+      - run: test/unit.sh
 
   install:
     runs-on: ubuntu-24.04

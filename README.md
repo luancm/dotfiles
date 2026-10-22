@@ -125,10 +125,11 @@ bash ~/.dotfiles/update
 
 ## Testing
 
-CI (`.github/workflows/ci.yml`) runs both checks on each push and pull request:
+CI (`.github/workflows/ci.yml`) runs these checks on each push and pull request:
 
 ```shell
 test/lint.sh            # shellcheck (warning level) + zsh -n
+test/unit.sh            # offline helper tests in temporary HOMEs (bash 4+)
 test/install-smoke.sh   # ./install --yes in a clean Ubuntu container (needs docker)
 ```
 

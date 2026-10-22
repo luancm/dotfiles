@@ -84,7 +84,22 @@ _antidote_lock="${_antidote_static}.lock"
 mkdir -p "${_antidote_static:h}"
 
 if [[ ! -s $_antidote_static || ! $_antidote_static -nt $_antidote_bundle ]]; then
-  if mkdir "$_antidote_lock" 2>/dev/null; then
+  # A shell killed mid-rebuild leaves the lock behind. Take it over when its
+  # owner is gone or it is older than a minute, or the bundle never rebuilds.
+  _antidote_locked() {
+    mkdir "$_antidote_lock" 2>/dev/null && return
+    local pid=
+    [[ -r $_antidote_lock/pid ]] && pid="$(<"$_antidote_lock/pid")"
+    if [[ $pid == <-> ]] && ! kill -0 "$pid" 2>/dev/null \
+      || [[ -n $_antidote_lock(#qN/mm+1) ]]; then
+      rm -rf "$_antidote_lock"
+      mkdir "$_antidote_lock" 2>/dev/null
+    else
+      return 1
+    fi
+  }
+  if _antidote_locked; then
+    print -r -- $$ >"$_antidote_lock/pid"
     _antidote_tmp="${_antidote_static}.tmp.$$"
     if antidote bundle <"$_antidote_bundle" >"$_antidote_tmp" && [[ -s $_antidote_tmp ]]; then
       mv -f "$_antidote_tmp" "$_antidote_static"
@@ -92,7 +107,7 @@ if [[ ! -s $_antidote_static || ! $_antidote_static -nt $_antidote_bundle ]]; th
       rm -f "$_antidote_tmp"
       print -ru2 -- "antidote: failed to generate plugin bundle from $_antidote_bundle"
     fi
-    rmdir "$_antidote_lock" 2>/dev/null
+    rm -rf "$_antidote_lock"
   else
     # Another shell is regenerating; wait briefly for a non-empty file.
     for _antidote_i in {1..50}; do
@@ -109,6 +124,7 @@ else
   print -ru2 -- "antidote: plugin bundle missing or empty ($_antidote_static); syntax-highlighting/autosuggestions skipped"
 fi
 unset _antidote_bundle _antidote_static _antidote_lock _antidote_tmp
+unfunction _antidote_locked 2>/dev/null
 
 # Basic auto/tab complete (compinit with daily cache rebuild).
 # `-C` skips the cache integrity check for a faster startup; the glob

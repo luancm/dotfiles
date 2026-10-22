@@ -116,6 +116,46 @@ case_install_release_binary_reports_mkdir_failure() {
   fi
 }
 
+# --- lib/secure_localrc.sh ---------------------------------------------------
+
+mode_of() { stat -c %a "$1" 2> /dev/null || stat -f %Lp "$1"; }
+
+case_secure_localrc_creates_private_file() {
+  bash "$DOTFILES/lib/secure_localrc.sh" || fail "exit status $?"
+  [[ "$(mode_of "$HOME/.localrc")" == 600 ]] || fail "mode is $(mode_of "$HOME/.localrc")"
+}
+
+case_secure_localrc_fixes_regular_file_and_backups() {
+  echo 'export A=1' > "$HOME/.localrc"
+  echo 'export A=0' > "$HOME/.localrc.bak.1"
+  chmod 644 "$HOME/.localrc" "$HOME/.localrc.bak.1"
+  bash "$DOTFILES/lib/secure_localrc.sh" || fail "exit status $?"
+  for f in "$HOME/.localrc" "$HOME/.localrc.bak.1"; do
+    [[ "$(mode_of "$f")" == 600 ]] || fail "$f mode is $(mode_of "$f")"
+  done
+}
+
+case_secure_localrc_fixes_symlink_target() {
+  mkdir -p "$TEST_ROOT/private"
+  echo 'export A=1' > "$TEST_ROOT/private/localrc"
+  chmod 644 "$TEST_ROOT/private/localrc"
+  ln -s "$TEST_ROOT/private/localrc" "$HOME/.localrc"
+  bash "$DOTFILES/lib/secure_localrc.sh" || fail "exit status $?"
+  [[ -L "$HOME/.localrc" ]] || fail "replaced the link"
+  [[ "$(mode_of "$TEST_ROOT/private/localrc")" == 600 ]] ||
+    fail "target mode is $(mode_of "$TEST_ROOT/private/localrc")"
+}
+
+case_secure_localrc_fails_when_target_stays_readable() {
+  echo 'export A=1' > "$HOME/.localrc"
+  chmod 644 "$HOME/.localrc"
+  chmod() { return 1; }
+  export -f chmod
+  if bash "$DOTFILES/lib/secure_localrc.sh"; then
+    fail "reported success while ~/.localrc stayed readable"
+  fi
+}
+
 # --- run ---------------------------------------------------------------------
 
 pattern="${1:-}"

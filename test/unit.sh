@@ -19,7 +19,8 @@ export DOTFILES_YES=1 DOTFILES_NONINTERACTIVE=1
 
 passed=0
 failed=0
-fail() { echo "    $*" >&2; return 1; }
+# Cases run in a subshell, so exit ends only the current case.
+fail() { echo "    $*" >&2; exit 1; }
 
 # Set up a fresh HOME and run one case.
 run_case() {
@@ -93,6 +94,26 @@ case_install_release_binary_installs() {
   install_release_binary mytool "file://$tarball" "$(sha256_of "$tarball")" ||
     fail "install_release_binary returned nonzero"
   [[ -x "$HOME/.local/bin/mytool" ]] || fail "binary not installed"
+}
+
+case_install_release_binary_reports_install_failure() {
+  load_download
+  local tarball
+  tarball="$(make_release mytool)"
+  install() { return 1; }
+  if install_release_binary mytool "file://$tarball" "$(sha256_of "$tarball")"; then
+    fail "returned 0 when install failed"
+  fi
+}
+
+case_install_release_binary_reports_mkdir_failure() {
+  load_download
+  local tarball
+  tarball="$(make_release mytool)"
+  touch "$HOME/.local"
+  if install_release_binary mytool "file://$tarball" "$(sha256_of "$tarball")"; then
+    fail "returned 0 when ~/.local/bin could not be created"
+  fi
 }
 
 # --- run ---------------------------------------------------------------------

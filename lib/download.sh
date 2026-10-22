@@ -64,8 +64,11 @@ install_release_binary() {
     rm -rf "$tmp"
     return 1
   fi
-  mkdir -p "$HOME/.local/bin"
-  install -m 755 "$binary" "$HOME/.local/bin/$name"
+  if ! mkdir -p "$HOME/.local/bin" || ! install -m 755 "$binary" "$HOME/.local/bin/$name"; then
+    log_error "Could not install \`$name\` to ~/.local/bin"
+    rm -rf "$tmp"
+    return 1
+  fi
   rm -rf "$tmp"
   case ":$PATH:" in
     *":$HOME/.local/bin:"*) ;;

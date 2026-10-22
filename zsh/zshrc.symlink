@@ -85,18 +85,20 @@ mkdir -p "${_antidote_static:h}"
 
 if [[ ! -s $_antidote_static || ! $_antidote_static -nt $_antidote_bundle ]]; then
   # A shell killed mid-rebuild leaves the lock behind. Take it over when its
-  # owner is gone or it is older than a minute, or the bundle never rebuilds.
+  # owner is gone, or the bundle never rebuilds. A live owner keeps the lock
+  # however long the build takes; the age limit only applies when the lock has
+  # no owner pid (the owner died between mkdir and writing it).
   _antidote_locked() {
     mkdir "$_antidote_lock" 2>/dev/null && return
     local pid=
     [[ -r $_antidote_lock/pid ]] && pid="$(<"$_antidote_lock/pid")"
-    if [[ $pid == <-> ]] && ! kill -0 "$pid" 2>/dev/null \
-      || [[ -n $_antidote_lock(#qN/mm+1) ]]; then
-      rm -rf "$_antidote_lock"
-      mkdir "$_antidote_lock" 2>/dev/null
+    if [[ $pid == <-> ]]; then
+      kill -0 "$pid" 2>/dev/null && return 1
     else
-      return 1
+      [[ -n $_antidote_lock(#qN/mm+1) ]] || return 1
     fi
+    rm -rf "$_antidote_lock"
+    mkdir "$_antidote_lock" 2>/dev/null
   }
   if _antidote_locked; then
     print -r -- $$ >"$_antidote_lock/pid"
@@ -107,7 +109,8 @@ if [[ ! -s $_antidote_static || ! $_antidote_static -nt $_antidote_bundle ]]; th
       rm -f "$_antidote_tmp"
       print -ru2 -- "antidote: failed to generate plugin bundle from $_antidote_bundle"
     fi
-    rm -rf "$_antidote_lock"
+    # Release only our own lock; another shell may have taken it over.
+    [[ -r $_antidote_lock/pid && "$(<"$_antidote_lock/pid")" == $$ ]] && rm -rf "$_antidote_lock"
   else
     # Another shell is regenerating; wait briefly for a non-empty file.
     for _antidote_i in {1..50}; do

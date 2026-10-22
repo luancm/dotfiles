@@ -156,6 +156,65 @@ case_secure_localrc_fails_when_target_stays_readable() {
   fi
 }
 
+# --- scripts/harden_ubuntu_dev_host.sh: add_keys -----------------------------
+
+load_add_keys() {
+  ok() { :; }
+  warn() { :; }
+  eval "$(sed -n '/^add_keys() {/,/^}/p' "$DOTFILES/scripts/harden_ubuntu_dev_host.sh")"
+  declare -F add_keys > /dev/null || fail "add_keys not found in the hardening script"
+}
+
+# Print a new public key line; extra args are passed to ssh-keygen (-C ...).
+new_pubkey() {
+  local f="$TEST_ROOT/key.$RANDOM$RANDOM"
+  ssh-keygen -q -t ed25519 -N '' -f "$f" "$@" > /dev/null
+  cat "$f.pub"
+}
+
+key_count() { ssh-keygen -lf "$1" 2> /dev/null | wc -l | tr -d ' '; }
+
+case_add_keys_separates_key_from_unterminated_last_line() {
+  load_add_keys
+  local file="$TEST_ROOT/authorized_keys" old new
+  old="$(new_pubkey -C old)"
+  new="$(new_pubkey -C new)"
+  printf '%s' "$old" > "$file"
+  add_keys "$file" <<< "$new" || fail "add_keys returned nonzero"
+  [[ "$(key_count "$file")" == 2 ]] || fail "ssh-keygen sees $(key_count "$file") keys, want 2"
+  grep -qxF -- "$new" "$file" || fail "new key is not on its own line"
+}
+
+case_add_keys_handles_unterminated_key_without_comment() {
+  load_add_keys
+  local file="$TEST_ROOT/authorized_keys" old new
+  old="$(new_pubkey -C '')"
+  old="${old% }"
+  new="$(new_pubkey -C new)"
+  printf '%s' "$old" > "$file"
+  add_keys "$file" <<< "$new" || fail "add_keys returned nonzero"
+  [[ "$(key_count "$file")" == 2 ]] || fail "ssh-keygen sees $(key_count "$file") keys, want 2"
+}
+
+case_add_keys_skips_duplicates() {
+  load_add_keys
+  local file="$TEST_ROOT/authorized_keys" key
+  key="$(new_pubkey -C k)"
+  printf '%s\n' "$key" > "$file"
+  add_keys "$file" <<< "$key" || fail "add_keys returned nonzero"
+  [[ "$(wc -l < "$file" | tr -d ' ')" == 1 ]] || fail "duplicate key added"
+}
+
+case_add_keys_rejects_invalid_key() {
+  load_add_keys
+  local file="$TEST_ROOT/authorized_keys"
+  : > "$file"
+  if add_keys "$file" <<< "ssh-ed25519 not-a-key comment"; then
+    fail "accepted an invalid key"
+  fi
+  [[ ! -s "$file" ]] || fail "wrote an invalid key"
+}
+
 # --- run ---------------------------------------------------------------------
 
 pattern="${1:-}"

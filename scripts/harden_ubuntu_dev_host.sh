@@ -153,21 +153,34 @@ USER_HOME=$(getent passwd "$NEW_USER" | cut -d: -f6)
 install -d -m 700 -o "$NEW_USER" -g "$NEW_USER" "$USER_HOME/.ssh"
 AUTH_KEYS="$USER_HOME/.ssh/authorized_keys"
 touch "$AUTH_KEYS"
+# add_keys FILE: append each valid public key read from stdin to FILE once.
+# Returns 1 if any line was not a valid key (those lines are not written).
 add_keys() {
-  local line added=0
+  local file="$1" line added=0 invalid=0
+  # Without a final newline, the next key would join the last line.
+  if [ -s "$file" ] && [ -n "$(tail -c 1 "$file")" ]; then
+    printf '\n' >> "$file"
+  fi
   while IFS= read -r line || [ -n "$line" ]; do
-    [ -z "$line" ] && continue
-    grep -qxF "$line" "$AUTH_KEYS" && continue
-    printf '%s\n' "$line" >> "$AUTH_KEYS"
+    case "$line" in '' | '#'*) continue ;; esac
+    if ! printf '%s\n' "$line" | ssh-keygen -lf /dev/stdin > /dev/null 2>&1; then
+      warn "Not a valid public key, skipped: ${line:0:40}..."
+      invalid=$((invalid + 1))
+      continue
+    fi
+    grep -qxF -- "$line" "$file" && continue
+    printf '%s\n' "$line" >> "$file"
     added=$((added + 1))
   done
-  ok "Added $added new key(s) to $AUTH_KEYS"
+  ok "Added $added new key(s) to $file"
+  [ "$invalid" -eq 0 ]
 }
 if [ -n "$SSH_PUBKEY" ]; then
-  printf '%s\n' "$SSH_PUBKEY" | add_keys
+  printf '%s\n' "$SSH_PUBKEY" | add_keys "$AUTH_KEYS" || die "--pubkey is not a valid SSH public key."
 else
-  add_keys < /root/.ssh/authorized_keys
+  add_keys "$AUTH_KEYS" < /root/.ssh/authorized_keys || warn "Some lines in /root/.ssh/authorized_keys were skipped."
 fi
+ssh-keygen -lf "$AUTH_KEYS" > /dev/null 2>&1 || die "$AUTH_KEYS has no valid keys after the update."
 chown "$NEW_USER:$NEW_USER" "$AUTH_KEYS"
 chmod 600 "$AUTH_KEYS"
 
@@ -235,8 +248,8 @@ chmod 644 "$SSHD_DROPIN"
 
 if [ "$DISABLE_ROOT" -eq 1 ]; then
   # Safety: refuse to disable root unless the new user has a key AND a password.
-  if ! [ -s "$USER_HOME/.ssh/authorized_keys" ]; then
-    die "Refusing to disable root SSH: $NEW_USER has no authorized_keys."
+  if ! ssh-keygen -lf "$AUTH_KEYS" > /dev/null 2>&1; then
+    die "Refusing to disable root SSH: $NEW_USER has no valid authorized_keys."
   fi
   PW_STATUS=$(passwd -S "$NEW_USER" | awk '{print $2}')
   if [ "$PW_STATUS" != "P" ]; then

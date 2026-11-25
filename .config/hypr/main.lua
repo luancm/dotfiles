@@ -1,5 +1,6 @@
 -- Hyprland config (Lua, >= 0.55)
 -- Converted from .conf format. Each section is a required module under hyprland/.
+-- Loaded from ~/.config/hypr/hyprland.lua, a local stub that lib/create_symlinks.sh writes.
 
 -- Shared variables used by keybinds and autostart modules.
 local mainMod     = "SUPER"

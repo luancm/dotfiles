@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 
-source "$DOTFILES/lib/io_handlers.sh"
-source "$DOTFILES/lib/package_installer.sh"
-
 # Git diff/review tools. delta renders readable line diffs (used as git's pager),
 # difftastic gives on-demand structural diffs (`git dft`), lazygit is a git TUI.
 # delta + difftastic make AUR PKGBUILD / supply-chain diff review legible.
+# Their git config lives in git/defaults.sh.
 
 # Ordered list of <package>; command name resolved by git_tool_cmd.
 git_tool_pkgs=(git-delta difftastic lazygit)
@@ -19,102 +17,37 @@ git_tool_cmd() {
 }
 
 # difftastic and lazygit are missing from some distro repos (e.g. Ubuntu noble).
-# Both upstreams ship static Linux binaries, so fall back to the latest GitHub
-# release, dropped into ~/.local/bin (already on PATH via the dotfiles zshrc).
-git_tools_bin_dir="$HOME/.local/bin"
+# Their upstreams ship Linux binaries, so fall back to the pinned GitHub
+# release (lib/versions.env), installed into ~/.local/bin.
 
-git_tool_repo() {
-  case "$1" in
-    git-delta)  echo dandavison/delta ;;
-    difftastic) echo Wilfred/difftastic ;;
-    lazygit)    echo jesseduffield/lazygit ;;
-  esac
-}
-
-# Release asset name fragment for this arch; empty when there is no binary to grab.
-git_tool_release_asset() {
+# Release URL for this system; empty when there is no binary to get.
+git_tool_release_url() {
   local pkg="$1" arch
-  [[ "$(uname -s)" = 'Linux' ]] || return 0
-  arch=$(uname -m)
+  arch="$(release_arch)"
+  [[ "$(uname -s)" == Linux && -n "$arch" ]] || return 0
 
-  case "$pkg:$arch" in
-    git-delta:x86_64)   echo '-x86_64-unknown-linux-gnu.tar.gz' ;;
-    git-delta:aarch64)  echo '-aarch64-unknown-linux-gnu.tar.gz' ;;
-    difftastic:x86_64)  echo 'difft-x86_64-unknown-linux-gnu.tar.gz' ;;
-    difftastic:aarch64) echo 'difft-aarch64-unknown-linux-gnu.tar.gz' ;;
-    lazygit:x86_64)     echo 'linux_x86_64.tar.gz' ;;
-    lazygit:aarch64)    echo 'linux_arm64.tar.gz' ;;
+  case "$pkg" in
+    git-delta)
+      echo "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-${arch}-unknown-linux-gnu.tar.gz" ;;
+    difftastic)
+      echo "https://github.com/Wilfred/difftastic/releases/download/${DIFFTASTIC_VERSION}/difft-${DIFFTASTIC_VERSION}-${arch}-unknown-linux-gnu.tar.gz" ;;
+    lazygit)
+      [[ "$arch" == aarch64 ]] && arch=arm64
+      echo "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_linux_${arch}.tar.gz" ;;
   esac
 }
 
 install_git_tool_from_release() {
-  local pkg="$1" cmd="$2" repo asset url tmp binary
-  repo=$(git_tool_repo "$pkg")
-  asset=$(git_tool_release_asset "$pkg")
-
-  if [[ -z "$repo" || -z "$asset" ]]; then
+  local pkg="$1" cmd="$2" url name arch sha_var
+  url="$(git_tool_release_url "$pkg")"
+  if [[ -z "$url" ]]; then
     log_warn "No prebuilt $pkg release for this platform. Please install it manually."
     return 1
   fi
-
-  if ! command -v curl > /dev/null; then
-    log_warn "curl is required to install $pkg from its GitHub release."
-    return 1
-  fi
-
-  url=$(curl -fsSL "https://api.github.com/repos/$repo/releases/latest" \
-    | grep -o '"browser_download_url": *"[^"]*"' \
-    | sed 's/.*"\(https[^"]*\)"/\1/' \
-    | grep -m1 -F "$asset")
-
-  if [[ -z "$url" ]]; then
-    log_warn "Could not find a \`$asset\` asset in the latest $repo release."
-    return 1
-  fi
-
-  tmp=$(mktemp -d) || return 1
-  log_info "Installing $pkg from $url"
-
-  if ! curl -fsSL "$url" | tar -xz -C "$tmp"; then
-    log_warn "Failed to download or extract the $pkg release archive."
-    rm -rf "$tmp"
-    return 1
-  fi
-
-  binary=$(find "$tmp" -type f -name "$cmd" | head -1)
-  if [[ -z "$binary" ]]; then
-    log_warn "No \`$cmd\` binary inside the $pkg release archive."
-    rm -rf "$tmp"
-    return 1
-  fi
-
-  mkdir -p "$git_tools_bin_dir"
-  install -m 755 "$binary" "$git_tools_bin_dir/$cmd"
-  rm -rf "$tmp"
-
-  log_info "Installed \`$cmd\` to $git_tools_bin_dir"
-  # Make the fresh binary visible to the configure_* steps below; the dotfiles
-  # zshrc puts ~/.local/bin on PATH for interactive shells.
-  case ":$PATH:" in
-    *":$git_tools_bin_dir:"*) ;;
-    *) export PATH="$PATH:$git_tools_bin_dir" ;;
-  esac
-}
-
-configure_delta() {
-  command -v delta > /dev/null || return 0
-  git config --global core.pager delta
-  git config --global interactive.diffFilter 'delta --color-only'
-  git config --global delta.navigate true
-  log_success 'Configured `delta` as git pager'
-}
-
-configure_difftastic() {
-  command -v difft > /dev/null || return 0
-  git config --global difftool.difftastic.cmd 'difft "$LOCAL" "$REMOTE"'
-  git config --global difftool.prompt false
-  git config --global alias.dft 'difftool -t difftastic'
-  log_success 'Configured `difftastic` as the `git dft` difftool'
+  name="${pkg#git-}"
+  arch="$(release_arch)"
+  sha_var="${name^^}_SHA256_${arch^^}"
+  install_release_binary "$cmd" "$url" "${!sha_var}"
 }
 
 # Install a single git tool, honouring 'some' mode (per-tool confirmation).
@@ -162,8 +95,6 @@ for pkg in "${git_tool_pkgs[@]}"; do
 done
 
 if [[ ${#git_tools_missing[@]} -eq 0 ]]; then
-  configure_delta
-  configure_difftastic
   return 0
 fi
 
@@ -182,7 +113,3 @@ fi
 for pkg in "${git_tool_pkgs[@]}"; do
   maybe_install_git_tool "$pkg"
 done
-
-# Configure whichever tools ended up installed.
-configure_delta
-configure_difftastic

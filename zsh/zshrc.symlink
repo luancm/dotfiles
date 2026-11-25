@@ -2,8 +2,11 @@
 
 # shortcut to this dotfiles path is $DOTFILES
 export DOTFILES="$HOME/.dotfiles"
-export EDITOR='vim'
+export EDITOR='nvim'
 export VEDITOR='code'
+# One copy of each PATH entry (the first wins) when ~/.localrc and tools add
+# the same directories again.
+typeset -U path PATH
 export PATH="$HOME/.local/bin:$DOTFILES/bin:$HOME/.bin:$PATH"
 export GPG_TTY=$(tty)
 
@@ -20,14 +23,20 @@ else
   is_mac_os=true
 fi
 
-source $DOTFILES/lib/io_handlers.sh
+# Start-up messages only with DOTFILES_VERBOSE=1 (io_handlers.sh runs tput).
+if [[ "${DOTFILES_VERBOSE:-0}" == 1 ]]; then
+  source "$DOTFILES/lib/io_handlers.sh"
+  _zshrc_log() { "$@"; }
+else
+  _zshrc_log() { : }
+fi
 
 HISTFILE=~/.zsh_history
-HISTSIZE=1000000000
-SAVEHIST=1000000000
+HISTSIZE=100000
+SAVEHIST=100000
 
 
-log_info "Welcome, let's zsh!"
+_zshrc_log log_info "Welcome, let's zsh!"
 
 # Initialise Homebrew before compinit: `brew shellenv` adds Homebrew's
 # completions dir to FPATH, and compinit only indexes what is on FPATH at
@@ -37,34 +46,17 @@ if $is_mac_os; then
 	source $DOTFILES/homebrew/config.sh
 fi
 
-# Basic auto/tab complete (compinit with daily cache rebuild).
-# `-C` skips the cache integrity check for a faster startup; the glob
-# qualifier (#qN.mh+24) matches if ~/.zcompdump is older than 24h, in
-# which case we do a full compinit to pick up newly installed completions.
-autoload -Uz compinit
-zmodload zsh/complist
-if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
-  compinit
-else
-  compinit -C
-fi
-_comp_options+=(globdots)
-
-
-zstyle ':completion:*' completer _oldlist _expand _complete _match _ignored _approximate # forces zsh to realize new commands
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' # matches case insensitive for lowercase
-zstyle ':completion:*' insert-tab pending # pasting with tabs doesn't perform completion
-zstyle ':completion:*' rehash true # rehash if command not found (possibly recently installed)
-zstyle ':completion:*' menu select=2 # menu if nb items > 2
-
-# load zsh files (top-level modules only; skip any generated bundle leftovers)
+# load zsh files (top-level modules only; skip any generated bundle leftovers).
+# Before compinit: base_opts.zsh sets EXTENDED_GLOB, which the (#q...) cache
+# check below needs.
 for file in $DOTFILES/zsh/*.zsh(N); do
   [[ ${file:t} == zsh_plugins.zsh ]] && continue
   source "$file"
 done
 unset file
 
-# Plugins managed by Antidote
+# Plugins managed by Antidote. Before compinit, so that zsh-completions is on
+# FPATH when compinit runs.
 # Ensure antidote is installed
 if [[ ! -d "$DOTFILES/zsh/antidote" ]]; then
   git clone --depth=1 https://github.com/mattmc3/antidote.git "$DOTFILES/zsh/antidote"
@@ -92,7 +84,24 @@ _antidote_lock="${_antidote_static}.lock"
 mkdir -p "${_antidote_static:h}"
 
 if [[ ! -s $_antidote_static || ! $_antidote_static -nt $_antidote_bundle ]]; then
-  if mkdir "$_antidote_lock" 2>/dev/null; then
+  # A shell killed mid-rebuild leaves the lock behind. Take it over when its
+  # owner is gone, or the bundle never rebuilds. A live owner keeps the lock
+  # however long the build takes; the age limit only applies when the lock has
+  # no owner pid (the owner died between mkdir and writing it).
+  _antidote_locked() {
+    mkdir "$_antidote_lock" 2>/dev/null && return
+    local pid=
+    [[ -r $_antidote_lock/pid ]] && pid="$(<"$_antidote_lock/pid")"
+    if [[ $pid == <-> ]]; then
+      kill -0 "$pid" 2>/dev/null && return 1
+    else
+      [[ -n $_antidote_lock(#qN/mm+1) ]] || return 1
+    fi
+    rm -rf "$_antidote_lock"
+    mkdir "$_antidote_lock" 2>/dev/null
+  }
+  if _antidote_locked; then
+    print -r -- $$ >"$_antidote_lock/pid"
     _antidote_tmp="${_antidote_static}.tmp.$$"
     if antidote bundle <"$_antidote_bundle" >"$_antidote_tmp" && [[ -s $_antidote_tmp ]]; then
       mv -f "$_antidote_tmp" "$_antidote_static"
@@ -100,7 +109,8 @@ if [[ ! -s $_antidote_static || ! $_antidote_static -nt $_antidote_bundle ]]; th
       rm -f "$_antidote_tmp"
       print -ru2 -- "antidote: failed to generate plugin bundle from $_antidote_bundle"
     fi
-    rmdir "$_antidote_lock" 2>/dev/null
+    # Release only our own lock; another shell may have taken it over.
+    [[ -r $_antidote_lock/pid && "$(<"$_antidote_lock/pid")" == $$ ]] && rm -rf "$_antidote_lock"
   else
     # Another shell is regenerating; wait briefly for a non-empty file.
     for _antidote_i in {1..50}; do
@@ -117,6 +127,27 @@ else
   print -ru2 -- "antidote: plugin bundle missing or empty ($_antidote_static); syntax-highlighting/autosuggestions skipped"
 fi
 unset _antidote_bundle _antidote_static _antidote_lock _antidote_tmp
+unfunction _antidote_locked 2>/dev/null
+
+# Basic auto/tab complete (compinit with daily cache rebuild).
+# `-C` skips the cache integrity check for a faster startup; the glob
+# qualifier (#qN.mh+24) matches if ~/.zcompdump is older than 24h, in
+# which case we do a full compinit to pick up newly installed completions.
+autoload -Uz compinit
+zmodload zsh/complist
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+_comp_options+=(globdots)
+
+
+zstyle ':completion:*' completer _oldlist _complete _match _ignored
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' # matches case insensitive for lowercase
+zstyle ':completion:*' insert-tab pending # pasting with tabs doesn't perform completion
+zstyle ':completion:*' rehash true # rehash if command not found (possibly recently installed)
+zstyle ':completion:*' menu select=2 # menu if nb items > 2
 
 # fzf: fuzzy file picker (Ctrl-T), directory jump (Alt-C), and general glue
 # for tools like sesh. History search (Ctrl-R) is handled by atuin when
@@ -174,15 +205,21 @@ if command -v zoxide > /dev/null; then
 	eval "$(zoxide init zsh)"
 fi
 
-log_info 'Loading .localrc configuration'
+_zshrc_log log_info 'Loading .localrc configuration'
 [ -f ~/.localrc ] && . ~/.localrc
+
+# mise (Node and Java versions; ~/.config/mise/config.toml). When it is
+# installed, nvm and sdkman below are not loaded.
+if (( $+commands[mise] )); then
+  eval "$(mise activate zsh)"
+fi
 
 # NVM (Node Version Manager) — lazy-loaded to avoid the ~200ms cost of
 # sourcing nvm.sh on every shell start. Calling any of the shimmed
 # commands below sources nvm.sh on demand and then re-runs the command;
 # the shims unset themselves so subsequent calls hit the real nvm/node.
 export NVM_DIR="$HOME/.nvm"
-if [ -s "$NVM_DIR/nvm.sh" ]; then
+if (( ! $+commands[mise] )) && [ -s "$NVM_DIR/nvm.sh" ]; then
   _nvm_load() {
     unset -f nvm node npm npx yarn pnpm corepack _nvm_load 2>/dev/null
     \. "$NVM_DIR/nvm.sh"
@@ -201,7 +238,7 @@ fi
 [[ -d "/usr/local/go/bin" ]] && export PATH="$PATH:/usr/local/go/bin"
 [[ -d "$HOME/go/bin" ]] && export PATH="$PATH:$HOME/go/bin"
 
-log_info 'Configuring prompt'
+_zshrc_log log_info 'Configuring prompt'
 autoload -U promptinit
 promptinit
 
@@ -217,12 +254,14 @@ eval "$(starship init zsh)"
 
 # export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor)
 
-log_success 'Good to go!'
+_zshrc_log log_success 'Good to go!'
+unset -f _zshrc_log
 
 # tmux auto-attach: on an interactive shell, land in tmux. The guards below
 # prevent the usual footguns:
 #   $TMUX set        -> already inside tmux (avoids infinite nesting)
 #   non-interactive  -> scripts and `zsh -c '…'` stay plain shells
+#   no terminal      -> `zsh -ic '…'` and agent tools stay plain shells
 #   $NVIM / vscode   -> editor terminals stay quick scratch shells
 #   NO_AUTO_TMUX=1   -> manual opt-out: `NO_AUTO_TMUX=1 zsh` for a bare shell
 # Session policy (independent tabs, reuse `main` when free):
@@ -233,6 +272,7 @@ log_success 'Good to go!'
 # zsh prompt instead of closing the terminal.
 if command -v tmux > /dev/null \
 	&& [[ -o interactive ]] \
+	&& [[ -t 0 && -t 1 ]] \
 	&& [ -z "$TMUX" ] \
 	&& [ -z "$NO_AUTO_TMUX" ] \
 	&& [ -z "$NVIM" ] \
@@ -254,17 +294,18 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-
-# locstat PATH
-export PATH="/Users/lms02/.locstat:$PATH"
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+# sdkman, lazy-loaded: sourcing sdkman-init.sh costs a large part of the start
+# time. Put the current candidates on PATH and set <NAME>_HOME (what
+# sdkman-init does), and load sdkman itself on the first `sdk` call. Skipped
+# when mise is installed, or when something (e.g. ~/.localrc) already loaded
+# sdkman. Keep at the end so
+# the candidates come first on PATH. Assumes sdkman_auto_env=false.
 export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-# locstat GIT_CONFIG begin
-export GIT_CONFIG_COUNT=2
-export GIT_CONFIG_KEY_0=notes.augment.mergeStrategy
-export GIT_CONFIG_VALUE_0=union
-export GIT_CONFIG_KEY_1=core.hooksPath
-export GIT_CONFIG_VALUE_1=/Users/lms02/.locstat/git/hooks
-# locstat GIT_CONFIG end
+if (( ! $+commands[mise] )) && [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && (( ! ${+functions[sdk]} )); then
+  for _sdk_current in "$SDKMAN_DIR"/candidates/*/current(N); do
+    export "${(U)${_sdk_current:h:t}}_HOME=$_sdk_current"
+    path=("$_sdk_current/bin" $path)
+  done
+  unset _sdk_current
+  sdk() { unset -f sdk; source "$SDKMAN_DIR/bin/sdkman-init.sh"; sdk "$@"; }
+fi

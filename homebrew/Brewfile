@@ -1,0 +1,46 @@
+# Homebrew packages that these dotfiles configure or call (macOS).
+#   brew bundle --file ~/.dotfiles/homebrew/Brewfile         # install
+#   brew bundle check --file ~/.dotfiles/homebrew/Brewfile   # report missing
+# Work-only and personal apps are not listed here; keep them out of the repo.
+
+# Shell
+brew "bash" # ./install needs Bash 4+
+brew "zsh"
+brew "starship"
+brew "atuin"
+brew "fzf"
+brew "zoxide"
+brew "tmux"
+brew "sesh"
+brew "tealdeer"
+
+# Neovim and the tools its plugins call
+brew "neovim"
+brew "ripgrep"
+brew "fd"
+brew "luarocks"
+brew "wget"
+brew "tree-sitter-cli"
+
+# Git
+brew "git-delta"
+brew "difftastic"
+brew "lazygit"
+brew "gh"
+brew "gnupg"
+
+# Toolchains (mise manages Node and Java)
+brew "mise"
+brew "go"
+
+# Containers and Kubernetes
+brew "colima"
+brew "docker"
+brew "docker-compose"
+brew "lazydocker"
+brew "kubernetes-cli"
+brew "k9s"
+
+# Terminal and font
+cask "ghostty"
+cask "font-fira-code-nerd-font"

@@ -1,0 +1,31 @@
+# Tools that ./install gets from the package manager (lib/install_dependencies.sh).
+# Columns: key  command  package  os  question
+#   key       name of the remembered answer (cache/install-answers)
+#   command   the tool is skipped when this command is on PATH
+#   package   package name (lib/package_installer.sh maps apt names)
+#   os        all, linux or mac
+#   question  rest of the line; "-" installs with no question (core tools)
+# Tools that need more steps have their own file in lib/dependencies/.
+
+curl                        curl         curl             all    -
+openssh                     ssh-keygen   openssh          all    -
+zsh                         zsh          zsh              all    -
+neovim                      nvim         neovim           all    neovim (editor)
+nvim_tools_ripgrep          rg           ripgrep          all    ripgrep (search; Neovim and fzf use it)
+nvim_tools_fd               fd           fd               all    fd (file finder; Neovim and fzf use it)
+nvim_tools_luarocks         luarocks     luarocks         all    luarocks (Neovim plugin tooling)
+nvim_tools_wget             wget         wget             all    wget (Neovim plugin tooling)
+nvim_tools_tree-sitter-cli  tree-sitter  tree-sitter-cli  all    tree-sitter-cli (builds Neovim parsers)
+fzf                         fzf          fzf              all    fzf (fuzzy finder)
+zoxide                      zoxide       zoxide           all    zoxide (smarter cd; powers z and sesh)
+tealdeer                    tldr         tealdeer         all    tealdeer (a fast tldr client)
+gpg                         gpg          gnupg            all    gpg (GnuPG; encryption and commit signing)
+tmux                        tmux         tmux             all    tmux (terminal multiplexer)
+atuin                       atuin        atuin            all    atuin (shell history search on Ctrl-R)
+mise                        mise         mise             all    mise (Node and Java versions; replaces nvm and sdkman)
+ghostty                     ghostty      ghostty          all    ghostty (terminal emulator)
+kubernetes                  kubectl      kubectl          all    Kubernetes tools (kubectl and k9s)
+kubernetes                  k9s          k9s              all    Kubernetes tools (kubectl and k9s)
+wl_clipboard                wl-copy      wl-clipboard     linux  wl-clipboard (pbcopy and pbpaste on Wayland)
+xclip                       xclip        xclip            linux  xclip (pbcopy and pbpaste on X11)
+playerctl                   playerctl    playerctl        linux  playerctl (media keys for Hyprland)

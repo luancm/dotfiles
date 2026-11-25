@@ -33,12 +33,17 @@ Leader is **Space**. Press it and wait: which-key pops up (delay 0) showing ever
 | `<Space>e` | Show diagnostic under cursor |
 | `<Space>tf` | Show diagnostic float |
 | `[d` / `]d` | Previous / next diagnostic |
-| `K` | Hover documentation |
+| `K` | Hover documentation (Neovim default) |
 | `gd` | Go to definition |
 | `gD` | Go to definition in new tab |
-| `gr` | References |
-| `<Space>ca` | Code action |
-| `<Space>cr` | Rename symbol |
+| `grr` | References (Neovim default) |
+| `gri` | Implementation (Neovim default) |
+| `grt` | Type definition (Neovim default) |
+| `gra` or `<Space>ca` | Code action |
+| `grn` or `<Space>cr` | Rename symbol |
+| `grx` | Run code lens (Neovim default) |
+| `gO` | Document symbols (Neovim default) |
+| `Ctrl-s` (insert) | Signature help (Neovim default) |
 | `gpd` / `gpi` | Preview definition / implementation (floating window) |
 | `gpc` | Close preview window |
 

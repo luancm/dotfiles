@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source "$DOTFILES/lib/io_handlers.sh"
-source "$DOTFILES/lib/package_installer.sh"
-
 # PipeWire is the Linux audio/video stack; it has no meaning on macOS
 # (which uses CoreAudio). Skip entirely there.
 [ "${OSTYPE#*darwin}" = "$OSTYPE" ] && is_mac_os=false || is_mac_os=true

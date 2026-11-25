@@ -13,6 +13,10 @@ keybind = ctrl+z=close_surface
 # Empty values reset the configuration to the default value
 font-family = FiraCode Nerd Font
 
+# macOS: left Option sends Alt (word jumps, tmux/nvim Alt binds); right
+# Option still types special characters. Ignored on Linux.
+macos-option-as-alt = left
+
 # Send one scroll event per wheel notch (default 3). Stops tmux scrolling
 # from feeling jittery, since the multiplier no longer compounds with tmux's
 # own per-notch line count.

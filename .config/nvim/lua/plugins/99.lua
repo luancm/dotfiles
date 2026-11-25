@@ -20,9 +20,10 @@ return {
                 -- model = "claude-sonnet-4-6",
                 provider = _99.Providers.OpenCodeProvider,
                 model = "opencode-go/glm-5.3-flash",
+				-- DEBUG logs include prompts; keep them out of /tmp.
 				logger = {
-					level = _99.DEBUG,
-					path = "/tmp/" .. basename .. ".99.debug",
+					level = _99.WARN,
+					path = vim.fn.stdpath("data") .. "/99/" .. basename .. ".log",
 					print_on_error = true,
 				},
 

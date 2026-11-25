@@ -1,7 +1,7 @@
 -- Look & feel: general, decoration, animations, layouts, misc, cursor.
 -- Catppuccin Mocha colors applied here; the theme module is a pure data table.
 
-local c = require("themes.catppuccin-mocha")
+local c = require("themes.catppuccin")
 
 -- Spring physics curve for natural window open/close motion (0.56.0 default).
 hl.curve("easy", { type = "spring", mass = 1, stiffness = 238.1191, dampening = 24.21279333 })
@@ -42,7 +42,7 @@ hl.config({
             enabled      = true,
             range        = 2,
             render_power = 3,
-            color        = "rgba(11111bee)",
+            color        = "rgba(" .. c.crustAlpha .. "ee)",
         },
         blur = {
             enabled = true,
@@ -83,7 +83,7 @@ hl.config({
         session_lock_blur          = true,
         -- Window swallowing: terminal hidden while GUI launched from it runs.
         enable_swallow             = true,
-        swallow_regex              = "^(Ghostty)$",
+        swallow_regex              = "^(com\\.mitchellh\\.ghostty|ghostty)$",
     },
     cursor = {
         hide_on_key_press = true,

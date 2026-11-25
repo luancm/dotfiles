@@ -19,12 +19,37 @@ if [[ $# -gt 1 ]]; then
   exit 1
 fi
 
-version="${1:-}"
-if [[ -z "$version" ]]; then
-  version="$(curl -fsSL https://api.github.com/repos/neovim/neovim/releases/latest |
-    sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')"
-  [[ -n "$version" ]] || { echo "error: could not determine latest release" >&2; exit 1; }
+case "$(uname -s)" in
+  Linux) ;;
+  Darwin) echo "error: on macOS install Neovim with Homebrew (brew upgrade neovim)" >&2; exit 1 ;;
+  *) echo "error: unsupported OS: $(uname -s)" >&2; exit 1 ;;
+esac
+case "$(uname -m)" in
+  x86_64 | amd64) arch=x86_64 ;;
+  aarch64 | arm64) arch=arm64 ;;
+  *) echo "error: no Neovim AppImage for CPU type $(uname -m)" >&2; exit 1 ;;
+esac
+asset="nvim-linux-$arch.appimage"
+
+release_api="https://api.github.com/repos/neovim/neovim/releases"
+if [[ -n "${1:-}" ]]; then release_url="$release_api/tags/$1"; else release_url="$release_api/latest"; fi
+# One JSON field per line, so this works for pretty and minified output.
+curl -fsSL "$release_url" | tr ',{' '\n\n' | sed 's/": */":/' > "$TMP/release.txt" ||
+  { echo "error: could not read release data from $release_url" >&2; exit 1; }
+version="$(sed -n 's/.*"tag_name":"\([^"]*\)".*/\1/p' "$TMP/release.txt" | head -1)"
+[[ -n "$version" ]] || { echo "error: could not determine the release tag" >&2; exit 1; }
+
+# GitHub publishes a sha256 digest for each asset; older releases ship shasum.txt.
+expected="$(awk -v name="\"name\":\"$asset\"" '
+  index($0, name) { found = 1 }
+  found && /"digest":"sha256:/ { sub(/.*"sha256:/, ""); sub(/".*/, ""); print; exit }
+' "$TMP/release.txt")"
+if [[ -z "$expected" ]]; then
+  expected="$(curl -fsSL "https://github.com/neovim/neovim/releases/download/$version/shasum.txt" 2>/dev/null |
+    awk -v f="$asset" '$2 == f || $2 == "*" f { print $1; exit }')" || true
 fi
+[[ "$expected" =~ ^[0-9a-f]{64}$ ]] ||
+  { echo "error: no sha256 published for $asset in $version; not installing" >&2; exit 1; }
 
 current=""
 [[ -x "$LINK" ]] && current="$("$LINK" --version | head -1 | sed 's/^NVIM //')"
@@ -40,7 +65,12 @@ if pgrep -x nvim >/dev/null 2>&1; then
 fi
 
 curl -fsSL -o "$TMP/nvim.appimage" \
-  "https://github.com/neovim/neovim/releases/download/$version/nvim-linux-x86_64.appimage"
+  "https://github.com/neovim/neovim/releases/download/$version/$asset"
+actual="$(sha256sum "$TMP/nvim.appimage" | cut -d' ' -f1)"
+if [[ "$actual" != "$expected" ]]; then
+  echo "error: checksum mismatch for $asset (expected $expected, got $actual)" >&2
+  exit 1
+fi
 chmod +x "$TMP/nvim.appimage"
 
 (cd "$TMP" && ./nvim.appimage --appimage-extract >/dev/null)

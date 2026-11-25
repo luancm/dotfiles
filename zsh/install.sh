@@ -8,7 +8,7 @@ if ! command -v zsh > /dev/null; then log_error 'Trying to configure zsh without
 
 # Check which shell is configured in passwd (this is because the $SHELL variable is only updated on login)
 zsh_path="$(which zsh)"
-if [[ "${SHELL#*zsh}" = "$SHELL" ]]; then
+if [[ "${SHELL:-}" != *zsh* ]]; then
     if command -v chsh >/dev/null; then
         if chsh -s "$zsh_path"; then
             log_success "set $("$zsh_path" --version) at $zsh_path as default shell"

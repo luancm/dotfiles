@@ -53,6 +53,8 @@ is_package_available() {
 
     case "$PKG_MANAGER" in
         apt)
+            # A new machine (or container) can have no package lists yet.
+            _ensure_apt_updated
             apt-cache show "$distro_package" &>/dev/null
             ;;
         yay)
